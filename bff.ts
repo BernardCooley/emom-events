@@ -1,3 +1,5 @@
+import { Promoter } from "@prisma/client";
+
 export class GoneError extends Error {
     statusCode = 410;
 }
@@ -50,4 +52,25 @@ export const fetchWithErrorHandling = async <T>(
         throw e;
     }
     return null;
+};
+
+interface FetchPromoterProps {
+    email: string;
+}
+
+export const fetchPromoter = async ({
+    email,
+}: FetchPromoterProps): Promise<Promoter | null> => {
+    try {
+        const promoter: Promoter | null = await fetchWithErrorHandling(
+            "/api/getPromoter",
+            "POST",
+            {
+                email,
+            }
+        );
+        return promoter;
+    } catch (error) {
+        throw error;
+    }
 };
