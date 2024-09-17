@@ -1,0 +1,88 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("POSTGRES_URL")
+    directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
+}
+
+model Event {
+    id          String    @id @default(uuid())
+    promoterId  String
+    venueId     String
+    name        String
+    timeFrom    DateTime
+    timeTo      DateTime
+    description String
+    websites    Website[]
+    imageIds    String[]
+    tickets     Ticket[]
+    lineup      Lineup[]
+    promoter    Promoter  @relation(fields: [promoterId], references: [id])
+    venue       Venue     @relation(fields: [venueId], references: [id])
+}
+
+model Promoter {
+    id         String    @id @default(uuid())
+    name       String
+    email      String    @unique
+    city       String?
+    state      String?
+    country    String
+    websites   Website[]
+    imageIds   String[]
+    events     Event[]
+}
+
+model Website {
+    id         String    @id @default(uuid())
+    name       String?
+    url        String
+    Event      Event?    @relation(fields: [eventId], references: [id])
+    eventId    String?
+    Promoter   Promoter? @relation(fields: [promoterId], references: [id])
+    promoterId String?
+}
+
+model Venue {
+    id          String   @id @default(uuid())
+    name        String
+    address     String
+    city        String
+    state       String
+    country     String
+    postcodeZip String
+    description String?
+    imageIds    String[]
+    events      Event[]
+}
+
+model Ticket {
+    id      String  @id @default(uuid())
+    name    String?
+    href    String
+    price   Float?
+    Event   Event?  @relation(fields: [eventId], references: [id])
+    eventId String?
+}
+
+model MediaLink {
+    id       String  @id @default(uuid())
+    name     String?
+    url      String
+    lineupId String?
+    Lineup   Lineup? @relation(fields: [lineupId], references: [id])
+}
+
+model Lineup {
+    id         String      @id @default(uuid())
+    artist     String
+    time       String?
+    website    String?
+    mediaLinks MediaLink[]
+    Event      Event?      @relation(fields: [eventId], references: [id])
+    eventId    String?
+}
