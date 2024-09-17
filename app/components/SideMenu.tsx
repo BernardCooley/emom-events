@@ -12,6 +12,7 @@ import {
     DrawerOverlay,
     IconButton,
     useDisclosure,
+    VStack,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { usePathname, useRouter } from "next/navigation";
@@ -68,20 +69,35 @@ const SideMenu = ({ placement = "right" }: Props) => {
                     <DrawerHeader>Menu</DrawerHeader>
 
                     <DrawerBody>
-                        {menuItems.map((item) => (
+                        <VStack
+                            justifyContent="space-between"
+                            h="full"
+                            alignItems="flex-end"
+                            pb={4}
+                        >
+                            <VStack w="full">
+                                {menuItems.map((item) => (
+                                    <Button
+                                        isDisabled={pageName === item.path}
+                                        onClick={() => {
+                                            onClose();
+                                            router.push(`/${item.path}`);
+                                        }}
+                                        key={item.path}
+                                        w="full"
+                                        variant="ghost"
+                                    >
+                                        {item.name}
+                                    </Button>
+                                ))}
+                            </VStack>
                             <Button
-                                isDisabled={pageName === item.path}
-                                onClick={() => {
-                                    onClose();
-                                    router.push(`/${item.path}`);
-                                }}
-                                key={item.path}
-                                w="full"
-                                variant="ghost"
+                                variant="link"
+                                onClick={() => router.push("/api/auth/signin")}
                             >
-                                {item.name}
+                                Promoter login
                             </Button>
-                        ))}
+                        </VStack>
                     </DrawerBody>
                 </DrawerContent>
             </Drawer>
