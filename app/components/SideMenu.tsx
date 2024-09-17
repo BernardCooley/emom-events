@@ -4,24 +4,29 @@ import React, { useRef } from "react";
 import {
     Box,
     Button,
+    Divider,
     Drawer,
     DrawerBody,
     DrawerCloseButton,
     DrawerContent,
+    DrawerFooter,
     DrawerHeader,
     DrawerOverlay,
     IconButton,
+    Text,
     useDisclosure,
     VStack,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut, signIn } from "next-auth/react";
 
 interface Props {
     placement?: "top" | "right" | "bottom" | "left";
 }
 
 const SideMenu = ({ placement = "right" }: Props) => {
+    const { data: session } = useSession();
     const pathname = usePathname();
     const router = useRouter();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -32,18 +37,27 @@ const SideMenu = ({ placement = "right" }: Props) => {
         {
             name: "Home",
             path: "",
+            show: true,
         },
         {
             name: "Events",
             path: "events",
+            show: true,
         },
         {
             name: "Promoters",
             path: "promoters",
+            show: true,
         },
         {
             name: "Venues",
             path: "venues",
+            show: true,
+        },
+        {
+            name: "Promoter Dashboard",
+            path: "promoter-dashboard",
+            show: session?.user ? true : false,
         },
     ];
 
@@ -69,14 +83,10 @@ const SideMenu = ({ placement = "right" }: Props) => {
                     <DrawerHeader>Menu</DrawerHeader>
 
                     <DrawerBody>
-                        <VStack
-                            justifyContent="space-between"
-                            h="full"
-                            alignItems="flex-end"
-                            pb={4}
-                        >
-                            <VStack w="full">
-                                {menuItems.map((item) => (
+                        <VStack w="full">
+                            {menuItems
+                                .filter((item) => item.show)
+                                .map((item) => (
                                     <Button
                                         isDisabled={pageName === item.path}
                                         onClick={() => {
@@ -90,15 +100,26 @@ const SideMenu = ({ placement = "right" }: Props) => {
                                         {item.name}
                                     </Button>
                                 ))}
-                            </VStack>
-                            <Button
-                                variant="link"
-                                onClick={() => router.push("/api/auth/signin")}
-                            >
-                                Promoter login
-                            </Button>
                         </VStack>
                     </DrawerBody>
+                    <Divider />
+                    <DrawerFooter>
+                        {session ? (
+                            <VStack w="full">
+                                <Text>{session.user?.name}</Text>
+                                <Button
+                                    variant="link"
+                                    onClick={() => signOut()}
+                                >
+                                    Sign out
+                                </Button>
+                            </VStack>
+                        ) : (
+                            <Button variant="link" onClick={() => signIn()}>
+                                Promoter login
+                            </Button>
+                        )}
+                    </DrawerFooter>
                 </DrawerContent>
             </Drawer>
         </Box>
