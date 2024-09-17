@@ -54,9 +54,9 @@ export const fetchWithErrorHandling = async <T>(
     return null;
 };
 
-interface FetchPromoterProps {
+type FetchPromoterProps = {
     email: string;
-}
+};
 
 export const fetchPromoter = async ({
     email,
@@ -70,6 +70,28 @@ export const fetchPromoter = async ({
             }
         );
         return promoter;
+    } catch (error) {
+        throw error;
+    }
+};
+
+type AddPromoterProps = {
+    data: Promoter;
+};
+
+export const addPromoter = async ({
+    data,
+}: AddPromoterProps): Promise<Promoter | null> => {
+    try {
+        const newPromoter: Promoter | null = await fetchWithErrorHandling(
+            "/api/addPromoter",
+            "POST",
+            {
+                data,
+            }
+        );
+
+        return newPromoter;
     } catch (error) {
         throw error;
     }

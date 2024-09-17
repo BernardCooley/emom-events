@@ -5,6 +5,7 @@ import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { fetchPromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
+import PromoterForm from "@/app/components/PromoterForm";
 
 interface Props {}
 
@@ -34,8 +35,25 @@ const PromoterDashboard = ({}: Props) => {
     if (!promoter) {
         return (
             <VStack gap={10} w="full" alignItems="center">
-                <Heading>Your promoter profile is incomplete</Heading>
+                <Heading>
+                    Promoter profile for {session?.user?.name} is incomplete
+                </Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
+                <PromoterForm
+                    onSuccess={(promoter) => {
+                        if (promoter) {
+                            getPromoter();
+                        }
+                    }}
+                    defaultValues={{
+                        name: session?.user?.name || "",
+                        city: "",
+                        state: "",
+                        country: "",
+                        images: [],
+                        email: session?.user?.email || "",
+                    }}
+                />
             </VStack>
         );
     }
