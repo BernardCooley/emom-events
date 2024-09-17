@@ -7,7 +7,7 @@ export default function Home() {
     const pages = ["events", "promoters", "venues"];
 
     return (
-        <Box position="relative">
+        <Box position="relative" pt={[12]}>
             <SimpleGrid columns={[1, 1, 2, 3]} spacing={10}>
                 {pages.map((page) => (
                     <GridItem key={page}>

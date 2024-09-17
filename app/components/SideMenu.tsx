@@ -115,7 +115,14 @@ const SideMenu = ({ placement = "right" }: Props) => {
                                 </Button>
                             </VStack>
                         ) : (
-                            <Button variant="link" onClick={() => signIn()}>
+                            <Button
+                                variant="link"
+                                onClick={() =>
+                                    signIn("promoter", {
+                                        callbackUrl: "/promoter-dashboard",
+                                    })
+                                }
+                            >
                                 Promoter login
                             </Button>
                         )}
