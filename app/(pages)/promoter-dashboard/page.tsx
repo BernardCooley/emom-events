@@ -19,6 +19,9 @@ import { useSession } from "next-auth/react";
 import { fetchPromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
 import PromoterForm from "@/app/components/PromoterForm";
+import { getFirebaseImageBlob } from "@/firebase/functions";
+import ImageGrid from "@/app/components/ImageGrid";
+import { FirebaseImageBlob } from "@/types";
 
 interface Props {}
 
@@ -27,12 +30,35 @@ const PromoterDashboard = ({}: Props) => {
     const { data: session } = useSession();
     const [promoter, setPromoter] = useState<Promoter | null>(null);
     const [loading, setLoading] = useState(true);
+    const [images, setImages] = useState<FirebaseImageBlob[]>([]);
 
     const getPromoter = useCallback(async () => {
         if (session?.user?.email) {
             const promoter = await fetchPromoter({
                 email: session?.user?.email,
             });
+
+            if (promoter) {
+                const imageUrls = await Promise.all(
+                    promoter.imageIds.map(async (imageId) => {
+                        const blob = await getFirebaseImageBlob(
+                            "promoterImages",
+                            `${promoter?.email}/${imageId}`
+                        );
+                        return {
+                            blob: blob?.blob,
+                            name: blob?.name.replace(`${promoter?.email}/`, ""),
+                        };
+                    })
+                );
+
+                setImages(
+                    imageUrls.filter(
+                        (img) =>
+                            img.blob !== undefined && img.name !== undefined
+                    ) as FirebaseImageBlob[]
+                );
+            }
             setPromoter(promoter);
             setLoading(false);
         }
@@ -64,7 +90,6 @@ const PromoterDashboard = ({}: Props) => {
                         city: "",
                         state: "",
                         country: "",
-                        images: [],
                         email: session?.user?.email || "",
                     }}
                 />
@@ -102,26 +127,33 @@ const PromoterDashboard = ({}: Props) => {
                 <Divider />
                 <CardBody>
                     {!editing && (
-                        <SimpleGrid columns={3}>
-                            <VStack alignItems="flex-start">
-                                <Text fontWeight={700}>Name</Text>
-                                <Text>{promoter.name}</Text>
-                            </VStack>
-                            <VStack alignItems="flex-start">
-                                <Text fontWeight={700}>Location</Text>
-                                <Text>{getLocation()}</Text>
-                            </VStack>
-                            <VStack alignItems="flex-start">
-                                <Text fontWeight={700}>Email</Text>
-                                <Text>{promoter.email}</Text>
-                            </VStack>
-                        </SimpleGrid>
+                        <>
+                            <SimpleGrid columns={3}>
+                                <VStack alignItems="flex-start">
+                                    <Text fontWeight={700}>Name</Text>
+                                    <Text>{promoter.name}</Text>
+                                </VStack>
+                                <VStack alignItems="flex-start">
+                                    <Text fontWeight={700}>Location</Text>
+                                    <Text>{getLocation()}</Text>
+                                </VStack>
+                                <VStack alignItems="flex-start">
+                                    <Text fontWeight={700}>Email</Text>
+                                    <Text>{promoter.email}</Text>
+                                </VStack>
+                            </SimpleGrid>
+                            <ImageGrid
+                                columns={[1, 3, 3, 6, 8]}
+                                images={images}
+                            />
+                        </>
                     )}
                 </CardBody>
                 <CardFooter>
                     <Flex w="full" alignItems="center" direction="column">
                         {editing && (
                             <PromoterForm
+                                existingImages={images}
                                 isEditing={true}
                                 onSuccess={(promoter) => {
                                     if (promoter) {
@@ -134,7 +166,6 @@ const PromoterDashboard = ({}: Props) => {
                                     city: promoter.city || "",
                                     state: promoter.state || "",
                                     country: promoter.country || "",
-                                    images: [],
                                     email: promoter.email || "",
                                 }}
                             />

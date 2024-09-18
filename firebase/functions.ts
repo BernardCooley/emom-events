@@ -1,5 +1,12 @@
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import {
+    deleteObject,
+    getBlob,
+    getDownloadURL,
+    ref,
+    uploadBytes,
+} from "firebase/storage";
 import { storage } from "./clientApp";
+import { FirebaseImageBlob } from "@/types";
 
 export const uploadFirebaseImage = async (
     folder: string,
@@ -14,5 +21,36 @@ export const uploadFirebaseImage = async (
         return getDownloadURL(response.ref);
     } catch (err: any) {
         return err;
+    }
+};
+
+export const deleteFirebaseImage = async (
+    folder: string,
+    name: string,
+    email: string
+) => {
+    const path = `${folder}/${email}/${name}`;
+    const pathReference = ref(storage, path);
+
+    try {
+        await deleteObject(pathReference);
+    } catch (err) {}
+};
+
+export const getFirebaseImageBlob = async (
+    folder: string,
+    name: string
+): Promise<FirebaseImageBlob | undefined> => {
+    const path = `${folder}/${name}`;
+    const pathReference = ref(storage, path);
+
+    try {
+        const blob = await getBlob(pathReference);
+        return {
+            blob,
+            name: `${name}`,
+        };
+    } catch (err) {
+        return undefined;
     }
 };

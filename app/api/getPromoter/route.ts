@@ -16,6 +16,7 @@ export async function POST(req: Request) {
                 city: true,
                 state: true,
                 country: true,
+                imageIds: true,
             },
         });
 

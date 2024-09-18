@@ -96,3 +96,8 @@ export type EventDetails = {
     promoterDetails: PromoterDetails | null;
     venueDetails: VenueDetails | null;
 };
+
+export type FirebaseImageBlob = {
+    blob: Blob;
+    name: string;
+};

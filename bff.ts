@@ -98,18 +98,21 @@ export const addPromoter = async ({
 };
 
 type UpdatePromoterProps = {
-    data: Promoter;
+    email: string;
+    imageIds: string[];
 };
 
-export const updatePromoter = async ({
-    data,
+export const updatePromoterImages = async ({
+    email,
+    imageIds,
 }: UpdatePromoterProps): Promise<Promoter | null> => {
     try {
         const updatedPromoter: Promoter | null = await fetchWithErrorHandling(
-            "/api/updatePromoter",
+            "/api/updatePromoterImages",
             "POST",
             {
-                data,
+                email,
+                imageIds,
             }
         );
 

@@ -1,23 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Button, Center, Heading, VStack } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextInput } from "./TextInput";
-import { addPromoter, updatePromoter } from "@/bff";
+import { addPromoter, updatePromoterImages } from "@/bff";
 import { Promoter } from "@prisma/client";
 import FileUpload from "./FileUpload";
-import { uploadFirebaseImage } from "@/firebase/functions";
+import { deleteFirebaseImage, uploadFirebaseImage } from "@/firebase/functions";
 import ImageGrid from "./ImageGrid";
+import { FirebaseImageBlob } from "@/types";
 
 export interface FormData {
     name: string;
     city: string;
     state: string;
     country: string;
-    images: string[];
     email: string;
 }
 
@@ -26,7 +26,6 @@ const schema: ZodType<FormData> = z.object({
     city: z.string(),
     state: z.string(),
     country: z.string().min(1, "Country is required"),
-    images: z.array(z.string()),
     email: z.string().email(),
 });
 
@@ -34,20 +33,22 @@ type Props = {
     defaultValues?: FormData;
     onSuccess: (promoter: Promoter) => void;
     isEditing?: boolean;
+    existingImages?: FirebaseImageBlob[];
 };
 
 const PromoterForm = ({
     defaultValues,
     onSuccess,
     isEditing = false,
+    existingImages,
 }: Props) => {
-    const [images, setImages] = useState<File[]>([]);
+    const [images, setImages] = useState<FirebaseImageBlob[]>(
+        existingImages || []
+    );
     const [isSaving, setIsSaving] = useState(false);
     const {
         handleSubmit,
         register,
-        setValue,
-        watch,
         formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -56,62 +57,76 @@ const PromoterForm = ({
             city: defaultValues?.city || "",
             state: defaultValues?.state || "",
             country: defaultValues?.country || "",
-            images: defaultValues?.images || [],
             email: defaultValues?.email || "",
         },
     });
 
-    useEffect(() => {
-        if (images.length) {
-            setValue("images", [
-                ...watchImages,
-                ...images.map((image) => URL.createObjectURL(image)),
-            ]);
-        }
-    }, [images]);
-
-    const watchImages = watch("images");
-
     const onSave = async (formData: FormData) => {
         setIsSaving(true);
         if (!isEditing) {
+            let imageIds: string[] = [];
             if (images.length) {
-                const imageIds = await Promise.all(
+                imageIds = await Promise.all(
                     images.map(async (image) => {
                         await uploadFirebaseImage(
                             "promoterImages",
-                            image,
+                            new File([image.blob], image.name),
                             formData.email
                         );
                         return image.name;
                     })
                 );
-                const resp = await addPromoter({
-                    data: {
-                        id: formData.email,
-                        name: formData.name,
-                        city: formData.city,
-                        state: formData.state,
-                        country: formData.country,
-                        imageIds: imageIds,
-                        email: formData.email,
-                    },
-                });
-                if (resp) {
-                    onSuccess(resp);
-                }
             }
-        } else {
-            const resp = await updatePromoter({
+            const resp = await addPromoter({
                 data: {
                     id: formData.email,
                     name: formData.name,
                     city: formData.city,
                     state: formData.state,
                     country: formData.country,
-                    imageIds: formData.images,
+                    imageIds: imageIds,
                     email: formData.email,
                 },
+            });
+            if (resp) {
+                onSuccess(resp);
+            }
+        } else {
+            let imageIds: string[] = [];
+
+            if (images.length) {
+                imageIds = await Promise.all(
+                    images.map(async (image) => {
+                        await uploadFirebaseImage(
+                            "promoterImages",
+                            new File([image.blob], image.name),
+                            formData.email
+                        );
+                        return image.name;
+                    })
+                );
+            }
+
+            const imagesToDelete = existingImages?.filter(
+                (img) => !images.find((i) => i.name === img.name)
+            );
+
+            if (imagesToDelete && imagesToDelete.length) {
+                await Promise.all(
+                    imagesToDelete.map(async (img) => {
+                        const fileToDelete = new File([img.blob], img.name);
+                        await deleteFirebaseImage(
+                            "promoterImages",
+                            fileToDelete.name,
+                            formData.email
+                        );
+                    })
+                );
+            }
+
+            const resp = await updatePromoterImages({
+                email: formData.email,
+                imageIds: imageIds,
             });
             if (resp) {
                 onSuccess(resp);
@@ -174,20 +189,20 @@ const PromoterForm = ({
 
                         <FileUpload
                             onUpload={(file) => {
-                                setImages((prevImages) => [
-                                    ...prevImages,
-                                    file,
-                                ]);
+                                setImages(
+                                    images.concat({
+                                        blob: file,
+                                        name: file.name,
+                                    })
+                                );
                             }}
                             fieldLabel="Images"
                             accept="image/*"
                             buttonText="Upload an image..."
                         />
                         <ImageGrid
-                            images={images.map((image) =>
-                                URL.createObjectURL(image)
-                            )}
-                            onRemove={(files) => setValue("images", files)}
+                            images={images}
+                            onRemove={(files) => setImages(files)}
                         />
                         <Button
                             onClick={handleSubmit(onSave)}

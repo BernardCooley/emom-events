@@ -1,17 +1,23 @@
 import React from "react";
 import { Box, IconButton, Image, SimpleGrid } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
+import { FirebaseImageBlob } from "@/types";
 
 interface Props {
-    images: string[];
-    onRemove?: (files: string[]) => void;
+    images: FirebaseImageBlob[];
+    onRemove?: (files: FirebaseImageBlob[]) => void;
+    columns?: number[];
 }
 
-const ImageGrid = ({ images, onRemove }: Props) => {
+const ImageGrid = ({ images, onRemove, columns = [3] }: Props) => {
+    const urls = images.map((file) =>
+        URL.createObjectURL(new File([file.blob], file.name))
+    );
+
     return (
-        <SimpleGrid columns={3} gap={4}>
-            {images?.length > 0 &&
-                images?.map((file) => (
+        <SimpleGrid columns={columns} gap={4}>
+            {urls?.length > 0 &&
+                urls?.map((file, index) => (
                     <Box position="relative" key={file}>
                         {onRemove && (
                             <IconButton
@@ -26,7 +32,9 @@ const ImageGrid = ({ images, onRemove }: Props) => {
                                 icon={<CloseIcon />}
                                 onClick={() =>
                                     onRemove(
-                                        images.filter((img) => img !== file)
+                                        images.filter(
+                                            (img) => img !== images[index]
+                                        )
                                     )
                                 }
                             />
