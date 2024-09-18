@@ -101,3 +101,8 @@ export type FirebaseImageBlob = {
     blob: Blob;
     name: string;
 };
+
+export type SelectOption = {
+    value: string;
+    label: string;
+};

@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Heading, Text, VStack } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Card,
+    CardHeader,
+    Heading,
+    Text,
+    useDisclosure,
+    VStack,
+} from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { fetchPromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
@@ -9,6 +18,7 @@ import PromoterForm from "@/app/components/PromoterForm";
 import { getFirebaseImageBlob } from "@/firebase/functions";
 import { FirebaseImageBlob } from "@/types";
 import PromoterProfile from "@/app/components/PromoterProfile";
+import AddEventModal from "@/app/components/AddEventModal";
 
 interface Props {}
 
@@ -17,6 +27,7 @@ const PromoterDashboard = ({}: Props) => {
     const [promoter, setPromoter] = useState<Promoter | null>(null);
     const [loading, setLoading] = useState(true);
     const [images, setImages] = useState<FirebaseImageBlob[]>([]);
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const getPromoter = useCallback(async () => {
         if (session?.user?.email) {
@@ -84,13 +95,30 @@ const PromoterDashboard = ({}: Props) => {
     }
 
     return (
-        <Box>
+        <VStack gap={10}>
             <PromoterProfile
                 promoter={promoter}
                 images={images}
                 onGetPromoter={getPromoter}
             />
-        </Box>
+            <Card w="full">
+                <CardHeader>
+                    <Box position="relative">
+                        <Button
+                            onClick={onOpen}
+                            right={0}
+                            top={0}
+                            variant="link"
+                            position="absolute"
+                        >
+                            Add Event
+                        </Button>
+                        <Heading size="md">Events</Heading>
+                    </Box>
+                </CardHeader>
+            </Card>
+            <AddEventModal isOpen={isOpen} onClose={onClose} />
+        </VStack>
     );
 };
 

@@ -27,7 +27,7 @@ interface Props {
     helperText?: string;
     leftIcon?: ReactNode;
     rightIcon?: ReactNode;
-    fieldProps: ComponentProps<"input">;
+    fieldProps?: ComponentProps<"input">;
     required?: boolean;
     styles?: CSSProperties;
     type?: string;
@@ -102,7 +102,7 @@ export const TextInput = forwardRef(
                         type={type}
                         placeholder={placeholder}
                         height={height}
-                        {...fieldProps}
+                        {...(fieldProps ? fieldProps : {})}
                         boxSizing="border-box"
                         size={size}
                         aria-label={title}

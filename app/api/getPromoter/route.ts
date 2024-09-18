@@ -17,6 +17,31 @@ export async function POST(req: Request) {
                 state: true,
                 country: true,
                 imageIds: true,
+                events: {
+                    select: {
+                        id: true,
+                        name: true,
+                        timeFrom: true,
+                        timeTo: true,
+                        description: true,
+                        imageIds: true,
+                        venue: {
+                            select: {
+                                id: true,
+                                name: true,
+                                address: true,
+                                city: true,
+                                state: true,
+                                country: true,
+                            },
+                        },
+                        lineup: {
+                            select: {
+                                artist: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
