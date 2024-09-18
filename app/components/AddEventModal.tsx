@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import {
+    Box,
     Button,
+    Flex,
     HStack,
     Modal,
     ModalBody,
@@ -8,6 +10,7 @@ import {
     ModalContent,
     ModalHeader,
     ModalOverlay,
+    Text,
     VStack,
 } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
@@ -150,15 +153,19 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                     size="lg"
                                     height="60px"
                                     variant="outline"
-                                    error={errors.lineup?.message}
                                     onEnter={() => {
                                         const val = addArtistRef.current?.value;
 
                                         if (val) {
-                                            setValue("lineup", [
-                                                ...watchLineup,
-                                                val,
-                                            ]);
+                                            setValue(
+                                                "lineup",
+                                                Array.from(
+                                                    new Set([
+                                                        ...watchLineup,
+                                                        val?.toLowerCase(),
+                                                    ])
+                                                )
+                                            );
                                             addArtistRef.current!.value = "";
                                         }
                                     }}
@@ -177,6 +184,97 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                         value: artist.toLowerCase(),
                                     }))}
                                 />
+                                <VStack w="full">
+                                    <Flex w="full">
+                                        <Text fontSize="lg">Venue</Text>
+                                        <Box color="gpRed.500" pl={1}>
+                                            *
+                                        </Box>
+                                    </Flex>
+
+                                    <VStack
+                                        p={6}
+                                        border="1px solid"
+                                        borderColor="gray.300"
+                                        w="full"
+                                        spacing={6}
+                                        rounded="lg"
+                                    >
+                                        <TextInput
+                                            title="Name"
+                                            type="text"
+                                            size="lg"
+                                            fieldProps={register("venue.name")}
+                                            height="60px"
+                                            variant="outline"
+                                            error={errors.venue?.name?.message}
+                                            required
+                                        />
+                                        <TextInput
+                                            title="Street Address"
+                                            type="text"
+                                            size="lg"
+                                            fieldProps={register(
+                                                "venue.address"
+                                            )}
+                                            height="60px"
+                                            variant="outline"
+                                            error={
+                                                errors.venue?.address?.message
+                                            }
+                                            required
+                                        />
+                                        <TextInput
+                                            title="City/Town"
+                                            type="text"
+                                            size="lg"
+                                            fieldProps={register("venue.city")}
+                                            height="60px"
+                                            variant="outline"
+                                            error={errors.venue?.city?.message}
+                                            required
+                                        />
+                                        <TextInput
+                                            title="County/State"
+                                            type="text"
+                                            size="lg"
+                                            fieldProps={register("venue.state")}
+                                            height="60px"
+                                            variant="outline"
+                                            error={errors.venue?.state?.message}
+                                            required
+                                        />
+                                        <TextInput
+                                            title="Country"
+                                            type="text"
+                                            size="lg"
+                                            fieldProps={register(
+                                                "venue.country"
+                                            )}
+                                            height="60px"
+                                            variant="outline"
+                                            error={
+                                                errors.venue?.country?.message
+                                            }
+                                            required
+                                        />
+                                        <TextInput
+                                            title="Postcode/Zip"
+                                            type="text"
+                                            size="lg"
+                                            fieldProps={register(
+                                                "venue.postcodeZip"
+                                            )}
+                                            height="60px"
+                                            variant="outline"
+                                            error={
+                                                errors.venue?.postcodeZip
+                                                    ?.message
+                                            }
+                                            required
+                                        />
+                                    </VStack>
+                                </VStack>
                             </VStack>
                             <HStack w="full" justifyContent="flex-end">
                                 <Button
