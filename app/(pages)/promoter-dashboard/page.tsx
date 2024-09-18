@@ -1,32 +1,18 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import {
-    Box,
-    Button,
-    Card,
-    CardBody,
-    CardFooter,
-    CardHeader,
-    Divider,
-    Flex,
-    Heading,
-    SimpleGrid,
-    Text,
-    VStack,
-} from "@chakra-ui/react";
+import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { fetchPromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
 import PromoterForm from "@/app/components/PromoterForm";
 import { getFirebaseImageBlob } from "@/firebase/functions";
-import ImageGrid from "@/app/components/ImageGrid";
 import { FirebaseImageBlob } from "@/types";
+import PromoterProfile from "@/app/components/PromoterProfile";
 
 interface Props {}
 
 const PromoterDashboard = ({}: Props) => {
-    const [editing, setEditing] = useState(false);
     const { data: session } = useSession();
     const [promoter, setPromoter] = useState<Promoter | null>(null);
     const [loading, setLoading] = useState(true);
@@ -97,82 +83,13 @@ const PromoterDashboard = ({}: Props) => {
         );
     }
 
-    const getLocation = () => {
-        const locationParts = [
-            promoter.city,
-            promoter.state,
-            promoter.country,
-        ].filter(Boolean);
-
-        return locationParts.join(", ");
-    };
-
     return (
         <Box>
-            <Card>
-                <CardHeader>
-                    <Box position="relative">
-                        <Button
-                            onClick={() => setEditing(!editing)}
-                            right={0}
-                            top={0}
-                            variant="link"
-                            position="absolute"
-                        >
-                            {editing ? "Cancel" : "Edit"}
-                        </Button>
-                        <Heading size="md">Profile</Heading>
-                    </Box>
-                </CardHeader>
-                <Divider />
-                <CardBody>
-                    {!editing && (
-                        <Flex width="full" direction="column" gap={10}>
-                            <SimpleGrid columns={[1, 1, 3]} gap={[6, 6, 0]}>
-                                <VStack alignItems="flex-start">
-                                    <Text fontWeight={700}>Name</Text>
-                                    <Text>{promoter.name}</Text>
-                                </VStack>
-                                <VStack alignItems="flex-start">
-                                    <Text fontWeight={700}>Location</Text>
-                                    <Text>{getLocation()}</Text>
-                                </VStack>
-                                <VStack alignItems="flex-start">
-                                    <Text fontWeight={700}>Email</Text>
-                                    <Text>{promoter.email}</Text>
-                                </VStack>
-                            </SimpleGrid>
-                            <ImageGrid
-                                columns={[2, 3, 5, 6, 8]}
-                                images={images}
-                            />
-                        </Flex>
-                    )}
-                </CardBody>
-                <CardFooter>
-                    <Flex w="full" alignItems="center" direction="column">
-                        {editing && (
-                            <PromoterForm
-                                existingImages={images}
-                                isEditing={true}
-                                onSuccess={(promoter) => {
-                                    if (promoter) {
-                                        getPromoter();
-                                        setEditing(false);
-                                    }
-                                }}
-                                defaultValues={{
-                                    name: promoter.name || "",
-                                    city: promoter.city || "",
-                                    state: promoter.state || "",
-                                    country: promoter.country || "",
-                                    email: promoter.email || "",
-                                }}
-                            />
-                        )}
-                    </Flex>
-                </CardFooter>
-            </Card>
+            <PromoterProfile
+                promoter={promoter}
+                images={images}
+                onGetPromoter={getPromoter}
+            />
         </Box>
     );
 };
