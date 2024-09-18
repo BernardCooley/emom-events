@@ -127,8 +127,8 @@ const PromoterDashboard = ({}: Props) => {
                 <Divider />
                 <CardBody>
                     {!editing && (
-                        <>
-                            <SimpleGrid columns={3}>
+                        <Flex width="full" direction="column" gap={10}>
+                            <SimpleGrid columns={[1, 1, 3]} gap={[6, 6, 0]}>
                                 <VStack alignItems="flex-start">
                                     <Text fontWeight={700}>Name</Text>
                                     <Text>{promoter.name}</Text>
@@ -143,10 +143,10 @@ const PromoterDashboard = ({}: Props) => {
                                 </VStack>
                             </SimpleGrid>
                             <ImageGrid
-                                columns={[1, 3, 3, 6, 8]}
+                                columns={[2, 3, 5, 6, 8]}
                                 images={images}
                             />
-                        </>
+                        </Flex>
                     )}
                 </CardBody>
                 <CardFooter>
