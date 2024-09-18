@@ -96,3 +96,25 @@ export const addPromoter = async ({
         throw error;
     }
 };
+
+type UpdatePromoterProps = {
+    data: Promoter;
+};
+
+export const updatePromoter = async ({
+    data,
+}: UpdatePromoterProps): Promise<Promoter | null> => {
+    try {
+        const updatedPromoter: Promoter | null = await fetchWithErrorHandling(
+            "/api/updatePromoter",
+            "POST",
+            {
+                data,
+            }
+        );
+
+        return updatedPromoter;
+    } catch (error) {
+        throw error;
+    }
+};

@@ -2,21 +2,14 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const { email } = await req.json();
+    const { data } = await req.json();
 
     try {
-        const promoter = await prisma?.promoter.findUnique({
+        const promoter = await prisma?.promoter.update({
             where: {
-                email,
+                id: data.email,
             },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                city: true,
-                state: true,
-                country: true,
-            },
+            data,
         });
 
         const response = NextResponse.json(promoter, {

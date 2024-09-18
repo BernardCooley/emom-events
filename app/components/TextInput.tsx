@@ -57,7 +57,7 @@ export const TextInput = forwardRef(
             variant = "primary",
             isReadOnly = false,
             allowErrors = true,
-            allowHelperText = true,
+            allowHelperText = false,
             onChange,
             onEnter,
         }: Props,

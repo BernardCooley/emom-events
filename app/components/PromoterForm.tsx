@@ -1,25 +1,16 @@
 "use client";
 
-import React from "react";
-import {
-    Box,
-    Button,
-    Flex,
-    FormControl,
-    FormLabel,
-    SimpleGrid,
-    Image,
-    VStack,
-    IconButton,
-} from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import { Box, Button, Center, Heading, VStack } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextInput } from "./TextInput";
-import { CloseIcon } from "@chakra-ui/icons";
-import Upload from "rc-upload";
-import { addPromoter } from "@/bff";
+import { addPromoter, updatePromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
+import FileUpload from "./FileUpload";
+import { uploadFirebaseImage } from "@/firebase/functions";
+import ImageGrid from "./ImageGrid";
 
 export interface FormData {
     name: string;
@@ -42,9 +33,16 @@ const schema: ZodType<FormData> = z.object({
 type Props = {
     defaultValues?: FormData;
     onSuccess: (promoter: Promoter) => void;
+    isEditing?: boolean;
 };
 
-const PromoterForm = ({ defaultValues, onSuccess }: Props) => {
+const PromoterForm = ({
+    defaultValues,
+    onSuccess,
+    isEditing = false,
+}: Props) => {
+    const [images, setImages] = useState<File[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
     const {
         handleSubmit,
         register,
@@ -63,126 +61,144 @@ const PromoterForm = ({ defaultValues, onSuccess }: Props) => {
         },
     });
 
+    useEffect(() => {
+        if (images.length) {
+            setValue("images", [
+                ...watchImages,
+                ...images.map((image) => URL.createObjectURL(image)),
+            ]);
+        }
+    }, [images]);
+
     const watchImages = watch("images");
 
     const onSave = async (formData: FormData) => {
-        const resp = await addPromoter({
-            data: {
-                id: "",
-                name: formData.name,
-                city: formData.city,
-                state: formData.state,
-                country: formData.country,
-                imageIds: formData.images,
-                email: formData.email,
-            },
-        });
-        if (resp) {
-            onSuccess(resp);
+        setIsSaving(true);
+        if (!isEditing) {
+            if (images.length) {
+                const imageIds = await Promise.all(
+                    images.map(async (image) => {
+                        await uploadFirebaseImage(
+                            "promoterImages",
+                            image,
+                            formData.email
+                        );
+                        return image.name;
+                    })
+                );
+                const resp = await addPromoter({
+                    data: {
+                        id: formData.email,
+                        name: formData.name,
+                        city: formData.city,
+                        state: formData.state,
+                        country: formData.country,
+                        imageIds: imageIds,
+                        email: formData.email,
+                    },
+                });
+                if (resp) {
+                    onSuccess(resp);
+                }
+            }
+        } else {
+            const resp = await updatePromoter({
+                data: {
+                    id: formData.email,
+                    name: formData.name,
+                    city: formData.city,
+                    state: formData.state,
+                    country: formData.country,
+                    imageIds: formData.images,
+                    email: formData.email,
+                },
+            });
+            if (resp) {
+                onSuccess(resp);
+            }
         }
+        setIsSaving(false);
     };
 
     return (
-        <Box w="50%">
-            <form onSubmit={handleSubmit(onSave)}>
-                <VStack>
-                    <TextInput
-                        title="Name"
-                        type="text"
-                        size="sm"
-                        fieldProps={register("name")}
-                        height="40px"
-                        variant="filled"
-                        error={errors.name?.message}
-                        required
-                    />
-                    <TextInput
-                        title="Country"
-                        type="text"
-                        size="sm"
-                        fieldProps={register("country")}
-                        height="40px"
-                        variant="filled"
-                        error={errors.country?.message}
-                        required
-                    />
-                    <TextInput
-                        title="State"
-                        type="text"
-                        size="sm"
-                        fieldProps={register("state")}
-                        height="40px"
-                        variant="filled"
-                        error={errors.state?.message}
-                    />
-                    <TextInput
-                        title="City"
-                        type="text"
-                        size="sm"
-                        fieldProps={register("city")}
-                        height="40px"
-                        variant="filled"
-                        error={errors.city?.message}
-                    />
+        <Box w="50%" position="relative">
+            {isSaving && (
+                <Center position="absolute" w="full" h="70vh">
+                    <Heading>Saving...</Heading>
+                </Center>
+            )}
+            <Box
+                opacity={isSaving ? 0.4 : 1}
+                pointerEvents={isSaving ? "none" : "auto"}
+            >
+                <form onSubmit={handleSubmit(onSave)}>
+                    <VStack gap={6}>
+                        <TextInput
+                            title="Name"
+                            type="text"
+                            size="lg"
+                            fieldProps={register("name")}
+                            height="60px"
+                            variant="outline"
+                            error={errors.name?.message}
+                            required
+                        />
+                        <TextInput
+                            title="Country"
+                            type="text"
+                            size="lg"
+                            fieldProps={register("country")}
+                            height="60px"
+                            variant="outline"
+                            error={errors.country?.message}
+                            required
+                        />
+                        <TextInput
+                            title="County/State"
+                            type="text"
+                            size="lg"
+                            fieldProps={register("state")}
+                            height="60px"
+                            variant="outline"
+                            error={errors.state?.message}
+                        />
+                        <TextInput
+                            title="City/Town"
+                            type="text"
+                            size="lg"
+                            fieldProps={register("city")}
+                            height="60px"
+                            variant="outline"
+                            error={errors.city?.message}
+                        />
 
-                    <FormControl>
-                        <FormLabel fontSize="lg" mb={0}>
-                            <Flex>
-                                <Box>Images</Box>
-                            </Flex>
-                        </FormLabel>
-                        <Upload
-                            customRequest={(options) => {
-                                setValue("images", [
-                                    ...watchImages,
-                                    URL.createObjectURL(options.file as File),
+                        <FileUpload
+                            onUpload={(file) => {
+                                setImages((prevImages) => [
+                                    ...prevImages,
+                                    file,
                                 ]);
                             }}
+                            fieldLabel="Images"
                             accept="image/*"
-                            style={{
-                                content: "rhaethj",
-                                width: "200px",
-                                height: "50px",
-                                border: "1px solid black",
-                                borderRadius: "5px",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                cursor: "pointer",
-                            }}
+                            buttonText="Upload an image..."
+                        />
+                        <ImageGrid
+                            images={images.map((image) =>
+                                URL.createObjectURL(image)
+                            )}
+                            onRemove={(files) => setValue("images", files)}
+                        />
+                        <Button
+                            onClick={handleSubmit(onSave)}
+                            colorScheme="blue"
+                            mt={10}
                         >
-                            Upload a file...
-                        </Upload>
-                    </FormControl>
-                    <SimpleGrid columns={3} gap={4}>
-                        {watchImages?.length > 0 &&
-                            watchImages?.map((file) => (
-                                <Box position="relative" key={file}>
-                                    <IconButton
-                                        rounded="full"
-                                        right={1}
-                                        top={1}
-                                        position="absolute"
-                                        aria-label="Remove image"
-                                        icon={<CloseIcon />}
-                                        onClick={() => {
-                                            setValue(
-                                                "images",
-                                                watchImages.filter(
-                                                    (img) => img !== file
-                                                )
-                                            );
-                                        }}
-                                    />
-                                    <Image src={file} alt="" />
-                                </Box>
-                            ))}
-                    </SimpleGrid>
-                    <Button mt={10} type="submit">
-                        Save
-                    </Button>
-                </VStack>
-            </form>
+                            Save
+                        </Button>
+                    </VStack>
+                </form>
+            </Box>
         </Box>
     );
 };
