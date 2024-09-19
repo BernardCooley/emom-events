@@ -403,10 +403,6 @@ const AddEventModal = ({
                                                     onAcceptVenue={() => {
                                                         trigger("venue").then(
                                                             (validated) => {
-                                                                console.log(
-                                                                    "🚀 ~ ).then ~ validated:",
-                                                                    validated
-                                                                );
                                                                 if (validated) {
                                                                     setShowAddressPanel(
                                                                         true
