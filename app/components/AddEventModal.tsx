@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     Button,
+    Center,
     Divider,
     Flex,
     HStack,
@@ -11,6 +12,7 @@ import {
     ModalContent,
     ModalHeader,
     ModalOverlay,
+    Spinner,
     Text,
     VStack,
 } from "@chakra-ui/react";
@@ -93,6 +95,7 @@ const AddEventModal = ({
     existingImages,
     promoterId,
 }: Props) => {
+    const [isSaving, setIsSaving] = useState(false);
     const [venueSearched, setVenueSearched] = useState(false);
     const [showAddressPanel, setShowAddressPanel] = useState(false);
     const [selectedVenue, setSelectedVenue] = useState<VenueItem | null>(null);
@@ -142,6 +145,7 @@ const AddEventModal = ({
     const watchArtist = watch("artist");
 
     const onSave = async (formData: FormData) => {
+        setIsSaving(true);
         let venue = null;
 
         if (!selectedVenue) {
@@ -187,8 +191,11 @@ const AddEventModal = ({
                             return image.name;
                         })
                     );
+                    handleModalClose();
                 }
+                handleModalClose();
             } else {
+                handleModalClose();
                 if (!selectedVenue) {
                     await deleteVenue({
                         venueId: venue.id,
@@ -197,17 +204,18 @@ const AddEventModal = ({
                 // TODO handle error
             }
         } else {
+            handleModalClose();
             // TODO handle error
             console.error("Failed to add venue");
         }
     };
 
     const handleSearchVenue = async () => {
-        setVenueSearched(true);
         const venues = await searchVenue({
             name: getValues("venueSearchTerm"),
         });
 
+        setVenueSearched(true);
         if (venues) setVenues(venues);
     };
 
@@ -227,6 +235,8 @@ const AddEventModal = ({
         setImages([]);
         setSelectedVenue(null);
         setVenueSearched(false);
+        setIsSaving(false);
+        setShowAddressPanel(false);
         reset();
         onClose();
     };
@@ -262,7 +272,26 @@ const AddEventModal = ({
                 <ModalHeader>Add Event</ModalHeader>
                 <Divider />
                 <ModalCloseButton />
-                <ModalBody mt={6}>
+                {isSaving && (
+                    <Center position="absolute" w="full">
+                        <VStack position="relative" top={40} gap={6}>
+                            <Spinner
+                                thickness="4px"
+                                speed="0.65s"
+                                emptyColor="gray.200"
+                                color="blue.500"
+                                size="xl"
+                            />
+                            <Text fontSize="xl">Saving Event...</Text>
+                        </VStack>
+                    </Center>
+                )}
+                <ModalBody
+                    position="relative"
+                    opacity={isSaving ? 0.3 : 1}
+                    pointerEvents={isSaving ? "none" : "auto"}
+                    mt={6}
+                >
                     <form onSubmit={handleSubmit(onSave)}>
                         <VStack gap={6}>
                             <VStack gap={6} w="full">
@@ -326,7 +355,11 @@ const AddEventModal = ({
                                         <VStack
                                             p={6}
                                             border="1px solid"
-                                            borderColor="gray.300"
+                                            borderColor={
+                                                errors.venue
+                                                    ? "red"
+                                                    : "gray.300"
+                                            }
                                             w="full"
                                             spacing={6}
                                             rounded="lg"
@@ -438,6 +471,7 @@ const AddEventModal = ({
                             </VStack>
                             <HStack w="full" justifyContent="flex-end">
                                 <Button
+                                    isDisabled={isSaving}
                                     variant="ghost"
                                     colorScheme="red"
                                     mr={3}
@@ -446,6 +480,7 @@ const AddEventModal = ({
                                     Cancel
                                 </Button>
                                 <Button
+                                    isDisabled={isSaving}
                                     onClick={handleSubmit(onSave)}
                                     colorScheme="blue"
                                 >

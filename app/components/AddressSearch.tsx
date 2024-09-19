@@ -127,6 +127,7 @@ const AddressSearch = ({
                         <GooglePlacesSearch
                             onPlaceChange={(place) => {
                                 onPlaceChange(place);
+                                onAcceptVenue();
                             }}
                         />
                     </Flex>

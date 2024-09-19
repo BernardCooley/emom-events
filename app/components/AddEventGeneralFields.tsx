@@ -93,9 +93,9 @@ const AddEventGeneralFields = ({
                 height="60px"
                 variant="outline"
                 error={errors.timeTo?.message}
-                required
             />
 
+            {/* TODO fix jumping images when typing */}
             <TextInput
                 fieldProps={register("artist")}
                 onChange={(e) => {
