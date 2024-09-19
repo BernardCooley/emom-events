@@ -1,7 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
+    Divider,
     Flex,
     HStack,
     IconButton,
@@ -24,7 +25,8 @@ import { Library } from "@googlemaps/js-api-loader";
 import GooglePlacesSearch from "./GooglePlacesSearch";
 import { searchVenue } from "@/bff";
 import { VenueItem } from "@/types";
-import { CloseIcon } from "@chakra-ui/icons";
+import { SearchIcon, SmallAddIcon } from "@chakra-ui/icons";
+import { TextAreaInput } from "./TextAreaInput";
 
 export interface FormData {
     name: string;
@@ -40,23 +42,41 @@ export interface FormData {
         country: string;
         postcodeZip: string;
     };
+    venueSearchTerm: string;
+    artist: string;
 }
 
-const schema: ZodType<FormData> = z.object({
-    name: z.string().min(1, "Name is required"),
-    timeFrom: z.string().min(1, "Start time is required"),
-    timeTo: z.string().min(1, "End time is required"),
-    description: z.string().min(1, "Description is required"),
-    lineup: z.array(z.string()),
-    venue: z.object({
-        name: z.string().min(1, "Venue name is required"),
-        address: z.string().min(1, "Venue address is required"),
-        city: z.string().min(1, "Venue city is required"),
-        state: z.string().min(1, "Venue state is required"),
-        country: z.string().min(1, "Venue country is required"),
-        postcodeZip: z.string(),
-    }),
-});
+const schema: ZodType<FormData> = z
+    .object({
+        name: z.string().min(1, "Name is required"),
+        timeFrom: z.string().min(1, "Date/Time from is required"),
+        timeTo: z.string(),
+        description: z.string().min(1, "Description is required"),
+        lineup: z.array(z.string()),
+        venue: z.object({
+            name: z.string().min(1, "Venue name is required"),
+            address: z.string().min(1, "Venue address is required"),
+            city: z.string().min(1, "Venue city is required"),
+            state: z.string().min(1, "Venue state is required"),
+            country: z.string().min(1, "Venue country is required"),
+            postcodeZip: z.string(),
+        }),
+        venueSearchTerm: z.string(),
+        artist: z.string(),
+    })
+    .refine(
+        (data) => {
+            if (data.timeTo.length > 0) {
+                return data.timeFrom < data.timeTo;
+            } else {
+                return true;
+            }
+        },
+        {
+            message: "End time must be after start time",
+            path: ["timeTo"],
+        }
+    );
 
 type Props = {
     isOpen: boolean;
@@ -65,21 +85,23 @@ type Props = {
 };
 
 const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
+    const [isAddingEventManually, setIsAddingEventManually] = useState(false);
     const [existingVenues, setExistingVenues] = useState<VenueItem[]>([]);
     const [existingVenueSearched, setExistingVenueSearched] = useState(false);
-    const [isSearchingForAddress, setIsSearchingForAddress] = useState(false);
+    const [isSearchingForAddress, setIsSearchingForAddress] = useState(true);
     const [libraries] = useState<Library[]>(["places"]);
     useJsApiLoader({
         id: "google-map-script",
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
         libraries: libraries,
     });
-    const addArtistRef = useRef<HTMLInputElement>(null);
     const {
         handleSubmit,
         register,
         setValue,
+        getValues,
         watch,
+        reset,
         formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -101,21 +123,38 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
     });
 
     const watchLineup = watch("lineup");
+    const watchVenueSearchTerm = watch("venueSearchTerm");
+    const watchArtist = watch("artist");
 
     const onSave = async (formData: FormData) => {
         console.log(formData);
     };
 
-    const handleSearchVenue = async (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        if (e.target.value.length > 2) {
-            const venues = await searchVenue({
-                name: e.target.value,
-            });
+    const handleSearchVenue = async () => {
+        const venues = await searchVenue({
+            name: getValues("venueSearchTerm"),
+        });
 
-            if (venues) setExistingVenues(venues);
+        if (venues) setExistingVenues(venues);
+        setExistingVenueSearched(true);
+    };
+
+    const handleArtistAdd = () => {
+        const val = getValues("artist");
+
+        if (val.length > 0) {
+            setValue("lineup", Array.from(new Set([...watchLineup, val])));
+            setValue("artist", "");
         }
+    };
+
+    const handleModalClose = () => {
+        setExistingVenues([]);
+        setIsAddingEventManually(false);
+        setExistingVenueSearched(false);
+        setIsSearchingForAddress(false);
+        reset();
+        onClose();
     };
 
     return (
@@ -123,14 +162,15 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
             closeOnOverlayClick={false}
             closeOnEsc={false}
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={handleModalClose}
             size="6xl"
         >
             <ModalOverlay />
-            <ModalContent h="80vh" overflowY="scroll">
+            <ModalContent pb={10} pt={4} h="80vh" overflowY="scroll">
                 <ModalHeader>Add Event</ModalHeader>
+                <Divider />
                 <ModalCloseButton />
-                <ModalBody>
+                <ModalBody mt={6}>
                     <form onSubmit={handleSubmit(onSave)}>
                         <VStack gap={6}>
                             <VStack gap={6} w="full">
@@ -144,7 +184,7 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                     error={errors.name?.message}
                                     required
                                 />
-                                <TextInput
+                                <TextAreaInput
                                     title="Description"
                                     type="text"
                                     size="lg"
@@ -174,31 +214,37 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                     error={errors.timeTo?.message}
                                     required
                                 />
+
                                 <TextInput
-                                    ref={addArtistRef}
+                                    fieldProps={register("artist")}
+                                    onChange={(e) => {
+                                        setValue("artist", e.target.value);
+                                    }}
                                     title="Add Artist"
                                     type="text"
                                     size="lg"
                                     height="60px"
                                     variant="outline"
-                                    onEnter={() => {
-                                        const val = addArtistRef.current?.value;
-
-                                        if (val) {
-                                            setValue(
-                                                "lineup",
-                                                Array.from(
-                                                    new Set([
-                                                        ...watchLineup,
-                                                        val?.toLowerCase(),
-                                                    ])
-                                                )
-                                            );
-                                            addArtistRef.current!.value = "";
-                                        }
-                                    }}
+                                    onEnter={handleArtistAdd}
+                                    rightIcon={
+                                        watchArtist?.length > 0 && (
+                                            <IconButton
+                                                mt={5}
+                                                h="58px"
+                                                w="58px"
+                                                minW="unset"
+                                                aria-label="Search"
+                                                icon={
+                                                    <SmallAddIcon fontSize="28px" />
+                                                }
+                                                onClick={handleArtistAdd}
+                                            />
+                                        )
+                                    }
                                 />
+
                                 <ChipGroup
+                                    title="Lineup: "
                                     onRemoveChip={(index) => {
                                         setValue(
                                             "lineup",
@@ -212,6 +258,7 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                         value: artist.toLowerCase(),
                                     }))}
                                 />
+                                <Divider />
                                 <VStack w="full">
                                     <Flex w="full">
                                         <Text fontSize="lg">Venue</Text>
@@ -227,105 +274,218 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                         w="full"
                                         spacing={6}
                                         rounded="lg"
+                                        alignItems="flex-start"
                                     >
-                                        <TextInput
-                                            title="Search for an existing Venue"
-                                            type="text"
-                                            size="lg"
-                                            height="60px"
-                                            variant="outline"
-                                            onChange={handleSearchVenue}
-                                        />
-                                        <VStack gap={2} w="full" mt={-10}>
-                                            {existingVenues.map(
-                                                (venue, index) => (
-                                                    <Flex
-                                                        onClick={() => {
-                                                            setExistingVenueSearched(
-                                                                true
-                                                            );
-                                                            setValue(
-                                                                "venue.name",
-                                                                existingVenues[
-                                                                    index
-                                                                ].name
-                                                            );
-                                                            setValue(
-                                                                "venue.address",
-                                                                existingVenues[
-                                                                    index
-                                                                ].address
-                                                            );
-                                                            setValue(
-                                                                "venue.city",
-                                                                existingVenues[
-                                                                    index
-                                                                ].city
-                                                            );
-                                                            setValue(
-                                                                "venue.state",
-                                                                existingVenues[
-                                                                    index
-                                                                ].state
-                                                            );
-                                                            setValue(
-                                                                "venue.country",
-                                                                existingVenues[
-                                                                    index
-                                                                ].country
-                                                            );
-                                                            setValue(
-                                                                "venue.postcodeZip",
-                                                                existingVenues[
-                                                                    index
-                                                                ].postcodeZip
-                                                            );
-                                                            setExistingVenues(
-                                                                []
-                                                            );
-                                                        }}
-                                                        p={2}
-                                                        _hover={{
-                                                            bg: "gray.100",
-                                                            cursor: "pointer",
-                                                        }}
-                                                        w="full"
-                                                        direction="column"
-                                                        key={venue.id}
-                                                    >
-                                                        <Text>
-                                                            {venue.name}
-                                                        </Text>
-                                                        <Text>{`${[
-                                                            venue.address,
-                                                            venue.city,
-                                                            venue.state,
-                                                            venue.country,
-                                                        ].join(", ")}`}</Text>
-                                                    </Flex>
-                                                )
-                                            )}
-                                        </VStack>
-                                        {existingVenueSearched && (
-                                            <>
-                                                <TextInput
-                                                    title="Name"
-                                                    type="text"
-                                                    size="lg"
-                                                    fieldProps={register(
-                                                        "venue.name"
-                                                    )}
-                                                    height="60px"
-                                                    variant="outline"
-                                                    error={
-                                                        errors.venue?.name
-                                                            ?.message
-                                                    }
-                                                    required
-                                                />
-                                                <Box w="full">
-                                                    {isSearchingForAddress ? (
+                                        {!isAddingEventManually && (
+                                            <Button
+                                                onClick={() =>
+                                                    setIsAddingEventManually(
+                                                        true
+                                                    )
+                                                }
+                                                variant="link"
+                                            >
+                                                Add Venue manually
+                                            </Button>
+                                        )}
+
+                                        {!isAddingEventManually ? (
+                                            <TextInput
+                                                fieldProps={register(
+                                                    "venueSearchTerm"
+                                                )}
+                                                onChange={(e) => {
+                                                    setValue(
+                                                        "venueSearchTerm",
+                                                        e.target.value
+                                                    );
+                                                }}
+                                                title="Search for an existing Venue"
+                                                type="text"
+                                                size="lg"
+                                                height="60px"
+                                                variant="outline"
+                                                onEnter={handleSearchVenue}
+                                                rightIcon={
+                                                    watchVenueSearchTerm?.length >
+                                                        0 && (
+                                                        <IconButton
+                                                            mt={5}
+                                                            h="58px"
+                                                            w="58px"
+                                                            minW="unset"
+                                                            aria-label="Search"
+                                                            icon={
+                                                                <SearchIcon />
+                                                            }
+                                                            onClick={
+                                                                handleSearchVenue
+                                                            }
+                                                        />
+                                                    )
+                                                }
+                                            />
+                                        ) : (
+                                            <Button
+                                                mb={4}
+                                                onClick={() => {
+                                                    setExistingVenueSearched(
+                                                        false
+                                                    );
+                                                    setIsAddingEventManually(
+                                                        false
+                                                    );
+                                                    setValue(
+                                                        "venueSearchTerm",
+                                                        ""
+                                                    );
+                                                }}
+                                                variant="link"
+                                            >
+                                                Search for an existing Venue
+                                            </Button>
+                                        )}
+                                        <VStack
+                                            alignItems="start"
+                                            gap={2}
+                                            w="full"
+                                            mt={-10}
+                                        >
+                                            {existingVenueSearched &&
+                                                existingVenues.length > 0 &&
+                                                existingVenues.map(
+                                                    (venue, index) => (
                                                         <Flex
+                                                            onClick={() => {
+                                                                setExistingVenueSearched(
+                                                                    true
+                                                                );
+                                                                setValue(
+                                                                    "venue.name",
+                                                                    existingVenues[
+                                                                        index
+                                                                    ].name
+                                                                );
+                                                                setValue(
+                                                                    "venue.address",
+                                                                    existingVenues[
+                                                                        index
+                                                                    ].address
+                                                                );
+                                                                setValue(
+                                                                    "venue.city",
+                                                                    existingVenues[
+                                                                        index
+                                                                    ].city
+                                                                );
+                                                                setValue(
+                                                                    "venue.state",
+                                                                    existingVenues[
+                                                                        index
+                                                                    ].state
+                                                                );
+                                                                setValue(
+                                                                    "venue.country",
+                                                                    existingVenues[
+                                                                        index
+                                                                    ].country
+                                                                );
+                                                                setValue(
+                                                                    "venue.postcodeZip",
+                                                                    existingVenues[
+                                                                        index
+                                                                    ]
+                                                                        .postcodeZip
+                                                                );
+                                                                setExistingVenues(
+                                                                    []
+                                                                );
+                                                            }}
+                                                            p={2}
+                                                            _hover={{
+                                                                bg: "gray.100",
+                                                                cursor: "pointer",
+                                                            }}
+                                                            w="full"
+                                                            direction="column"
+                                                            key={venue.id}
+                                                        >
+                                                            <Text>
+                                                                {venue.name}
+                                                            </Text>
+                                                            <Text>{`${[
+                                                                venue.address,
+                                                                venue.city,
+                                                                venue.state,
+                                                                venue.country,
+                                                            ].join(
+                                                                ", "
+                                                            )}`}</Text>
+                                                        </Flex>
+                                                    )
+                                                )}
+                                            {!isAddingEventManually &&
+                                                existingVenueSearched &&
+                                                existingVenues.length === 0 && (
+                                                    <Text
+                                                        w="full"
+                                                        fontSize="lg"
+                                                    >
+                                                        No Venues found
+                                                    </Text>
+                                                )}
+                                        </VStack>
+                                        <Box
+                                            w="full"
+                                            opacity={
+                                                isAddingEventManually ? 1 : 0
+                                            }
+                                            h={
+                                                isAddingEventManually
+                                                    ? "unset"
+                                                    : 0
+                                            }
+                                            overflow={
+                                                isAddingEventManually
+                                                    ? "unset"
+                                                    : "hidden"
+                                            }
+                                        >
+                                            <TextInput
+                                                title="Name"
+                                                type="text"
+                                                size="lg"
+                                                fieldProps={register(
+                                                    "venue.name"
+                                                )}
+                                                height="60px"
+                                                variant="outline"
+                                                error={
+                                                    errors.venue?.name?.message
+                                                }
+                                                required
+                                            />
+                                            <Box w="full">
+                                                {isSearchingForAddress ? (
+                                                    <VStack
+                                                        w="full"
+                                                        alignItems="flex-start"
+                                                    >
+                                                        <Button
+                                                            mb={6}
+                                                            mt={4}
+                                                            onClick={() =>
+                                                                setIsSearchingForAddress(
+                                                                    false
+                                                                )
+                                                            }
+                                                            variant="link"
+                                                        >
+                                                            Enter location
+                                                            manually
+                                                        </Button>
+                                                        <Flex
+                                                            w="full"
                                                             alignItems="center"
                                                             gap={4}
                                                         >
@@ -355,35 +515,41 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                                                     );
                                                                 }}
                                                             />
-                                                            <IconButton
-                                                                h="28px"
-                                                                w="28px"
-                                                                minW="unset"
-                                                                aria-label="Remove image"
-                                                                icon={
-                                                                    <CloseIcon />
-                                                                }
-                                                                onClick={() =>
-                                                                    setIsSearchingForAddress(
-                                                                        false
-                                                                    )
-                                                                }
-                                                            />
                                                         </Flex>
-                                                    ) : (
-                                                        <Button
-                                                            onClick={() =>
-                                                                setIsSearchingForAddress(
-                                                                    true
-                                                                )
-                                                            }
-                                                            variant="link"
-                                                        >
-                                                            Search for Location
-                                                        </Button>
-                                                    )}
-                                                </Box>
-
+                                                    </VStack>
+                                                ) : (
+                                                    <Button
+                                                        mb={7}
+                                                        onClick={() =>
+                                                            setIsSearchingForAddress(
+                                                                true
+                                                            )
+                                                        }
+                                                        variant="link"
+                                                    >
+                                                        Search for a location
+                                                    </Button>
+                                                )}
+                                            </Box>
+                                            <VStack
+                                                h={
+                                                    !isSearchingForAddress
+                                                        ? "unset"
+                                                        : 0
+                                                }
+                                                overflow={
+                                                    !isSearchingForAddress
+                                                        ? "unset"
+                                                        : "hidden"
+                                                }
+                                                opacity={
+                                                    !isSearchingForAddress
+                                                        ? 1
+                                                        : 0
+                                                }
+                                                w="full"
+                                                spacing={4}
+                                            >
                                                 <TextInput
                                                     title="Street Address"
                                                     type="text"
@@ -460,8 +626,8 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                                     }
                                                     required
                                                 />
-                                            </>
-                                        )}
+                                            </VStack>
+                                        </Box>
                                     </VStack>
                                 </VStack>
                             </VStack>
@@ -470,7 +636,7 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                     variant="ghost"
                                     colorScheme="red"
                                     mr={3}
-                                    onClick={onClose}
+                                    onClick={handleModalClose}
                                 >
                                     Close
                                 </Button>

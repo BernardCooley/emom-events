@@ -5,6 +5,7 @@ import {
     Collapse,
     Flex,
     IconButton,
+    Text,
     useDisclosure,
 } from "@chakra-ui/react";
 import Chip from "./Chip";
@@ -19,6 +20,7 @@ type Props = {
     showRightIcon?: boolean;
     sortChips?: boolean;
     onRemoveChip?: (id: number) => void;
+    title?: string;
 };
 
 const ChipGroup = ({
@@ -29,6 +31,7 @@ const ChipGroup = ({
     showRightIcon = true,
     sortChips = false,
     onRemoveChip,
+    title,
 }: Props) => {
     const { isOpen, onToggle } = useDisclosure();
     const [chipContainerHeight, setChipContainerHeight] = useState(0);
@@ -62,6 +65,9 @@ const ChipGroup = ({
                     animateOpacity
                     startingHeight={chipHeight}
                 >
+                    {currentChips.length > 0 && title && (
+                        <Text mb={2}>{title}</Text>
+                    )}
                     <Flex gap={2} wrap="wrap" maxW={containerWidth} ref={ref}>
                         {currentChips?.map((chip, index) => {
                             return (
