@@ -18,7 +18,7 @@ import { formatDateTime } from "@/utils";
 import { getFirebaseImageURL } from "@/firebase/functions";
 
 type EventCardProps = {
-    eventDetails: EventDetails | null;
+    eventDetails: EventDetails;
 };
 
 const EventCard = ({ eventDetails }: EventCardProps) => {
@@ -29,16 +29,26 @@ const EventCard = ({ eventDetails }: EventCardProps) => {
         href?: string;
     };
 
+    const {
+        id,
+        name,
+        venue,
+        timeFrom,
+        timeTo,
+        promoter,
+        description,
+        lineup,
+        imageIds,
+    } = eventDetails || {};
+
     useEffect(() => {
-        if (eventDetails && eventDetails.imageIds.length > 0) {
-            getImage(eventDetails.imageIds[0]);
-        }
-    }, [eventDetails]);
+        getImage(imageIds[0]);
+    }, [imageIds]);
 
     const getImage = async (imageId: string) => {
         const image = await getFirebaseImageURL(
             "eventImages",
-            `${eventDetails?.id}/${imageId}`
+            `${id}/${imageId}`
         );
         if (image) {
             setImageUrl(image);
@@ -68,86 +78,65 @@ const EventCard = ({ eventDetails }: EventCardProps) => {
 
     return (
         <>
-            {eventDetails ? (
-                <Card>
-                    <CardHeader>
-                        <Heading size="md">{eventDetails.name}</Heading>
-                    </CardHeader>
+            <Card>
+                <CardHeader>
+                    <Heading size="md">{name}</Heading>
+                </CardHeader>
 
-                    <CardBody>
-                        <Flex gap={8} wrap="wrap" alignItems="flex-start">
-                            <Center
-                                mb={6}
-                                w={["full", "60%", "50%", "30%", "30%"]}
-                            >
-                                {imageUrl && imageUrl.length > 0 && (
-                                    <Image
-                                        src={imageUrl || ""}
-                                        alt="Green double couch with wooden legs"
-                                        borderRadius="lg"
-                                    />
-                                )}
-                            </Center>
-                            <Stack
-                                w="60%"
-                                divider={<StackDivider />}
-                                spacing="4"
-                            >
-                                <Detail
-                                    title="Name"
-                                    value={eventDetails.name || ""}
+                <CardBody>
+                    <Flex gap={8} wrap="wrap" alignItems="flex-start">
+                        <Center mb={6} w={["full", "60%", "50%", "30%", "30%"]}>
+                            {imageUrl && imageUrl.length > 0 && (
+                                <Image
+                                    src={imageUrl || ""}
+                                    alt="Green double couch with wooden legs"
+                                    borderRadius="lg"
                                 />
+                            )}
+                        </Center>
+                        <Stack w="60%" divider={<StackDivider />} spacing="4">
+                            <Detail title="Name" value={name || ""} />
+                            <Detail
+                                href={`/venues/${venue.id}`}
+                                title="Venue"
+                                value={
+                                    [
+                                        venue.name,
+                                        venue.city,
+                                        venue.country,
+                                    ].join(", ") || ""
+                                }
+                            />
+                            <Detail
+                                title="From"
+                                value={formatDateTime(timeFrom!!)}
+                            />
+                            {timeTo && (
                                 <Detail
-                                    href={`/venues/${eventDetails.venue.id}`}
-                                    title="Venue"
-                                    value={
-                                        [
-                                            eventDetails.venue.name,
-                                            eventDetails.venue.city,
-                                            eventDetails.venue.country,
-                                        ].join(", ") || ""
-                                    }
+                                    title="To"
+                                    value={formatDateTime(timeTo)}
                                 />
+                            )}
+                            {/* TODO - Url shows promoters email address */}
+                            <Detail
+                                title="Organiser/Promoter"
+                                value={promoter.name || ""}
+                                href={`/promoters/${promoter.id}`}
+                            />
+                            <Detail
+                                title="Description"
+                                value={description || ""}
+                            />
+                            {lineup && lineup.length > 0 && (
                                 <Detail
-                                    title="From"
-                                    value={formatDateTime(
-                                        eventDetails.timeFrom
-                                    )}
+                                    title="Lineup"
+                                    value={lineup.join(", ") || ""}
                                 />
-                                {eventDetails.timeTo && (
-                                    <Detail
-                                        title="To"
-                                        value={formatDateTime(
-                                            eventDetails.timeTo
-                                        )}
-                                    />
-                                )}
-                                {/* TODO - Url shows promoters email address */}
-                                <Detail
-                                    title="Organiser/Promoter"
-                                    value={eventDetails.promoter.name || ""}
-                                    href={`/promoters/${eventDetails.promoter.id}`}
-                                />
-                                <Detail
-                                    title="Description"
-                                    value={eventDetails.description || ""}
-                                />
-                                {eventDetails.lineup &&
-                                    eventDetails.lineup.length > 0 && (
-                                        <Detail
-                                            title="Lineup"
-                                            value={
-                                                eventDetails.lineup.join(
-                                                    ", "
-                                                ) || ""
-                                            }
-                                        />
-                                    )}
-                            </Stack>
-                        </Flex>
-                    </CardBody>
-                </Card>
-            ) : null}
+                            )}
+                        </Stack>
+                    </Flex>
+                </CardBody>
+            </Card>
         </>
     );
 };
