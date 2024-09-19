@@ -9,24 +9,30 @@ import {
     SimpleGrid,
     Text,
 } from "@chakra-ui/react";
-import { Promoter, Venue, Event } from "@/types";
+import { EventDetails, VenueDetails, PromoterDetails } from "@/types";
 import { useRouter } from "next/navigation";
 import { capitalizeFirstLetter } from "@/utils";
 
 interface Props {
-    data: Event[] | Venue[] | Promoter[];
+    data: EventDetails[] | VenueDetails[] | PromoterDetails[];
+    title?: string;
     page: string;
-    fields?: (keyof Event)[] | (keyof Venue)[] | (keyof Promoter)[];
+    fields?:
+        | (keyof EventDetails)[]
+        | (keyof VenueDetails)[]
+        | (keyof PromoterDetails)[];
 }
 
-const ItemList = ({ data, page, fields }: Props) => {
+const ItemList = ({ data, page, fields, title }: Props) => {
     const router = useRouter();
 
     return (
         <Box>
-            <Heading size="lg" mb={4}>
-                {capitalizeFirstLetter(page)}
-            </Heading>
+            {title && (
+                <Heading size="lg" mb={4}>
+                    {capitalizeFirstLetter(title)}
+                </Heading>
+            )}
             <SimpleGrid spacing={4} columns={{ base: 1, md: 2, lg: 3 }}>
                 {data.map((item) => (
                     <Card

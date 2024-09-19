@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -46,6 +46,7 @@ export interface FormData {
     };
     venueSearchTerm: string;
     artist: string;
+    imageIds: string[];
 }
 
 const schema: ZodType<FormData> = z
@@ -65,6 +66,9 @@ const schema: ZodType<FormData> = z
         }),
         venueSearchTerm: z.string(),
         artist: z.string(),
+        imageIds: z.array(z.string()).min(1, {
+            message: "At least one image is required",
+        }),
     })
     .refine(
         (data) => {
@@ -141,6 +145,7 @@ const AddEventModal = ({
                 country: "",
                 postcodeZip: "",
             },
+            imageIds: [],
         },
     });
 
@@ -184,20 +189,16 @@ const AddEventModal = ({
             });
 
             if (newEvent) {
-                if (images.length) {
-                    await Promise.all(
-                        images.map(async (image) => {
-                            await uploadFirebaseImage(
-                                "eventImages",
-                                new File([image.blob], image.name),
-                                newEvent.id
-                            );
-                            return image.name;
-                        })
-                    );
-                    onSuccess();
-                    handleModalClose();
-                }
+                await Promise.all(
+                    images.map(async (image) => {
+                        await uploadFirebaseImage(
+                            "eventImages",
+                            new File([image.blob], image.name),
+                            newEvent.id
+                        );
+                        return image.name;
+                    })
+                );
                 onSuccess();
                 handleModalClose();
             } else {
@@ -305,12 +306,22 @@ const AddEventModal = ({
                                     errors={errors}
                                     register={register}
                                     images={images}
-                                    onImageSelect={(images) =>
-                                        setImages(images)
-                                    }
-                                    onImageRemove={(images) =>
-                                        setImages(images)
-                                    }
+                                    onImageSelect={(images) => {
+                                        setImages(images);
+                                        setValue(
+                                            "imageIds",
+                                            images.map((image) => image.name)
+                                        );
+                                        trigger("imageIds");
+                                    }}
+                                    onImageRemove={(images) => {
+                                        setImages(images);
+                                        setValue(
+                                            "imageIds",
+                                            images.map((image) => image.name)
+                                        );
+                                        trigger("imageIds");
+                                    }}
                                     onArtistChange={(artist) =>
                                         setValue("artist", artist)
                                     }

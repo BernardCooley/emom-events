@@ -14,19 +14,20 @@ import {
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { fetchPromoter } from "@/bff";
-import { Promoter } from "@prisma/client";
+import { Event } from "@prisma/client";
 import PromoterForm from "@/app/components/PromoterForm";
 import { getFirebaseImageBlob } from "@/firebase/functions";
-import { FirebaseImageBlob } from "@/types";
+import { FirebaseImageBlob, PromoterDetails } from "@/types";
 import PromoterProfile from "@/app/components/PromoterProfile";
 import AddEventModal from "@/app/components/AddEventModal";
+import ItemList from "@/app/components/ItemList";
 
 interface Props {}
 
 const PromoterDashboard = ({}: Props) => {
     const toast = useToast();
     const { data: session } = useSession();
-    const [promoter, setPromoter] = useState<Promoter | null>(null);
+    const [promoter, setPromoter] = useState<PromoterDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [images, setImages] = useState<FirebaseImageBlob[]>([]);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -96,6 +97,12 @@ const PromoterDashboard = ({}: Props) => {
         );
     }
 
+    const fields = [
+        "description",
+        "timeFrom",
+        "timeTo",
+    ] satisfies (keyof Event)[];
+
     return (
         <VStack gap={10}>
             <PromoterProfile
@@ -116,6 +123,11 @@ const PromoterDashboard = ({}: Props) => {
                             Add Event
                         </Button>
                         <Heading size="md">Events</Heading>
+                        <ItemList
+                            page="events"
+                            fields={fields}
+                            data={promoter.events}
+                        />
                     </Box>
                 </CardHeader>
             </Card>

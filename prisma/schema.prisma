@@ -14,7 +14,7 @@ model Event {
     name        String
     status      String?
     timeFrom    String
-    timeTo      String
+    timeTo      String?
     description String
     websites    String[]
     imageIds    String[]

@@ -1,65 +1,3 @@
-export type Event = {
-    id: string;
-    promoterId: string;
-    venueId: string;
-    name: string;
-    timeFrom: string;
-    timeTo: string;
-    description: string;
-    websites?: Website[];
-    imageIds?: string[];
-    tickets?: Ticket[];
-    lineup?: Lineup[];
-};
-
-export type Promoter = {
-    id: string;
-    name: string;
-    email: string;
-    city?: string;
-    state?: string;
-    country: string;
-    websites?: Website[];
-    imageIds?: string[];
-    events: Event["id"][];
-};
-
-export type Venue = {
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    postcodeZip: string;
-    events: Event["id"][];
-    description?: string;
-    imageIds?: string[];
-};
-
-type Website = {
-    name?: string;
-    url: string;
-};
-
-type Ticket = {
-    name?: string;
-    href: string;
-    price?: number;
-};
-
-type MediaLink = {
-    name?: string;
-    url: string;
-};
-
-type Lineup = {
-    artist: string;
-    time?: string;
-    website?: string;
-    mediaLinks?: MediaLink[];
-};
-
 export type PromoterDetails = {
     id: string;
     name: string;
@@ -67,9 +5,9 @@ export type PromoterDetails = {
     city: string;
     state: string;
     country: string;
-    websites: Website;
-    imageId: string;
-    events: string[];
+    websites: string[];
+    imageIds: string[];
+    events: EventDetails[];
 };
 
 export type VenueDetails = {
@@ -85,16 +23,22 @@ export type VenueDetails = {
 
 export type EventDetails = {
     id: string;
-    promoterId: string;
-    venueId: string;
-    title: string;
+    name: string;
     timeFrom: string;
-    timeTo: string;
+    timeTo?: string;
     description: string;
-    websites: Website;
-    imageId: string;
-    promoterDetails: PromoterDetails | null;
-    venueDetails: VenueDetails | null;
+    imageIds: string;
+    promoter: {
+        id: string;
+        name: string;
+    };
+    venue: {
+        id: string;
+        name: string;
+        city: string;
+        country: string;
+    };
+    lineup?: string[];
 };
 
 export type FirebaseImageBlob = {

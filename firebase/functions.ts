@@ -54,3 +54,18 @@ export const getFirebaseImageBlob = async (
         return undefined;
     }
 };
+
+export const getFirebaseImageURL = async (
+    folder: string,
+    name: string
+): Promise<string | undefined> => {
+    const path = `${folder}/${name}`;
+    const pathReference = ref(storage, path);
+
+    try {
+        const url = await getDownloadURL(pathReference);
+        return url;
+    } catch (err) {
+        return undefined;
+    }
+};

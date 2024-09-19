@@ -1,5 +1,11 @@
 import { Event, Promoter, Venue } from "@prisma/client";
-import { AddEventInput, AddVenueInput, VenueItem } from "./types";
+import {
+    AddEventInput,
+    AddVenueInput,
+    EventDetails,
+    PromoterDetails,
+    VenueItem,
+} from "./types";
 
 export class GoneError extends Error {
     statusCode = 410;
@@ -61,9 +67,9 @@ type FetchPromoterProps = {
 
 export const fetchPromoter = async ({
     email,
-}: FetchPromoterProps): Promise<Promoter | null> => {
+}: FetchPromoterProps): Promise<PromoterDetails | null> => {
     try {
-        const promoter: Promoter | null = await fetchWithErrorHandling(
+        const promoter: PromoterDetails | null = await fetchWithErrorHandling(
             "/api/getPromoter",
             "POST",
             {
@@ -206,6 +212,28 @@ export const deleteVenue = async ({
         );
 
         return deleteVenue;
+    } catch (error) {
+        throw error;
+    }
+};
+
+type FetchEventProps = {
+    eventId: string;
+};
+
+export const fetchEvent = async ({
+    eventId,
+}: FetchEventProps): Promise<EventDetails | null> => {
+    try {
+        const deleteEvent: EventDetails | null = await fetchWithErrorHandling(
+            "/api/getEvent",
+            "POST",
+            {
+                eventId,
+            }
+        );
+
+        return deleteEvent;
     } catch (error) {
         throw error;
     }

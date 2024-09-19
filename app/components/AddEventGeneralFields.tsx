@@ -58,6 +58,7 @@ const AddEventGeneralFields = ({
                 required
             />
             <FileUpload
+                allowErrors
                 onUpload={(file) => {
                     onImageSelect(
                         images.concat({
@@ -69,6 +70,8 @@ const AddEventGeneralFields = ({
                 fieldLabel="Images"
                 accept="image/*"
                 buttonText="Upload an image..."
+                required
+                error={errors.imageIds?.message}
             />
             <ImageGrid
                 columns={[6]}

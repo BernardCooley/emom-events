@@ -15,11 +15,10 @@ import {
 } from "@chakra-ui/react";
 import ImageGrid from "./ImageGrid";
 import PromoterForm from "./PromoterForm";
-import { Promoter } from "@prisma/client";
-import { FirebaseImageBlob } from "@/types";
+import { FirebaseImageBlob, PromoterDetails } from "@/types";
 
 interface Props {
-    promoter: Promoter;
+    promoter: PromoterDetails;
     images: FirebaseImageBlob[];
     onGetPromoter: () => void;
 }

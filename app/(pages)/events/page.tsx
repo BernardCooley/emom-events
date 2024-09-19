@@ -1,20 +1,12 @@
 "use client";
 
 import React from "react";
-import { events } from "@/data/events";
-import ItemList from "@/app/components/ItemList";
-import { Event } from "@/types";
+import { Box } from "@chakra-ui/react";
 
 interface Props {}
 
 const Page = ({}: Props) => {
-    const fields = [
-        "description",
-        "timeFrom",
-        "timeTo",
-    ] satisfies (keyof Event)[];
-
-    return <ItemList fields={fields} data={events} page="events" />;
+    return <Box>Events</Box>;
 };
 
 export default Page;
