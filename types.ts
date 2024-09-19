@@ -116,3 +116,27 @@ export type VenueItem = {
     country: string;
     postcodeZip: string;
 };
+
+export type AddEventInput = {
+    promoterId: string;
+    venueId: string;
+    name: string;
+    timeFrom: string;
+    timeTo: string;
+    description: string;
+    websites: string[];
+    imageIds: string[];
+    tickets: string[];
+    lineup: string[];
+};
+
+export type AddVenueInput = {
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    postcodeZip: string;
+    description?: string;
+    links?: string[];
+};

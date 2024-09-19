@@ -14,8 +14,8 @@ model Event {
     promoterId  String
     venueId     String
     name        String
-    timeFrom    DateTime
-    timeTo      DateTime
+    timeFrom    String
+    timeTo      String
     description String
     websites    String[]
     imageIds    String[]
@@ -45,7 +45,6 @@ model Venue {
     state       String
     country     String
     postcodeZip String
-    description String?
     links       String[]
     events      Event[]
 }

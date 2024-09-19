@@ -20,12 +20,13 @@ import { useForm } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
-import { addVenue, searchVenue } from "@/bff";
+import { addEvent, addVenue, searchVenue } from "@/bff";
 import { FirebaseImageBlob, VenueItem } from "@/types";
 import AddEventGeneralFields from "./AddEventGeneralFields";
 import AddressPanel from "./AddressPanel";
 import VenueSearch from "./VenueSearch";
 import AddressSearch from "./AddressSearch";
+import { uploadFirebaseImage } from "@/firebase/functions";
 
 export interface FormData {
     name: string;
@@ -78,6 +79,7 @@ const schema: ZodType<FormData> = z
     );
 
 type Props = {
+    promoterId: string;
     isOpen: boolean;
     onClose: () => void;
     defaultValues?: FormData;
@@ -89,6 +91,7 @@ const AddEventModal = ({
     onClose,
     defaultValues,
     existingImages,
+    promoterId,
 }: Props) => {
     const [showAddressPanel, setShowAddressPanel] = useState(false);
     const [selectedVenueIndex, setSelectedVenueIndex] = useState<number | null>(
@@ -139,22 +142,49 @@ const AddEventModal = ({
     const watchArtist = watch("artist");
 
     const onSave = async (formData: FormData) => {
-        console.log(formData);
+        // TODO: Only add of its a new venue
+        const newVenue = await addVenue({
+            data: {
+                name: formData.venue.name,
+                address: formData.venue.address,
+                city: formData.venue.city,
+                state: formData.venue.state,
+                country: formData.venue.country,
+                postcodeZip: formData.venue.postcodeZip,
+            },
+        });
 
-        // Add venue
-        // const newVenue = await addVenue({
-        //     data: {
-        //         name: formData.venue.name,
-        //         address: formData.venue.address,
-        //         city: formData.venue.city,
-        //         state: formData.venue.state,
-        //         country: formData.venue.country,
-        //         postcodeZip: formData.venue.postcodeZip,
-        //     },
-        // });
-        // console.log(newVenue);
-        // Add images
-        // Add event
+        if (newVenue) {
+            const newEvent = await addEvent({
+                data: {
+                    promoterId: promoterId,
+                    venueId: newVenue.id,
+                    name: formData.name,
+                    timeFrom: formData.timeFrom,
+                    timeTo: formData.timeTo,
+                    description: formData.description,
+                    websites: [],
+                    imageIds: images.map((image) => image.name),
+                    tickets: [],
+                    lineup: formData.lineup,
+                },
+            });
+
+            if (newEvent && images.length) {
+                await Promise.all(
+                    images.map(async (image) => {
+                        await uploadFirebaseImage(
+                            "eventImages",
+                            new File([image.blob], image.name),
+                            newEvent.id
+                        );
+                        return image.name;
+                    })
+                );
+            }
+        } else {
+            // TODO: Remove venue
+        }
     };
 
     const handleSearchVenue = async () => {

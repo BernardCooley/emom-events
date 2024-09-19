@@ -1,0 +1,33 @@
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+export async function POST(req: Request) {
+    const { data } = await req.json();
+
+    try {
+        const event = await prisma?.venue.create({
+            data: {
+                name: data.name,
+                address: data.address,
+                city: data.city,
+                state: data.state,
+                country: data.country,
+                postcodeZip: data.postcodeZip,
+            },
+        });
+
+        const response = NextResponse.json(event, {
+            status: 200,
+        });
+
+        return response;
+    } catch (error: any) {
+        console.error(error);
+        return NextResponse.json(
+            { error: error },
+            {
+                status: error.status || 500,
+            }
+        );
+    }
+}

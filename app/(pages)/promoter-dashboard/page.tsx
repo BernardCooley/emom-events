@@ -117,7 +117,11 @@ const PromoterDashboard = ({}: Props) => {
                     </Box>
                 </CardHeader>
             </Card>
-            <AddEventModal isOpen={isOpen} onClose={onClose} />
+            <AddEventModal
+                promoterId={promoter.id}
+                isOpen={isOpen}
+                onClose={onClose}
+            />
         </VStack>
     );
 };

@@ -11,9 +11,9 @@ import { FirebaseImageBlob } from "@/types";
 export const uploadFirebaseImage = async (
     folder: string,
     file: File,
-    userId?: string
+    subFolder?: string
 ): Promise<string> => {
-    const path = `${folder}/${userId || ""}/${file.name}`;
+    const path = `${folder}/${subFolder || ""}/${file.name}`;
     try {
         const storageRef = ref(storage, path);
 
