@@ -4,6 +4,7 @@ import {
     Button,
     Flex,
     HStack,
+    IconButton,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -21,6 +22,9 @@ import ChipGroup from "./ChipGroup";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
 import GooglePlacesSearch from "./GooglePlacesSearch";
+import { searchVenue } from "@/bff";
+import { VenueItem } from "@/types";
+import { CloseIcon } from "@chakra-ui/icons";
 
 export interface FormData {
     name: string;
@@ -61,6 +65,9 @@ type Props = {
 };
 
 const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
+    const [existingVenues, setExistingVenues] = useState<VenueItem[]>([]);
+    const [existingVenueSearched, setExistingVenueSearched] = useState(false);
+    const [isSearchingForAddress, setIsSearchingForAddress] = useState(false);
     const [libraries] = useState<Library[]>(["places"]);
     useJsApiLoader({
         id: "google-map-script",
@@ -97,6 +104,18 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
 
     const onSave = async (formData: FormData) => {
         console.log(formData);
+    };
+
+    const handleSearchVenue = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        if (e.target.value.length > 2) {
+            const venues = await searchVenue({
+                name: e.target.value,
+            });
+
+            if (venues) setExistingVenues(venues);
+        }
     };
 
     return (
@@ -210,103 +229,239 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                         rounded="lg"
                                     >
                                         <TextInput
-                                            title="Name"
+                                            title="Search for an existing Venue"
                                             type="text"
                                             size="lg"
-                                            fieldProps={register("venue.name")}
                                             height="60px"
                                             variant="outline"
-                                            error={errors.venue?.name?.message}
-                                            required
+                                            onChange={handleSearchVenue}
                                         />
-                                        <GooglePlacesSearch
-                                            onPlaceChange={(place) => {
-                                                setValue(
-                                                    "venue.address",
-                                                    place.address
-                                                );
-                                                setValue(
-                                                    "venue.city",
-                                                    place.city
-                                                );
-                                                setValue(
-                                                    "venue.state",
-                                                    place.state
-                                                );
-                                                setValue(
-                                                    "venue.country",
-                                                    place.country
-                                                );
-                                                setValue(
-                                                    "venue.postcodeZip",
-                                                    place.postcodeZip
-                                                );
-                                            }}
-                                        />
+                                        <VStack gap={2} w="full" mt={-10}>
+                                            {existingVenues.map(
+                                                (venue, index) => (
+                                                    <Flex
+                                                        onClick={() => {
+                                                            setExistingVenueSearched(
+                                                                true
+                                                            );
+                                                            setValue(
+                                                                "venue.name",
+                                                                existingVenues[
+                                                                    index
+                                                                ].name
+                                                            );
+                                                            setValue(
+                                                                "venue.address",
+                                                                existingVenues[
+                                                                    index
+                                                                ].address
+                                                            );
+                                                            setValue(
+                                                                "venue.city",
+                                                                existingVenues[
+                                                                    index
+                                                                ].city
+                                                            );
+                                                            setValue(
+                                                                "venue.state",
+                                                                existingVenues[
+                                                                    index
+                                                                ].state
+                                                            );
+                                                            setValue(
+                                                                "venue.country",
+                                                                existingVenues[
+                                                                    index
+                                                                ].country
+                                                            );
+                                                            setValue(
+                                                                "venue.postcodeZip",
+                                                                existingVenues[
+                                                                    index
+                                                                ].postcodeZip
+                                                            );
+                                                            setExistingVenues(
+                                                                []
+                                                            );
+                                                        }}
+                                                        p={2}
+                                                        _hover={{
+                                                            bg: "gray.100",
+                                                            cursor: "pointer",
+                                                        }}
+                                                        w="full"
+                                                        direction="column"
+                                                        key={venue.id}
+                                                    >
+                                                        <Text>
+                                                            {venue.name}
+                                                        </Text>
+                                                        <Text>{`${[
+                                                            venue.address,
+                                                            venue.city,
+                                                            venue.state,
+                                                            venue.country,
+                                                        ].join(", ")}`}</Text>
+                                                    </Flex>
+                                                )
+                                            )}
+                                        </VStack>
+                                        {existingVenueSearched && (
+                                            <>
+                                                <TextInput
+                                                    title="Name"
+                                                    type="text"
+                                                    size="lg"
+                                                    fieldProps={register(
+                                                        "venue.name"
+                                                    )}
+                                                    height="60px"
+                                                    variant="outline"
+                                                    error={
+                                                        errors.venue?.name
+                                                            ?.message
+                                                    }
+                                                    required
+                                                />
+                                                <Box w="full">
+                                                    {isSearchingForAddress ? (
+                                                        <Flex
+                                                            alignItems="center"
+                                                            gap={4}
+                                                        >
+                                                            <GooglePlacesSearch
+                                                                onPlaceChange={(
+                                                                    place
+                                                                ) => {
+                                                                    setValue(
+                                                                        "venue.address",
+                                                                        place.address
+                                                                    );
+                                                                    setValue(
+                                                                        "venue.city",
+                                                                        place.city
+                                                                    );
+                                                                    setValue(
+                                                                        "venue.state",
+                                                                        place.state
+                                                                    );
+                                                                    setValue(
+                                                                        "venue.country",
+                                                                        place.country
+                                                                    );
+                                                                    setValue(
+                                                                        "venue.postcodeZip",
+                                                                        place.postcodeZip
+                                                                    );
+                                                                }}
+                                                            />
+                                                            <IconButton
+                                                                h="28px"
+                                                                w="28px"
+                                                                minW="unset"
+                                                                aria-label="Remove image"
+                                                                icon={
+                                                                    <CloseIcon />
+                                                                }
+                                                                onClick={() =>
+                                                                    setIsSearchingForAddress(
+                                                                        false
+                                                                    )
+                                                                }
+                                                            />
+                                                        </Flex>
+                                                    ) : (
+                                                        <Button
+                                                            onClick={() =>
+                                                                setIsSearchingForAddress(
+                                                                    true
+                                                                )
+                                                            }
+                                                            variant="link"
+                                                        >
+                                                            Search for Location
+                                                        </Button>
+                                                    )}
+                                                </Box>
 
-                                        <TextInput
-                                            title="Street Address"
-                                            type="text"
-                                            size="lg"
-                                            fieldProps={register(
-                                                "venue.address"
-                                            )}
-                                            height="60px"
-                                            variant="outline"
-                                            error={
-                                                errors.venue?.address?.message
-                                            }
-                                            required
-                                        />
-                                        <TextInput
-                                            title="City/Town"
-                                            type="text"
-                                            size="lg"
-                                            fieldProps={register("venue.city")}
-                                            height="60px"
-                                            variant="outline"
-                                            error={errors.venue?.city?.message}
-                                            required
-                                        />
-                                        <TextInput
-                                            title="County/State"
-                                            type="text"
-                                            size="lg"
-                                            fieldProps={register("venue.state")}
-                                            height="60px"
-                                            variant="outline"
-                                            error={errors.venue?.state?.message}
-                                            required
-                                        />
-                                        <TextInput
-                                            title="Country"
-                                            type="text"
-                                            size="lg"
-                                            fieldProps={register(
-                                                "venue.country"
-                                            )}
-                                            height="60px"
-                                            variant="outline"
-                                            error={
-                                                errors.venue?.country?.message
-                                            }
-                                            required
-                                        />
-                                        <TextInput
-                                            title="Postcode/Zip"
-                                            type="text"
-                                            size="lg"
-                                            fieldProps={register(
-                                                "venue.postcodeZip"
-                                            )}
-                                            height="60px"
-                                            variant="outline"
-                                            error={
-                                                errors.venue?.postcodeZip
-                                                    ?.message
-                                            }
-                                            required
-                                        />
+                                                <TextInput
+                                                    title="Street Address"
+                                                    type="text"
+                                                    size="lg"
+                                                    fieldProps={register(
+                                                        "venue.address"
+                                                    )}
+                                                    height="60px"
+                                                    variant="outline"
+                                                    error={
+                                                        errors.venue?.address
+                                                            ?.message
+                                                    }
+                                                    required
+                                                />
+                                                <TextInput
+                                                    title="City/Town"
+                                                    type="text"
+                                                    size="lg"
+                                                    fieldProps={register(
+                                                        "venue.city"
+                                                    )}
+                                                    height="60px"
+                                                    variant="outline"
+                                                    error={
+                                                        errors.venue?.city
+                                                            ?.message
+                                                    }
+                                                    required
+                                                />
+                                                <TextInput
+                                                    title="County/State"
+                                                    type="text"
+                                                    size="lg"
+                                                    fieldProps={register(
+                                                        "venue.state"
+                                                    )}
+                                                    height="60px"
+                                                    variant="outline"
+                                                    error={
+                                                        errors.venue?.state
+                                                            ?.message
+                                                    }
+                                                    required
+                                                />
+                                                <TextInput
+                                                    title="Country"
+                                                    type="text"
+                                                    size="lg"
+                                                    fieldProps={register(
+                                                        "venue.country"
+                                                    )}
+                                                    height="60px"
+                                                    variant="outline"
+                                                    error={
+                                                        errors.venue?.country
+                                                            ?.message
+                                                    }
+                                                    required
+                                                />
+                                                <TextInput
+                                                    title="Postcode/Zip"
+                                                    type="text"
+                                                    size="lg"
+                                                    fieldProps={register(
+                                                        "venue.postcodeZip"
+                                                    )}
+                                                    height="60px"
+                                                    variant="outline"
+                                                    error={
+                                                        errors.venue
+                                                            ?.postcodeZip
+                                                            ?.message
+                                                    }
+                                                    required
+                                                />
+                                            </>
+                                        )}
                                     </VStack>
                                 </VStack>
                             </VStack>

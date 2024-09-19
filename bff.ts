@@ -1,4 +1,5 @@
 import { Promoter } from "@prisma/client";
+import { VenueItem } from "./types";
 
 export class GoneError extends Error {
     statusCode = 410;
@@ -117,6 +118,28 @@ export const updatePromoterImages = async ({
         );
 
         return updatedPromoter;
+    } catch (error) {
+        throw error;
+    }
+};
+
+type SearchVenueProps = {
+    name: string;
+};
+
+export const searchVenue = async ({
+    name,
+}: SearchVenueProps): Promise<VenueItem[] | null> => {
+    try {
+        const venue: VenueItem[] | null = await fetchWithErrorHandling(
+            "/api/searchVenue",
+            "POST",
+            {
+                name,
+            }
+        );
+
+        return venue;
     } catch (error) {
         throw error;
     }

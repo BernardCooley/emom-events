@@ -106,3 +106,13 @@ export type SelectOption = {
     value: string;
     label: string;
 };
+
+export type VenueItem = {
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    postcodeZip: string;
+};
