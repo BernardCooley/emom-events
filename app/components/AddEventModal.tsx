@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     Button,
@@ -24,9 +24,11 @@ import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
 import GooglePlacesSearch from "./GooglePlacesSearch";
 import { searchVenue } from "@/bff";
-import { VenueItem } from "@/types";
+import { FirebaseImageBlob, VenueItem } from "@/types";
 import { SearchIcon, SmallAddIcon } from "@chakra-ui/icons";
 import { TextAreaInput } from "./TextAreaInput";
+import FileUpload from "./FileUpload";
+import ImageGrid from "./ImageGrid";
 
 export interface FormData {
     name: string;
@@ -82,9 +84,18 @@ type Props = {
     isOpen: boolean;
     onClose: () => void;
     defaultValues?: FormData;
+    existingImages?: FirebaseImageBlob[];
 };
 
-const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
+const AddEventModal = ({
+    isOpen,
+    onClose,
+    defaultValues,
+    existingImages,
+}: Props) => {
+    const [images, setImages] = useState<FirebaseImageBlob[]>(
+        existingImages || []
+    );
     const [isAddingEventManually, setIsAddingEventManually] = useState(false);
     const [existingVenues, setExistingVenues] = useState<VenueItem[]>([]);
     const [existingVenueSearched, setExistingVenueSearched] = useState(false);
@@ -153,6 +164,7 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
         setIsAddingEventManually(false);
         setExistingVenueSearched(false);
         setIsSearchingForAddress(false);
+        setImages([]);
         reset();
         onClose();
     };
@@ -193,6 +205,24 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                     variant="outline"
                                     error={errors.description?.message}
                                     required
+                                />
+                                <FileUpload
+                                    onUpload={(file) => {
+                                        setImages(
+                                            images.concat({
+                                                blob: file,
+                                                name: file.name,
+                                            })
+                                        );
+                                    }}
+                                    fieldLabel="Images"
+                                    accept="image/*"
+                                    buttonText="Upload an image..."
+                                />
+                                <ImageGrid
+                                    columns={[6]}
+                                    images={images}
+                                    onRemove={(files) => setImages(files)}
                                 />
                                 <TextInput
                                     title="From"
