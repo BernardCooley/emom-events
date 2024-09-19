@@ -17,10 +17,10 @@ model Event {
     timeFrom    DateTime
     timeTo      DateTime
     description String
-    websites    Website[]
+    websites    String[]
     imageIds    String[]
-    tickets     Ticket[]
-    lineup      Lineup[]
+    tickets     String[]
+    lineup      String[]
     promoter    Promoter  @relation(fields: [promoterId], references: [id])
     venue       Venue     @relation(fields: [venueId], references: [id])
 }
@@ -32,19 +32,9 @@ model Promoter {
     city       String?
     state      String?
     country    String
-    websites   Website[]
+    websites   String[]
     imageIds   String[]
     events     Event[]
-}
-
-model Website {
-    id         String    @id @default(uuid())
-    name       String?
-    url        String
-    Event      Event?    @relation(fields: [eventId], references: [id])
-    eventId    String?
-    Promoter   Promoter? @relation(fields: [promoterId], references: [id])
-    promoterId String?
 }
 
 model Venue {
@@ -56,33 +46,6 @@ model Venue {
     country     String
     postcodeZip String
     description String?
-    imageIds    String[]
+    links       String[]
     events      Event[]
-}
-
-model Ticket {
-    id      String  @id @default(uuid())
-    name    String?
-    href    String
-    price   Float?
-    Event   Event?  @relation(fields: [eventId], references: [id])
-    eventId String?
-}
-
-model MediaLink {
-    id       String  @id @default(uuid())
-    name     String?
-    url      String
-    lineupId String?
-    Lineup   Lineup? @relation(fields: [lineupId], references: [id])
-}
-
-model Lineup {
-    id         String      @id @default(uuid())
-    artist     String
-    time       String?
-    website    String?
-    mediaLinks MediaLink[]
-    Event      Event?      @relation(fields: [eventId], references: [id])
-    eventId    String?
 }

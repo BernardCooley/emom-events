@@ -86,6 +86,7 @@ const PromoterForm = ({
                     country: formData.country,
                     imageIds: imageIds,
                     email: formData.email,
+                    websites: [],
                 },
             });
             if (resp) {
@@ -136,7 +137,7 @@ const PromoterForm = ({
     };
 
     return (
-        <Box w="50%" position="relative">
+        <Box w={["100%", "100%", "100%", "50%"]} position="relative">
             {isSaving && (
                 <Center position="absolute" w="full" h="70vh">
                     <Heading>Saving...</Heading>

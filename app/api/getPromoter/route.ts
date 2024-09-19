@@ -35,11 +35,7 @@ export async function POST(req: Request) {
                                 country: true,
                             },
                         },
-                        lineup: {
-                            select: {
-                                artist: true,
-                            },
-                        },
+                        lineup: true,
                     },
                 },
             },
