@@ -36,7 +36,7 @@ const GooglePlacesSearch = ({ onPlaceChange }: Props) => {
                 onPlacesChanged={handlePlaceChange}
             >
                 <TextInput
-                    title="Search for a location"
+                    title="Search for an address"
                     type="text"
                     size="lg"
                     height="60px"

@@ -11,9 +11,8 @@ generator client {
 
 model Event {
     id          String    @id @default(uuid())
-    promoterId  String
-    venueId     String
     name        String
+    status      String?
     timeFrom    String
     timeTo      String
     description String
@@ -22,7 +21,9 @@ model Event {
     tickets     String[]
     lineup      String[]
     promoter    Promoter  @relation(fields: [promoterId], references: [id])
+    promoterId  String
     venue       Venue     @relation(fields: [venueId], references: [id])
+    venueId     String
 }
 
 model Promoter {

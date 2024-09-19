@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Flex, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
 import GooglePlacesSearch from "./GooglePlacesSearch";
 import { TextInput } from "./TextInput";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
@@ -34,7 +34,7 @@ const AddressSearch = ({
                         onClick={onSearchClick}
                         variant="link"
                     >
-                        Search for a location
+                        Search for an address
                     </Button>
 
                     <VStack
@@ -53,7 +53,6 @@ const AddressSearch = ({
                             height="60px"
                             variant="outline"
                             error={errors.venue?.address?.message}
-                            required
                         />
                         <TextInput
                             title="City/Town"
@@ -93,9 +92,25 @@ const AddressSearch = ({
                             height="60px"
                             variant="outline"
                             error={errors.venue?.postcodeZip?.message}
-                            required
                         />
-                        <Button onClick={onAcceptVenue}>Accept Venue</Button>
+                        <VStack
+                            h="80px"
+                            color="red"
+                            w="full"
+                            gap={4}
+                            alignItems="start"
+                        >
+                            <Button
+                                border={errors.venue ? "1px solid" : "none"}
+                                borderColor={errors.venue ? "red" : "none"}
+                                onClick={onAcceptVenue}
+                            >
+                                Accept Venue
+                            </Button>
+                            {errors.venue && (
+                                <Text>Errors occur. Please see above</Text>
+                            )}
+                        </VStack>
                     </VStack>
                 </VStack>
             ) : (

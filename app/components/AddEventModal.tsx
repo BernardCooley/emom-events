@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
-import { addEvent, addVenue, searchVenue } from "@/bff";
+import { addEvent, addVenue, deleteVenue, searchVenue } from "@/bff";
 import { FirebaseImageBlob, VenueItem } from "@/types";
 import AddEventGeneralFields from "./AddEventGeneralFields";
 import AddressPanel from "./AddressPanel";
@@ -55,7 +55,7 @@ const schema: ZodType<FormData> = z
         lineup: z.array(z.string()),
         venue: z.object({
             name: z.string().min(1, "Venue name is required"),
-            address: z.string().min(1, "Venue address is required"),
+            address: z.string(),
             city: z.string().min(1, "Venue city is required"),
             state: z.string().min(1, "Venue state is required"),
             country: z.string().min(1, "Venue country is required"),
@@ -93,10 +93,9 @@ const AddEventModal = ({
     existingImages,
     promoterId,
 }: Props) => {
+    const [venueSearched, setVenueSearched] = useState(false);
     const [showAddressPanel, setShowAddressPanel] = useState(false);
-    const [selectedVenueIndex, setSelectedVenueIndex] = useState<number | null>(
-        null
-    );
+    const [selectedVenue, setSelectedVenue] = useState<VenueItem | null>(null);
     const [images, setImages] = useState<FirebaseImageBlob[]>(
         existingImages || []
     );
@@ -117,6 +116,7 @@ const AddEventModal = ({
         getValues,
         watch,
         reset,
+        trigger,
         formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -142,23 +142,28 @@ const AddEventModal = ({
     const watchArtist = watch("artist");
 
     const onSave = async (formData: FormData) => {
-        // TODO: Only add of its a new venue
-        const newVenue = await addVenue({
-            data: {
-                name: formData.venue.name,
-                address: formData.venue.address,
-                city: formData.venue.city,
-                state: formData.venue.state,
-                country: formData.venue.country,
-                postcodeZip: formData.venue.postcodeZip,
-            },
-        });
+        let venue = null;
 
-        if (newVenue) {
+        if (!selectedVenue) {
+            venue = await addVenue({
+                data: {
+                    name: formData.venue.name,
+                    address: formData.venue.address,
+                    city: formData.venue.city,
+                    state: formData.venue.state,
+                    country: formData.venue.country,
+                    postcodeZip: formData.venue.postcodeZip,
+                },
+            });
+        } else {
+            venue = selectedVenue;
+        }
+
+        if (venue) {
             const newEvent = await addEvent({
                 data: {
                     promoterId: promoterId,
-                    venueId: newVenue.id,
+                    venueId: venue.id,
                     name: formData.name,
                     timeFrom: formData.timeFrom,
                     timeTo: formData.timeTo,
@@ -170,24 +175,35 @@ const AddEventModal = ({
                 },
             });
 
-            if (newEvent && images.length) {
-                await Promise.all(
-                    images.map(async (image) => {
-                        await uploadFirebaseImage(
-                            "eventImages",
-                            new File([image.blob], image.name),
-                            newEvent.id
-                        );
-                        return image.name;
-                    })
-                );
+            if (newEvent) {
+                if (images.length) {
+                    await Promise.all(
+                        images.map(async (image) => {
+                            await uploadFirebaseImage(
+                                "eventImages",
+                                new File([image.blob], image.name),
+                                newEvent.id
+                            );
+                            return image.name;
+                        })
+                    );
+                }
+            } else {
+                if (!selectedVenue) {
+                    await deleteVenue({
+                        venueId: venue.id,
+                    });
+                }
+                // TODO handle error
             }
         } else {
-            // TODO: Remove venue
+            // TODO handle error
+            console.error("Failed to add venue");
         }
     };
 
     const handleSearchVenue = async () => {
+        setVenueSearched(true);
         const venues = await searchVenue({
             name: getValues("venueSearchTerm"),
         });
@@ -209,17 +225,18 @@ const AddEventModal = ({
         setIsVenueManual(false);
         setIsAddressManual(true);
         setImages([]);
-        setSelectedVenueIndex(null);
+        setSelectedVenue(null);
+        setVenueSearched(false);
         reset();
         onClose();
     };
 
-    const handleVenueClick = (index: number) => {
-        setSelectedVenueIndex(index);
+    const handleVenueClick = (venue: VenueItem) => {
+        setSelectedVenue(venue);
         setIsVenueManual(true);
         if (venues) {
-            setValue("venue.name", venues[index].name);
-            setVenueAddressFields(venues[index]);
+            setValue("venue.name", venue.name);
+            setVenueAddressFields(venue);
         }
         setVenues(null);
     };
@@ -283,8 +300,7 @@ const AddEventModal = ({
                                         </Box>
                                     </Flex>
 
-                                    {selectedVenueIndex !== null ||
-                                    showAddressPanel ? (
+                                    {selectedVenue || showAddressPanel ? (
                                         <AddressPanel
                                             address={{
                                                 name: getValues("venue.name"),
@@ -301,7 +317,7 @@ const AddEventModal = ({
                                             }}
                                             onEdit={() => {
                                                 setShowAddressPanel(false);
-                                                setSelectedVenueIndex(null);
+                                                setSelectedVenue(null);
                                                 setIsVenueManual(true);
                                                 setIsAddressManual(true);
                                             }}
@@ -319,9 +335,11 @@ const AddEventModal = ({
                                             <VenueSearch
                                                 isManual={isVenueManual}
                                                 register={register}
-                                                onAddManuallyClick={() =>
-                                                    setIsVenueManual(true)
-                                                }
+                                                onAddManuallyClick={() => {
+                                                    setIsVenueManual(true);
+                                                    setIsAddressManual(false);
+                                                    setVenueSearched(false);
+                                                }}
                                                 onVenueSearchChange={(val) =>
                                                     setValue(
                                                         "venueSearchTerm",
@@ -335,20 +353,24 @@ const AddEventModal = ({
                                                     watchVenueSearchTerm
                                                 }
                                                 onSearchClick={() => {
+                                                    setVenues(null);
                                                     setIsVenueManual(false);
                                                     setValue(
                                                         "venueSearchTerm",
                                                         ""
                                                     );
+                                                    setVenueSearched(false);
                                                 }}
                                                 showResults={
-                                                    venues!! &&
-                                                    !selectedVenueIndex
+                                                    venues !== null &&
+                                                    venues.length > 0 &&
+                                                    !selectedVenue
                                                 }
                                                 venues={venues}
                                                 handleVenueClick={(val) =>
                                                     handleVenueClick(val)
                                                 }
+                                                venueSearched={venueSearched}
                                             />
 
                                             <Box
@@ -379,8 +401,18 @@ const AddEventModal = ({
 
                                                 <AddressSearch
                                                     onAcceptVenue={() => {
-                                                        setShowAddressPanel(
-                                                            true
+                                                        trigger("venue").then(
+                                                            (validated) => {
+                                                                console.log(
+                                                                    "🚀 ~ ).then ~ validated:",
+                                                                    validated
+                                                                );
+                                                                if (validated) {
+                                                                    setShowAddressPanel(
+                                                                        true
+                                                                    );
+                                                                }
+                                                            }
                                                         );
                                                     }}
                                                     register={register}
@@ -390,6 +422,9 @@ const AddEventModal = ({
                                                         setIsAddressManual(true)
                                                     }
                                                     onPlaceChange={(place) => {
+                                                        setIsAddressManual(
+                                                            true
+                                                        );
                                                         setVenueAddressFields(
                                                             place
                                                         );

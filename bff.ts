@@ -188,3 +188,25 @@ export const addVenue = async ({
         throw error;
     }
 };
+
+type DeleteVenueProps = {
+    venueId: string;
+};
+
+export const deleteVenue = async ({
+    venueId,
+}: DeleteVenueProps): Promise<Venue | null> => {
+    try {
+        const deleteVenue: Venue | null = await fetchWithErrorHandling(
+            "/api/deleteVenue",
+            "POST",
+            {
+                venueId,
+            }
+        );
+
+        return deleteVenue;
+    } catch (error) {
+        throw error;
+    }
+};

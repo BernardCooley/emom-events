@@ -16,7 +16,8 @@ interface Props {
     onSearchClick: () => void;
     showResults: boolean;
     venues: VenueItem[] | null;
-    handleVenueClick: (index: number) => void;
+    handleVenueClick: (venue: VenueItem) => void;
+    venueSearched: boolean;
 }
 
 const VenueSearch = ({
@@ -30,6 +31,7 @@ const VenueSearch = ({
     showResults,
     venues,
     handleVenueClick,
+    venueSearched,
 }: Props) => {
     return (
         <>
@@ -73,9 +75,9 @@ const VenueSearch = ({
                         {showResults &&
                             venues &&
                             venues.length > 0 &&
-                            venues.map((venue, index) => (
+                            venues.map((venue) => (
                                 <Flex
-                                    onClick={() => handleVenueClick(index)}
+                                    onClick={() => handleVenueClick(venue)}
                                     p={2}
                                     _hover={{
                                         bg: "gray.100",
@@ -94,7 +96,7 @@ const VenueSearch = ({
                                     ].join(", ")}`}</Text>
                                 </Flex>
                             ))}
-                        {showResults && !venues && (
+                        {venues && venues.length === 0 && venueSearched && (
                             <Text w="full" fontSize="lg">
                                 No Venues found
                             </Text>
