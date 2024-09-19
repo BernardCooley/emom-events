@@ -9,6 +9,7 @@ import {
     Heading,
     Text,
     useDisclosure,
+    useToast,
     VStack,
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
@@ -23,6 +24,7 @@ import AddEventModal from "@/app/components/AddEventModal";
 interface Props {}
 
 const PromoterDashboard = ({}: Props) => {
+    const toast = useToast();
     const { data: session } = useSession();
     const [promoter, setPromoter] = useState<Promoter | null>(null);
     const [loading, setLoading] = useState(true);
@@ -118,6 +120,23 @@ const PromoterDashboard = ({}: Props) => {
                 </CardHeader>
             </Card>
             <AddEventModal
+                onFail={() => {
+                    toast({
+                        title: "Failed to add event. Please try again later.",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }}
+                onSuccess={() => {
+                    toast({
+                        title: "Event created.",
+                        status: "success",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    getPromoter();
+                }}
                 promoterId={promoter.id}
                 isOpen={isOpen}
                 onClose={onClose}

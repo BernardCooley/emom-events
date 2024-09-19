@@ -86,6 +86,8 @@ type Props = {
     onClose: () => void;
     defaultValues?: FormData;
     existingImages?: FirebaseImageBlob[];
+    onSuccess: () => void;
+    onFail: () => void;
 };
 
 const AddEventModal = ({
@@ -94,6 +96,8 @@ const AddEventModal = ({
     defaultValues,
     existingImages,
     promoterId,
+    onSuccess,
+    onFail,
 }: Props) => {
     const [isSaving, setIsSaving] = useState(false);
     const [venueSearched, setVenueSearched] = useState(false);
@@ -191,21 +195,23 @@ const AddEventModal = ({
                             return image.name;
                         })
                     );
+                    onSuccess();
                     handleModalClose();
                 }
+                onSuccess();
                 handleModalClose();
             } else {
-                handleModalClose();
                 if (!selectedVenue) {
                     await deleteVenue({
                         venueId: venue.id,
                     });
                 }
-                // TODO handle error
+                onFail();
+                handleModalClose();
             }
         } else {
+            onFail();
             handleModalClose();
-            // TODO handle error
             console.error("Failed to add venue");
         }
     };
