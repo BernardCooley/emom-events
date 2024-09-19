@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
     Box,
     Button,
@@ -18,6 +18,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import ChipGroup from "./ChipGroup";
+import { StandaloneSearchBox, useJsApiLoader } from "@react-google-maps/api";
+import { getAddress } from "@/utils";
+import { Library } from "@googlemaps/js-api-loader";
 
 export interface FormData {
     name: string;
@@ -58,6 +61,13 @@ type Props = {
 };
 
 const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
+    const [libraries] = useState<Library[]>(["places"]);
+    useJsApiLoader({
+        id: "google-map-script",
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+        libraries: libraries,
+    });
+    const placesRef = useRef<any>(null);
     const addArtistRef = useRef<HTMLInputElement>(null);
     const {
         handleSubmit,
@@ -83,6 +93,16 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
             },
         },
     });
+
+    const handlePlaceChange = () => {
+        const [place] = placesRef.current.getPlaces();
+        const addressComponents = getAddress(place);
+        setValue("venue.address", addressComponents.address);
+        setValue("venue.city", addressComponents.city);
+        setValue("venue.state", addressComponents.state);
+        setValue("venue.country", addressComponents.country);
+        setValue("venue.postcodeZip", addressComponents.postcodeZip);
+    };
 
     const watchLineup = watch("lineup");
 
@@ -210,6 +230,30 @@ const AddEventModal = ({ isOpen, onClose, defaultValues }: Props) => {
                                             error={errors.venue?.name?.message}
                                             required
                                         />
+
+                                        <Box
+                                            w="full"
+                                            position="relative"
+                                            zIndex={5000}
+                                        >
+                                            <StandaloneSearchBox
+                                                onLoad={(ref) =>
+                                                    (placesRef.current = ref)
+                                                }
+                                                onPlacesChanged={
+                                                    handlePlaceChange
+                                                }
+                                            >
+                                                <TextInput
+                                                    title="Search for a location"
+                                                    type="text"
+                                                    size="lg"
+                                                    height="60px"
+                                                    variant="outline"
+                                                />
+                                            </StandaloneSearchBox>
+                                        </Box>
+
                                         <TextInput
                                             title="Street Address"
                                             type="text"
