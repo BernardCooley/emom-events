@@ -27,17 +27,12 @@ export type EventDetails = {
     timeFrom: string;
     timeTo?: string;
     description: string;
-    imageIds: string;
+    imageIds: string[];
     promoter: {
         id: string;
         name: string;
     };
-    venue: {
-        id: string;
-        name: string;
-        city: string;
-        country: string;
-    };
+    venue: VenueItem;
     lineup?: string[];
 };
 

@@ -39,21 +39,21 @@ const PromoterDashboard = ({}: Props) => {
             });
 
             if (promoter) {
-                const imageUrls = await Promise.all(
+                const imageBlobs = await Promise.all(
                     promoter.imageIds.map(async (imageId) => {
                         const blob = await getFirebaseImageBlob(
-                            "promoterImages",
-                            `${promoter?.email}/${imageId}`
+                            `promoterImages/${promoter?.email}/${imageId}`,
+                            imageId
                         );
                         return {
                             blob: blob?.blob,
-                            name: blob?.name.replace(`${promoter?.email}/`, ""),
+                            name: blob?.name,
                         };
                     })
                 );
 
                 setImages(
-                    imageUrls.filter(
+                    imageBlobs.filter(
                         (img) =>
                             img.blob !== undefined && img.name !== undefined
                     ) as FirebaseImageBlob[]

@@ -38,10 +38,9 @@ export const deleteFirebaseImage = async (
 };
 
 export const getFirebaseImageBlob = async (
-    folder: string,
+    path: string,
     name: string
 ): Promise<FirebaseImageBlob | undefined> => {
-    const path = `${folder}/${name}`;
     const pathReference = ref(storage, path);
 
     try {
@@ -56,10 +55,8 @@ export const getFirebaseImageBlob = async (
 };
 
 export const getFirebaseImageURL = async (
-    folder: string,
-    name: string
+    path: string
 ): Promise<string | undefined> => {
-    const path = `${folder}/${name}`;
     const pathReference = ref(storage, path);
 
     try {

@@ -37,7 +37,7 @@ const PromoterProfile = ({ promoter, images, onGetPromoter }: Props) => {
     };
 
     return (
-        <Card>
+        <Card w="full">
             <CardHeader>
                 <Box position="relative">
                     <Button

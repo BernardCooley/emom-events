@@ -61,77 +61,89 @@ const PromoterForm = ({
         },
     });
 
+    const onCreatePromoter = async (formData: FormData) => {
+        let imageIds: string[] = [];
+        if (images.length) {
+            imageIds = await Promise.all(
+                images.map(async (image) => {
+                    await uploadFirebaseImage(
+                        "promoterImages",
+                        new File([image.blob], image.name),
+                        formData.email
+                    );
+                    return image.name;
+                })
+            );
+        }
+        const resp = await addPromoter({
+            data: {
+                id: formData.email,
+                name: formData.name,
+                city: formData.city,
+                state: formData.state,
+                country: formData.country,
+                imageIds: imageIds,
+                email: formData.email,
+                websites: [],
+            },
+        });
+        if (resp) {
+            onSuccess(resp);
+        }
+    };
+
+    const onUpdatePromoter = async (formData: FormData) => {
+        let imageIds: string[] = [];
+
+        const purgedImages = images?.filter(
+            (img) => !existingImages?.find((i) => i.name === img.name)
+        );
+
+        const imagesToDelete = existingImages?.filter(
+            (img) => !images.find((i) => i.name === img.name)
+        );
+
+        if (purgedImages.length) {
+            imageIds = await Promise.all(
+                purgedImages.map(async (image) => {
+                    await uploadFirebaseImage(
+                        "promoterImages",
+                        new File([image.blob], image.name),
+                        formData.email
+                    );
+                    return image.name;
+                })
+            );
+        }
+
+        if (imagesToDelete && imagesToDelete.length) {
+            await Promise.all(
+                imagesToDelete.map(async (img) => {
+                    const fileToDelete = new File([img.blob], img.name);
+                    await deleteFirebaseImage(
+                        "promoterImages",
+                        fileToDelete.name,
+                        formData.email
+                    );
+                })
+            );
+        }
+
+        const resp = await updatePromoterImages({
+            email: formData.email,
+            imageIds: images.map((img) => img.name),
+        });
+        if (resp) {
+            onSuccess(resp);
+        }
+    };
+
     const onSave = async (formData: FormData) => {
         setIsSaving(true);
-        if (!isEditing) {
-            let imageIds: string[] = [];
-            if (images.length) {
-                imageIds = await Promise.all(
-                    images.map(async (image) => {
-                        await uploadFirebaseImage(
-                            "promoterImages",
-                            new File([image.blob], image.name),
-                            formData.email
-                        );
-                        return image.name;
-                    })
-                );
-            }
-            const resp = await addPromoter({
-                data: {
-                    id: formData.email,
-                    name: formData.name,
-                    city: formData.city,
-                    state: formData.state,
-                    country: formData.country,
-                    imageIds: imageIds,
-                    email: formData.email,
-                    websites: [],
-                },
-            });
-            if (resp) {
-                onSuccess(resp);
-            }
+        if (isEditing) {
+            await onUpdatePromoter(formData);
         } else {
-            let imageIds: string[] = [];
-
-            if (images.length) {
-                imageIds = await Promise.all(
-                    images.map(async (image) => {
-                        await uploadFirebaseImage(
-                            "promoterImages",
-                            new File([image.blob], image.name),
-                            formData.email
-                        );
-                        return image.name;
-                    })
-                );
-            }
-
-            const imagesToDelete = existingImages?.filter(
-                (img) => !images.find((i) => i.name === img.name)
-            );
-
-            if (imagesToDelete && imagesToDelete.length) {
-                await Promise.all(
-                    imagesToDelete.map(async (img) => {
-                        const fileToDelete = new File([img.blob], img.name);
-                        await deleteFirebaseImage(
-                            "promoterImages",
-                            fileToDelete.name,
-                            formData.email
-                        );
-                    })
-                );
-            }
-
-            const resp = await updatePromoterImages({
-                email: formData.email,
-                imageIds: imageIds,
-            });
-            if (resp) {
-                onSuccess(resp);
-            }
+            await onCreatePromoter(formData);
         }
         setIsSaving(false);
     };
