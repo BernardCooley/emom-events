@@ -22,13 +22,23 @@ import { useForm } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
-import { addEvent, addVenue, deleteVenue, searchVenue } from "@/bff";
+import {
+    addEvent,
+    addVenue,
+    deleteVenue,
+    searchVenue,
+    updateEvent,
+} from "@/bff";
 import { FirebaseImageBlob, VenueItem } from "@/types";
 import AddEventGeneralFields from "./AddEventGeneralFields";
 import AddressPanel from "./AddressPanel";
 import VenueSearch from "./VenueSearch";
 import AddressSearch from "./AddressSearch";
-import { uploadFirebaseImage } from "@/firebase/functions";
+import {
+    deleteFirebaseImage,
+    getFirebaseImageBlob,
+    uploadFirebaseImage,
+} from "@/firebase/functions";
 
 export interface FormData {
     name: string;
@@ -92,6 +102,7 @@ type Props = {
     existingImages?: FirebaseImageBlob[];
     onSuccess: () => void;
     onFail: () => void;
+    eventId?: string;
 };
 
 const AddEventModal = ({
@@ -102,6 +113,7 @@ const AddEventModal = ({
     promoterId,
     onSuccess,
     onFail,
+    eventId,
 }: Props) => {
     const [isSaving, setIsSaving] = useState(false);
     const [venueSearched, setVenueSearched] = useState(false);
@@ -119,6 +131,42 @@ const AddEventModal = ({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
         libraries: libraries,
     });
+
+    useEffect(() => {
+        reset(defaultValues);
+        if (defaultValues?.venue) {
+            setSelectedVenue({
+                id: "",
+                name: defaultValues.venue.name,
+                address: defaultValues.venue.address,
+                city: defaultValues.venue.city,
+                state: defaultValues.venue.state,
+                country: defaultValues.venue.country,
+                postcodeZip: defaultValues.venue.postcodeZip,
+            });
+            setIsVenueManual(true);
+        }
+
+        getImages();
+    }, [defaultValues]);
+
+    const getImages = async () => {
+        if (defaultValues?.imageIds && eventId) {
+            const imgs = await Promise.all(
+                defaultValues?.imageIds.map(async (image) => {
+                    return await getFirebaseImageBlob(
+                        `eventImages/${eventId}/${image}`,
+                        image
+                    );
+                })
+            );
+            const removeUndefined = imgs.filter(
+                (img) => img !== undefined
+            ) as FirebaseImageBlob[];
+
+            if (imgs) setImages(removeUndefined);
+        }
+    };
 
     const {
         handleSubmit,
@@ -153,8 +201,7 @@ const AddEventModal = ({
     const watchVenueSearchTerm = watch("venueSearchTerm");
     const watchArtist = watch("artist");
 
-    const onSave = async (formData: FormData) => {
-        setIsSaving(true);
+    const onCreateEvent = async (formData: FormData) => {
         let venue = null;
 
         if (!selectedVenue) {
@@ -217,6 +264,78 @@ const AddEventModal = ({
         }
     };
 
+    const onUpdateEvent = async (formData: FormData) => {
+        const updatedEvent = await updateEvent({
+            id: eventId as string,
+            event: {
+                name: formData.name,
+                timeFrom: formData.timeFrom,
+                timeTo: formData.timeTo,
+                description: formData.description,
+                imageIds: images.map((image) => image.name),
+                lineup: formData.lineup,
+            },
+            venue: {
+                name: formData.venue.name,
+                address: formData.venue.address,
+                city: formData.venue.city,
+                state: formData.venue.state,
+                country: formData.venue.country,
+                postcodeZip: formData.venue.postcodeZip,
+            },
+        });
+
+        if (updatedEvent) {
+            const imagesToUpload = images?.filter(
+                (img) => !existingImages?.find((i) => i.name === img.name)
+            );
+
+            const imagesToDelete = existingImages?.filter(
+                (img) => !images.find((i) => i.name === img.name)
+            );
+
+            if (imagesToUpload.length) {
+                await Promise.all(
+                    imagesToUpload.map(async (image) => {
+                        await uploadFirebaseImage(
+                            "eventImages",
+                            new File([image.blob], image.name),
+                            updatedEvent.id
+                        );
+                        return image.name;
+                    })
+                );
+            }
+
+            if (imagesToDelete && imagesToDelete.length) {
+                await Promise.all(
+                    imagesToDelete.map(async (img) => {
+                        const fileToDelete = new File([img.blob], img.name);
+                        await deleteFirebaseImage(
+                            "eventImages",
+                            fileToDelete.name,
+                            updatedEvent.id
+                        );
+                    })
+                );
+            }
+            onSuccess();
+            handleModalClose();
+        } else {
+            onFail();
+            handleModalClose();
+        }
+    };
+
+    const onSave = async (formData: FormData) => {
+        setIsSaving(true);
+        if (eventId) {
+            await onUpdateEvent(formData);
+        } else {
+            await onCreateEvent(formData);
+        }
+    };
+
     const handleSearchVenue = async () => {
         const venues = await searchVenue({
             name: getValues("venueSearchTerm"),
@@ -276,7 +395,9 @@ const AddEventModal = ({
         >
             <ModalOverlay />
             <ModalContent pb={10} pt={4} h="80vh" overflowY="scroll">
-                <ModalHeader>Add Event</ModalHeader>
+                <ModalHeader>
+                    {eventId ? "Update Event" : "Create Event"}
+                </ModalHeader>
                 <Divider />
                 <ModalCloseButton />
                 {isSaving && (
@@ -501,7 +622,7 @@ const AddEventModal = ({
                                     onClick={handleSubmit(onSave)}
                                     colorScheme="blue"
                                 >
-                                    Create Event
+                                    {eventId ? "Update Event" : "Create Event"}
                                 </Button>
                             </HStack>
                         </VStack>

@@ -99,7 +99,7 @@ const PromoterForm = ({
     const onUpdatePromoter = async (formData: FormData) => {
         let imageIds: string[] = [];
 
-        const purgedImages = images?.filter(
+        const imagesToUpload = images?.filter(
             (img) => !existingImages?.find((i) => i.name === img.name)
         );
 
@@ -107,9 +107,9 @@ const PromoterForm = ({
             (img) => !images.find((i) => i.name === img.name)
         );
 
-        if (purgedImages.length) {
+        if (imagesToUpload.length) {
             imageIds = await Promise.all(
-                purgedImages.map(async (image) => {
+                imagesToUpload.map(async (image) => {
                     await uploadFirebaseImage(
                         "promoterImages",
                         new File([image.blob], image.name),

@@ -46,10 +46,7 @@ const EventCard = ({ eventDetails }: EventCardProps) => {
     }, [imageIds]);
 
     const getImage = async (imageId: string) => {
-        const image = await getFirebaseImageURL(
-            "eventImages",
-            `${id}/${imageId}`
-        );
+        const image = await getFirebaseImageURL(`eventImages/${id}/${imageId}`);
         if (image) {
             setImageUrl(image);
         }

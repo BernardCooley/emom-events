@@ -105,21 +105,28 @@ export const addPromoter = async ({
 };
 
 type UpdatePromoterProps = {
-    email: string;
-    imageIds: string[];
+    id: string;
+    data: {
+        name?: Promoter["name"];
+        city?: Promoter["city"];
+        state?: Promoter["state"];
+        country?: Promoter["country"];
+        websites?: Promoter["websites"];
+        imageIds?: Promoter["imageIds"];
+    };
 };
 
-export const updatePromoterImages = async ({
-    email,
-    imageIds,
+export const updatePromoter = async ({
+    id,
+    data,
 }: UpdatePromoterProps): Promise<Promoter | null> => {
     try {
         const updatedPromoter: Promoter | null = await fetchWithErrorHandling(
-            "/api/updatePromoterImages",
+            "/api/updatePromoter",
             "POST",
             {
-                email,
-                imageIds,
+                id,
+                data,
             }
         );
 
@@ -234,6 +241,48 @@ export const fetchEvent = async ({
         );
 
         return deleteEvent;
+    } catch (error) {
+        throw error;
+    }
+};
+
+type UpdateEventProps = {
+    id: string;
+    event: {
+        name: EventDetails["name"];
+        timeFrom: EventDetails["timeFrom"];
+        timeTo?: EventDetails["timeTo"];
+        description: EventDetails["description"];
+        imageIds: EventDetails["imageIds"];
+        lineup?: EventDetails["lineup"];
+    };
+    venue: {
+        name: VenueItem["name"];
+        address: VenueItem["address"];
+        city: VenueItem["city"];
+        state: VenueItem["state"];
+        country: VenueItem["country"];
+        postcodeZip: VenueItem["postcodeZip"];
+    };
+};
+
+export const updateEvent = async ({
+    id,
+    event,
+    venue,
+}: UpdateEventProps): Promise<EventDetails | null> => {
+    try {
+        const updatedEvent: EventDetails | null = await fetchWithErrorHandling(
+            "/api/updateEvent",
+            "POST",
+            {
+                id,
+                event,
+                venue,
+            }
+        );
+
+        return updatedEvent;
     } catch (error) {
         throw error;
     }

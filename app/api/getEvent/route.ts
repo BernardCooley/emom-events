@@ -26,8 +26,11 @@ export async function POST(req: Request) {
                     select: {
                         id: true,
                         name: true,
+                        address: true,
                         city: true,
+                        state: true,
                         country: true,
+                        postcodeZip: true,
                     },
                 },
                 lineup: true,

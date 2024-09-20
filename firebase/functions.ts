@@ -47,7 +47,7 @@ export const getFirebaseImageBlob = async (
         const blob = await getBlob(pathReference);
         return {
             blob,
-            name: `${name}`,
+            name,
         };
     } catch (err) {
         return undefined;
