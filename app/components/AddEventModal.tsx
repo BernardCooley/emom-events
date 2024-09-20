@@ -396,7 +396,7 @@ const AddEventModal = ({
             <ModalOverlay />
             <ModalContent pb={10} pt={4} h="80vh" overflowY="scroll">
                 <ModalHeader>
-                    {eventId ? "Update Event" : "Create Event"}
+                    {eventId ? "Edit Event" : "Create Event"}
                 </ModalHeader>
                 <Divider />
                 <ModalCloseButton />

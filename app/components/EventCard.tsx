@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
     Box,
+    Button,
     Card,
     CardBody,
     CardHeader,
     Center,
     Flex,
     Heading,
+    HStack,
     Image,
     Stack,
     StackDivider,
@@ -19,9 +21,11 @@ import { getFirebaseImageURL } from "@/firebase/functions";
 
 type EventCardProps = {
     eventDetails: EventDetails;
+    canEdit?: boolean;
+    onEditClick?: () => void;
 };
 
-const EventCard = ({ eventDetails }: EventCardProps) => {
+const EventCard = ({ eventDetails, canEdit, onEditClick }: EventCardProps) => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     type DetailProps = {
         title: string;
@@ -77,11 +81,28 @@ const EventCard = ({ eventDetails }: EventCardProps) => {
         <>
             <Card>
                 <CardHeader>
-                    <Heading size="md">{name}</Heading>
+                    <HStack w="full" justifyContent="space-between">
+                        <Heading size="lg">{name}</Heading>
+                        {canEdit && (
+                            <Button
+                                right={0}
+                                top={0}
+                                onClick={onEditClick}
+                                variant="link"
+                            >
+                                Edit Event
+                            </Button>
+                        )}
+                    </HStack>
                 </CardHeader>
 
                 <CardBody>
-                    <Flex gap={8} wrap="wrap" alignItems="flex-start">
+                    <Flex
+                        position="relative"
+                        gap={8}
+                        wrap="wrap"
+                        alignItems="flex-start"
+                    >
                         <Center mb={6} w={["full", "60%", "50%", "30%", "30%"]}>
                             {imageUrl && imageUrl.length > 0 && (
                                 <Image
@@ -92,7 +113,6 @@ const EventCard = ({ eventDetails }: EventCardProps) => {
                             )}
                         </Center>
                         <Stack w="60%" divider={<StackDivider />} spacing="4">
-                            <Detail title="Name" value={name || ""} />
                             <Detail
                                 href={`/venues/${venue.id}`}
                                 title="Venue"
@@ -105,12 +125,12 @@ const EventCard = ({ eventDetails }: EventCardProps) => {
                                 }
                             />
                             <Detail
-                                title="From"
+                                title="Date/Time From"
                                 value={formatDateTime(timeFrom!!)}
                             />
                             {timeTo && (
                                 <Detail
-                                    title="To"
+                                    title="Date/Time To"
                                     value={formatDateTime(timeTo)}
                                 />
                             )}

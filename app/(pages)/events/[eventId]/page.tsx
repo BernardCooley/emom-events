@@ -5,20 +5,16 @@ import { useParams } from "next/navigation";
 import EventCard from "@/app/components/EventCard";
 import { EventDetails, FirebaseImageBlob } from "@/types";
 import { fetchEvent } from "@/bff";
-import {
-    Button,
-    Center,
-    Heading,
-    useDisclosure,
-    useToast,
-} from "@chakra-ui/react";
+import { Center, Heading, useDisclosure, useToast } from "@chakra-ui/react";
 import PageLoading from "@/app/components/PageLoading";
 import AddEventModal from "@/app/components/AddEventModal";
 import { getFirebaseImageBlob } from "@/firebase/functions";
+import { useSession } from "next-auth/react";
 
 interface Props {}
 
 const Event = ({}: Props) => {
+    const { data: session } = useSession();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
     const [loading, setLoading] = React.useState(true);
@@ -73,7 +69,6 @@ const Event = ({}: Props) => {
         <>
             {eventDetails ? (
                 <>
-                    <Button onClick={onOpen}>Open</Button>
                     <AddEventModal
                         existingImages={images}
                         eventId={eventId as string}
@@ -122,7 +117,13 @@ const Event = ({}: Props) => {
                         isOpen={isOpen}
                         onClose={onClose}
                     />
-                    <EventCard eventDetails={eventDetails} />
+                    <EventCard
+                        onEditClick={onOpen}
+                        canEdit={
+                            session?.user?.email === eventDetails.promoter.id
+                        }
+                        eventDetails={eventDetails}
+                    />
                 </>
             ) : (
                 <Center w="full" h="80vh">
