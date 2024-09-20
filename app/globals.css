@@ -44,3 +44,8 @@ a {
 .pac-container {
   z-index: 5000 !important;
 }
+
+.carousel-container {
+  width: 100%;
+  height: 100px;
+}

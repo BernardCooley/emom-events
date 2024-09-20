@@ -1,8 +1,9 @@
+import { FirebaseImageBlob } from "./types";
+
 export const capitalizeFirstLetter = (str: string): string => {
     if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
 };
-
 
 export const getAddress = (
     place: any
@@ -75,4 +76,8 @@ export const formatDateTime = (dateTimeString: string) => {
         minute: "2-digit",
     };
     return date.toLocaleDateString(undefined, options);
+};
+
+export const getUrlFromBlob = (blob: FirebaseImageBlob): string => {
+    return URL.createObjectURL(new File([blob.blob], blob.name));
 };

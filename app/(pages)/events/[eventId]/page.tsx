@@ -118,6 +118,7 @@ const Event = ({}: Props) => {
                         onClose={onClose}
                     />
                     <EventCard
+                        images={images}
                         onEditClick={onOpen}
                         canEdit={
                             session?.user?.email === eventDetails.promoter.id

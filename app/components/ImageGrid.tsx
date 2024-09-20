@@ -2,6 +2,7 @@ import React from "react";
 import { Box, IconButton, Image, SimpleGrid } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { FirebaseImageBlob } from "@/types";
+import { getUrlFromBlob } from "@/utils";
 
 interface Props {
     images: FirebaseImageBlob[];
@@ -10,9 +11,7 @@ interface Props {
 }
 
 const ImageGrid = ({ images, onRemove, columns = [3] }: Props) => {
-    const urls = images.map((file) =>
-        URL.createObjectURL(new File([file.blob], file.name))
-    );
+    const urls = images.map((file) => getUrlFromBlob(file));
 
     return (
         <SimpleGrid columns={columns} gap={4}>
