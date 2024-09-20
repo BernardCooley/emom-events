@@ -2,16 +2,14 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const { email, imageIds } = await req.json();
+    const { id, data } = await req.json();
 
     try {
         const newPromoter = await prisma?.promoter.update({
             where: {
-                id: email,
+                id,
             },
-            data: {
-                imageIds,
-            },
+            data,
         });
 
         const response = NextResponse.json(newPromoter, {

@@ -6,7 +6,7 @@ import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextInput } from "./TextInput";
-import { addPromoter, updatePromoterImages } from "@/bff";
+import { addPromoter, updatePromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
 import FileUpload from "./FileUpload";
 import { deleteFirebaseImage, uploadFirebaseImage } from "@/firebase/functions";
@@ -133,9 +133,16 @@ const PromoterForm = ({
             );
         }
 
-        const resp = await updatePromoterImages({
-            email: formData.email,
-            imageIds: images.map((img) => img.name),
+        const resp = await updatePromoter({
+            id: formData.email,
+            data: {
+                name: formData.name,
+                city: formData.city,
+                state: formData.state,
+                country: formData.country,
+                imageIds: images.map((img) => img.name),
+                websites: [],
+            },
         });
 
         if (resp) {
