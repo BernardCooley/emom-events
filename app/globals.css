@@ -49,3 +49,21 @@ a {
   width: 100%;
   height: 100px;
 }
+
+.react-multiple-carousel__arrow {
+  min-height: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  width: 32px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.react-multiple-carousel__arrow:hover {
+  background: rgba(0, 0, 0, 0.6) !important;
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.react-multiple-carousel__arrow::before {
+  font-size: 16px !important;
+}

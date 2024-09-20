@@ -77,7 +77,7 @@ const ImageCarousel = ({
                             responsive={responsive}
                             keyBoardControl={true}
                             customTransition="all .5"
-                            transitionDuration={500}
+                            transitionDuration={200}
                             containerClass="carousel-container"
                             removeArrowOnDeviceType={["tablet", "mobile"]}
                             itemClass="carousel-item-padding-40-px"
@@ -85,6 +85,7 @@ const ImageCarousel = ({
                             {images &&
                                 images?.map((img, index) => (
                                     <Image
+                                        _hover={{ cursor: "pointer" }}
                                         onClick={() =>
                                             setSelectedImageIndex(index)
                                         }
