@@ -39,24 +39,26 @@ import {
     getFirebaseImageBlob,
     uploadFirebaseImage,
 } from "@/firebase/functions";
+import { Event, Venue } from "@prisma/client";
 
 export interface FormData {
-    name: string;
-    timeFrom: string;
-    timeTo: string;
-    description: string;
-    lineup: string[];
+    name: Event["name"];
+    timeFrom: Event["timeFrom"];
+    timeTo: Event["timeTo"];
+    description: Event["description"];
+    lineup: Event["lineup"];
     venue: {
-        name: string;
-        address: string;
-        city: string;
-        state: string;
-        country: string;
-        postcodeZip: string;
+        name: Venue["name"];
+        address: Venue["address"];
+        city: Venue["city"];
+        state: Venue["state"];
+        country: Venue["country"];
+        postcodeZip: Venue["postcodeZip"];
     };
     venueSearchTerm: string;
-    artist: string;
-    imageIds: string[];
+    artist: Event["lineup"][0];
+    imageIds: Event["imageIds"];
+    websites: Event["websites"];
 }
 
 const schema: ZodType<FormData> = z
@@ -79,6 +81,7 @@ const schema: ZodType<FormData> = z
         imageIds: z.array(z.string()).min(1, {
             message: "At least one image is required",
         }),
+        websites: z.array(z.string()),
     })
     .refine(
         (data) => {

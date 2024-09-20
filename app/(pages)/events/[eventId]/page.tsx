@@ -24,6 +24,18 @@ const Event = ({}: Props) => {
     );
     const [images, setImages] = useState<FirebaseImageBlob[]>([]);
 
+    const {
+        imageIds,
+        name,
+        timeFrom,
+        timeTo,
+        description,
+        promoter,
+        venue,
+        lineup,
+        websites,
+    } = eventDetails || {};
+
     useEffect(() => {
         if (eventId) {
             getEventDetails();
@@ -35,9 +47,9 @@ const Event = ({}: Props) => {
     }, [eventDetails]);
 
     const getImages = async () => {
-        if (eventDetails?.imageIds) {
+        if (imageIds) {
             const imageBlobs = await Promise.all(
-                eventDetails.imageIds.map((imageId) =>
+                imageIds.map((imageId) =>
                     getFirebaseImageBlob(
                         `eventImages/${eventId}/${imageId}`,
                         imageId
@@ -67,34 +79,34 @@ const Event = ({}: Props) => {
 
     return (
         <>
-            {eventDetails ? (
+            {name &&
+            venue &&
+            timeFrom &&
+            description &&
+            promoter &&
+            eventDetails ? (
                 <>
                     <AddEventModal
                         existingImages={images}
                         eventId={eventId as string}
                         defaultValues={{
-                            name: eventDetails.name,
+                            name: name,
                             venue: {
-                                name: eventDetails.venue.name,
-                                address: eventDetails.venue.address,
-                                city: eventDetails.venue.city,
-                                state: eventDetails.venue.state,
-                                country: eventDetails.venue.country,
-                                postcodeZip: eventDetails.venue.postcodeZip,
+                                name: venue.name,
+                                address: venue.address,
+                                city: venue.city,
+                                state: venue.state,
+                                country: venue.country,
+                                postcodeZip: venue.postcodeZip,
                             },
-                            timeFrom: eventDetails.timeFrom,
-                            timeTo:
-                                eventDetails.timeTo !== undefined
-                                    ? eventDetails.timeTo
-                                    : "",
-                            description: eventDetails.description,
-                            lineup: eventDetails.lineup || [],
-                            imageIds:
-                                eventDetails.imageIds !== undefined
-                                    ? eventDetails.imageIds
-                                    : [],
+                            timeFrom: timeFrom,
+                            timeTo: timeTo !== undefined ? timeTo : "",
+                            description: description,
+                            lineup: lineup || [],
+                            imageIds: imageIds !== undefined ? imageIds : [],
                             venueSearchTerm: "",
                             artist: "",
+                            websites: websites || [],
                         }}
                         onFail={() => {
                             toast({
@@ -113,16 +125,14 @@ const Event = ({}: Props) => {
                             });
                             getEventDetails();
                         }}
-                        promoterId={eventDetails.promoter.id}
+                        promoterId={promoter.id}
                         isOpen={isOpen}
                         onClose={onClose}
                     />
                     <EventCard
                         images={images}
                         onEditClick={onOpen}
-                        canEdit={
-                            session?.user?.email === eventDetails.promoter.id
-                        }
+                        canEdit={session?.user?.email === promoter.id}
                         eventDetails={eventDetails}
                     />
                 </>

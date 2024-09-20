@@ -14,11 +14,11 @@ import ImageGrid from "./ImageGrid";
 import { FirebaseImageBlob } from "@/types";
 
 export interface FormData {
-    name: string;
-    city: string;
-    state: string;
-    country: string;
-    email: string;
+    name: Promoter["name"];
+    city: Promoter["city"];
+    state: Promoter["state"];
+    country: Promoter["country"];
+    email: Promoter["email"];
 }
 
 const schema: ZodType<FormData> = z.object({

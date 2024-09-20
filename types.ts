@@ -1,39 +1,42 @@
+import { Event, Promoter, Venue } from "@prisma/client";
+
 export type PromoterDetails = {
-    id: string;
-    name: string;
-    email: string;
-    city: string;
-    state: string;
-    country: string;
-    websites: string[];
-    imageIds: string[];
+    id: Promoter["id"];
+    name: Promoter["name"];
+    email: Promoter["email"];
+    city: Promoter["city"];
+    state: Promoter["state"];
+    country: Promoter["country"];
+    websites: Promoter["websites"];
+    imageIds: Promoter["imageIds"];
     events: EventDetails[];
 };
 
 export type VenueDetails = {
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    postcodeZip: string;
-    events: string[];
+    id: Venue["id"];
+    name: Venue["name"];
+    address: Venue["address"];
+    city: Venue["city"];
+    state: Venue["state"];
+    country: Venue["country"];
+    postcodeZip: Venue["postcodeZip"];
+    events: EventDetails[];
 };
 
 export type EventDetails = {
-    id: string;
-    name: string;
-    timeFrom: string;
-    timeTo?: string;
-    description: string;
-    imageIds: string[];
+    id: Event["id"];
+    name: Event["name"];
+    timeFrom: Event["timeFrom"];
+    timeTo?: Event["timeTo"];
+    description: Event["description"];
+    imageIds: Event["imageIds"];
     promoter: {
-        id: string;
-        name: string;
+        id: Promoter["id"];
+        name: Promoter["name"];
     };
     venue: VenueItem;
-    lineup?: string[];
+    lineup?: Event["lineup"];
+    websites?: Event["websites"];
 };
 
 export type FirebaseImageBlob = {
@@ -47,35 +50,34 @@ export type SelectOption = {
 };
 
 export type VenueItem = {
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    postcodeZip: string;
+    id: Venue["id"];
+    name: Venue["name"];
+    address: Venue["address"];
+    city: Venue["city"];
+    state: Venue["state"];
+    country: Venue["country"];
+    postcodeZip: Venue["postcodeZip"];
 };
 
 export type AddEventInput = {
     promoterId: string;
     venueId: string;
-    name: string;
-    timeFrom: string;
-    timeTo: string;
-    description: string;
-    websites: string[];
-    imageIds: string[];
-    tickets: string[];
-    lineup: string[];
+    name: Event["name"];
+    timeFrom: Event["timeFrom"];
+    timeTo: Event["timeTo"];
+    description: Event["description"];
+    websites: Event["websites"];
+    imageIds: Event["imageIds"];
+    tickets: Event["tickets"];
+    lineup: Event["lineup"];
 };
 
 export type AddVenueInput = {
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    postcodeZip: string;
-    description?: string;
-    links?: string[];
+    name: Venue["name"];
+    address: Venue["address"];
+    city: Venue["city"];
+    state: Venue["state"];
+    country: Venue["country"];
+    postcodeZip: Venue["postcodeZip"];
+    links?: Venue["links"];
 };
