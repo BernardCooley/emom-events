@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogOverlay,
     Box,
+    Button,
     Flex,
     FormControl,
     FormLabel,
     Text,
+    useDisclosure,
     VStack,
 } from "@chakra-ui/react";
 import Upload from "rc-upload";
+import { getImageDimensions, handleImageUpload } from "@/utils";
 
 type Props = {
     onUpload: (file: File) => void;
@@ -28,8 +37,33 @@ const FileUpload = ({
     allowErrors,
     error,
 }: Props) => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const cancelRef = useRef<HTMLButtonElement>(null);
+    const [errorMessage, setErrorMessage] = useState("");
+
     return (
         <VStack w="full" gap={4}>
+            <AlertDialog
+                isOpen={isOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onClose}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Add image
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>{errorMessage}</AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button colorScheme="blue" onClick={onClose} ml={3}>
+                                Ok
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
             <FormControl>
                 <FormLabel fontSize="lg" mb={0}>
                     <Flex>
@@ -43,7 +77,23 @@ const FileUpload = ({
                 </FormLabel>
                 <Upload
                     customRequest={(options) => {
-                        onUpload(options.file as File);
+                        getImageDimensions(
+                            options.file as File,
+                            (dimensions) => {
+                                handleImageUpload({
+                                    fileSizeLimit: 2,
+                                    dimensions,
+                                    file: options.file as File,
+                                    onError: (errorMessage) => {
+                                        setErrorMessage(errorMessage);
+                                        onOpen();
+                                    },
+                                    onSuccess: () => {
+                                        onUpload(options.file as File);
+                                    },
+                                });
+                            }
+                        );
                     }}
                     accept={accept}
                     style={{

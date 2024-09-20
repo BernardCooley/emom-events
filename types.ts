@@ -81,3 +81,8 @@ export type AddVenueInput = {
     postcodeZip: Venue["postcodeZip"];
     links?: Venue["links"];
 };
+
+export type Dimensions = {
+    width: number;
+    height: number;
+};

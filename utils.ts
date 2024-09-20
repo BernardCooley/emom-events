@@ -1,4 +1,4 @@
-import { FirebaseImageBlob } from "./types";
+import { Dimensions, FirebaseImageBlob } from "./types";
 
 export const capitalizeFirstLetter = (str: string): string => {
     if (!str) return str;
@@ -80,4 +80,49 @@ export const formatDateTime = (dateTimeString: string) => {
 
 export const getUrlFromBlob = (blob: FirebaseImageBlob): string => {
     return URL.createObjectURL(new File([blob.blob], blob.name));
+};
+
+export const getImageDimensions = (
+    file: File,
+    callback: (dimensions: { width: number; height: number }) => void
+) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = function () {
+        callback({ width: img.width, height: img.height });
+        URL.revokeObjectURL(objectUrl); // Clean up the object URL
+    };
+
+    img.src = objectUrl;
+};
+
+type HandleImageUploadProps = {
+    fileSizeLimit: number;
+    dimensions: Dimensions;
+    file: File;
+    onError: (errorMessage: string) => void;
+    onSuccess: () => void;
+};
+
+export const handleImageUpload = ({
+    fileSizeLimit,
+    dimensions,
+    file,
+    onError,
+    onSuccess,
+}: HandleImageUploadProps) => {
+    const fileSize = Number((file.size / 1024 / 1024).toFixed(0));
+    if (dimensions.width !== dimensions.height || fileSize > fileSizeLimit) {
+        let errorMessage = "";
+        if (dimensions.width !== dimensions.height) {
+            errorMessage += "Images must be square. ";
+        }
+        if (fileSize > fileSizeLimit) {
+            errorMessage += `File size must be less than ${fileSizeLimit} MB.`;
+        }
+        onError(errorMessage);
+    } else {
+        onSuccess();
+    }
 };
