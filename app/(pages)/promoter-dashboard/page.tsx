@@ -80,8 +80,22 @@ const PromoterDashboard = ({}: Props) => {
                 </Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
                 <PromoterForm
+                    onFail={() => {
+                        toast({
+                            title: "Failed to update your details. Please try again later.",
+                            status: "error",
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    }}
                     onSuccess={(promoter) => {
                         if (promoter) {
+                            toast({
+                                title: "Your details have been updated.",
+                                status: "success",
+                                duration: 5000,
+                                isClosable: true,
+                            });
                             getPromoter();
                         }
                     }}

@@ -11,6 +11,7 @@ import {
     Heading,
     SimpleGrid,
     Text,
+    useToast,
     VStack,
 } from "@chakra-ui/react";
 import ImageGrid from "./ImageGrid";
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const PromoterProfile = ({ promoter, images, onGetPromoter }: Props) => {
+    const toast = useToast();
     const [editing, setEditing] = useState(false);
 
     const getLocation = () => {
@@ -82,9 +84,23 @@ const PromoterProfile = ({ promoter, images, onGetPromoter }: Props) => {
                             isEditing={true}
                             onSuccess={(promoter) => {
                                 if (promoter) {
+                                    toast({
+                                        title: "Your details have been updated.",
+                                        status: "success",
+                                        duration: 5000,
+                                        isClosable: true,
+                                    });
                                     onGetPromoter();
                                     setEditing(false);
                                 }
+                            }}
+                            onFail={() => {
+                                toast({
+                                    title: "Failed to update your details. Please try again later.",
+                                    status: "error",
+                                    duration: 5000,
+                                    isClosable: true,
+                                });
                             }}
                             defaultValues={{
                                 name: promoter.name || "",

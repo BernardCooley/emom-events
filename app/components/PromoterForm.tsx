@@ -32,6 +32,7 @@ const schema: ZodType<FormData> = z.object({
 type Props = {
     defaultValues?: FormData;
     onSuccess: (promoter: Promoter) => void;
+    onFail: () => void;
     isEditing?: boolean;
     existingImages?: FirebaseImageBlob[];
 };
@@ -39,6 +40,7 @@ type Props = {
 const PromoterForm = ({
     defaultValues,
     onSuccess,
+    onFail,
     isEditing = false,
     existingImages,
 }: Props) => {
@@ -89,6 +91,8 @@ const PromoterForm = ({
         });
         if (resp) {
             onSuccess(resp);
+        } else {
+            onFail();
         }
     };
 
@@ -133,6 +137,7 @@ const PromoterForm = ({
             email: formData.email,
             imageIds: images.map((img) => img.name),
         });
+
         if (resp) {
             onSuccess(resp);
         }
