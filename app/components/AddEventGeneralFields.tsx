@@ -14,20 +14,17 @@ interface Props {
     register: UseFormRegister<FormData>;
     errors: FieldErrors<FormData>;
     images: FirebaseImageBlob[];
-    onImageSelect: (images: FirebaseImageBlob[]) => void;
     onImageRemove: (images: FirebaseImageBlob[]) => void;
     onArtistChange: (artist: string) => void;
     onArtistAdd: () => void;
     artistValue: string;
     lineupValue: string[];
     onArtistRemove: (index: number) => void;
-    croppedImageToUpload: FirebaseImageBlob | null;
     onImageSelected: (file: File) => void;
 }
 
 const AddEventGeneralFields = ({
     images,
-    onImageSelect,
     onImageRemove,
     onArtistChange,
     onArtistAdd,
@@ -36,15 +33,8 @@ const AddEventGeneralFields = ({
     onArtistRemove,
     register,
     errors,
-    croppedImageToUpload,
     onImageSelected,
 }: Props) => {
-    useEffect(() => {
-        if (croppedImageToUpload) {
-            onImageSelect(images.concat(croppedImageToUpload));
-        }
-    }, [croppedImageToUpload]);
-
     return (
         <VStack gap={6} w="full">
             <TextInput

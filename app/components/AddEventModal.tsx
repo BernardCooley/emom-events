@@ -146,6 +146,17 @@ const AddEventModal = ({
     });
 
     useEffect(() => {
+        if (croppedImageToUpload) {
+            setImages(images.concat(croppedImageToUpload));
+            setValue(
+                "imageIds",
+                images.map((image) => image.name)
+            );
+            trigger("imageIds");
+        }
+    }, [croppedImageToUpload]);
+
+    useEffect(() => {
         if (imageToUpload && imageRef.current) {
             cropper = new Cropper(imageRef.current, {
                 viewMode: 2,
@@ -504,22 +515,9 @@ const AddEventModal = ({
                                         onImageSelected={(file) =>
                                             setImageToUpload(file)
                                         }
-                                        croppedImageToUpload={
-                                            croppedImageToUpload
-                                        }
                                         errors={errors}
                                         register={register}
                                         images={images}
-                                        onImageSelect={(images) => {
-                                            setImages(images);
-                                            setValue(
-                                                "imageIds",
-                                                images.map(
-                                                    (image) => image.name
-                                                )
-                                            );
-                                            trigger("imageIds");
-                                        }}
                                         onImageRemove={(images) => {
                                             setImages(images);
                                             setValue(
