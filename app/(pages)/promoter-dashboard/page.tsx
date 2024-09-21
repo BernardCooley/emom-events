@@ -29,7 +29,9 @@ const PromoterDashboard = ({}: Props) => {
     const { data: session } = useSession();
     const [promoter, setPromoter] = useState<PromoterDetails | null>(null);
     const [loading, setLoading] = useState(true);
-    const [images, setImages] = useState<FirebaseImageBlob[]>([]);
+    const [profileImage, setProfileImage] = useState<FirebaseImageBlob | null>(
+        null
+    );
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const getPromoter = useCallback(async () => {
@@ -39,25 +41,14 @@ const PromoterDashboard = ({}: Props) => {
             });
 
             if (promoter) {
-                const imageBlobs = await Promise.all(
-                    promoter.imageIds.map(async (imageId) => {
-                        const blob = await getFirebaseImageBlob(
-                            `promoterImages/${promoter?.email}/${imageId}`,
-                            imageId
-                        );
-                        return {
-                            blob: blob?.blob,
-                            name: blob?.name,
-                        };
-                    })
+                const imageBlob = await getFirebaseImageBlob(
+                    `promoterImages/${promoter?.email}/${promoter.imageIds[0]}`,
+                    promoter.imageIds[0]
                 );
 
-                setImages(
-                    imageBlobs.filter(
-                        (img) =>
-                            img.blob !== undefined && img.name !== undefined
-                    ) as FirebaseImageBlob[]
-                );
+                if (imageBlob) {
+                    setProfileImage(imageBlob);
+                }
             }
             setPromoter(promoter);
             setLoading(false);
@@ -80,6 +71,7 @@ const PromoterDashboard = ({}: Props) => {
                 </Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
                 <PromoterForm
+                    existingProfileImage={profileImage}
                     onFail={() => {
                         toast({
                             title: "Failed to update your details. Please try again later.",
@@ -121,7 +113,7 @@ const PromoterDashboard = ({}: Props) => {
         <VStack gap={10}>
             <PromoterProfile
                 promoter={promoter}
-                images={images}
+                profileImage={profileImage}
                 onGetPromoter={getPromoter}
             />
             <Card w="full">

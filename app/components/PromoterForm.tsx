@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Box, Button, Center, Heading, VStack } from "@chakra-ui/react";
+import { Box, Button, Center, Heading, Image, VStack } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,9 +10,9 @@ import { addPromoter, updatePromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
 import FileUpload from "./FileUpload";
 import { deleteFirebaseImage, uploadFirebaseImage } from "@/firebase/functions";
-import ImageGrid from "./ImageGrid";
 import { FirebaseImageBlob } from "@/types";
 import ImageCropper from "./ImageCropper";
+import { getUrlFromBlob } from "@/utils";
 
 export interface FormData {
     name: Promoter["name"];
@@ -35,7 +35,7 @@ type Props = {
     onSuccess: (promoter: Promoter) => void;
     onFail: () => void;
     isEditing?: boolean;
-    existingImages?: FirebaseImageBlob[];
+    existingProfileImage: FirebaseImageBlob | null;
 };
 
 const PromoterForm = ({
@@ -43,20 +43,20 @@ const PromoterForm = ({
     onSuccess,
     onFail,
     isEditing = false,
-    existingImages,
+    existingProfileImage,
 }: Props) => {
     const [imageToCrop, setImageToCrop] = useState<File | null>(null);
     const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
         null
     );
-    const [images, setImages] = useState<FirebaseImageBlob[]>(
-        existingImages || []
+    const [profileImage, setProfileImage] = useState<FirebaseImageBlob | null>(
+        existingProfileImage
     );
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (croppedImage) {
-            setImages(images.concat(croppedImage));
+            setProfileImage(croppedImage);
         }
     }, [croppedImage]);
 
@@ -77,18 +77,17 @@ const PromoterForm = ({
 
     const onCreatePromoter = async (formData: FormData) => {
         let imageIds: string[] = [];
-        if (images.length) {
-            imageIds = await Promise.all(
-                images.map(async (image) => {
-                    await uploadFirebaseImage(
-                        "promoterImages",
-                        new File([image.blob], image.name),
-                        formData.email
-                    );
-                    return image.name;
-                })
+
+        if (profileImage) {
+            const newImage = await uploadFirebaseImage(
+                "promoterImages",
+                new File([profileImage.blob], profileImage.name),
+                formData.email
             );
+
+            if (newImage) imageIds.push(profileImage.name);
         }
+
         const resp = await addPromoter({
             data: {
                 id: formData.email,
@@ -108,42 +107,47 @@ const PromoterForm = ({
         }
     };
 
+    const handleProfileImageChange = async (
+        promoterId: string,
+        newImage?: FirebaseImageBlob | null,
+        existingImage?: FirebaseImageBlob | null
+    ): Promise<string[]> => {
+        if (!newImage) return [];
+
+        if (!existingImage) {
+            await uploadFirebaseImage(
+                "promoterImages",
+                new File([newImage.blob], newImage.name),
+                promoterId
+            );
+            return [newImage.name];
+        }
+
+        if (existingImage.name === newImage.name) return [existingImage.name];
+
+        if (existingImage.name !== newImage.name) {
+            await uploadFirebaseImage(
+                "promoterImages",
+                new File([newImage.blob], newImage.name),
+                promoterId
+            );
+            await deleteFirebaseImage(
+                "promoterImages",
+                existingImage.name,
+                promoterId
+            );
+            return [newImage.name];
+        }
+
+        return [];
+    };
+
     const onUpdatePromoter = async (formData: FormData) => {
-        let imageIds: string[] = [];
-
-        const imagesToUpload = images?.filter(
-            (img) => !existingImages?.find((i) => i.name === img.name)
+        const imageIds = await handleProfileImageChange(
+            formData.email,
+            profileImage,
+            existingProfileImage
         );
-
-        const imagesToDelete = existingImages?.filter(
-            (img) => !images.find((i) => i.name === img.name)
-        );
-
-        if (imagesToUpload.length) {
-            imageIds = await Promise.all(
-                imagesToUpload.map(async (image) => {
-                    await uploadFirebaseImage(
-                        "promoterImages",
-                        new File([image.blob], image.name),
-                        formData.email
-                    );
-                    return image.name;
-                })
-            );
-        }
-
-        if (imagesToDelete && imagesToDelete.length) {
-            await Promise.all(
-                imagesToDelete.map(async (img) => {
-                    const fileToDelete = new File([img.blob], img.name);
-                    await deleteFirebaseImage(
-                        "promoterImages",
-                        fileToDelete.name,
-                        formData.email
-                    );
-                })
-            );
-        }
 
         const resp = await updatePromoter({
             id: formData.email,
@@ -152,7 +156,7 @@ const PromoterForm = ({
                 city: formData.city,
                 state: formData.state,
                 country: formData.country,
-                imageIds: images.map((img) => img.name),
+                imageIds: imageIds,
                 websites: [],
             },
         });
@@ -240,10 +244,14 @@ const PromoterForm = ({
                             accept="image/*"
                             buttonText="Upload an image..."
                         />
-                        <ImageGrid
-                            images={images}
-                            onRemove={(files) => setImages(files)}
-                        />
+                        {profileImage && (
+                            <Box position="relative" w="200px">
+                                <Image
+                                    src={getUrlFromBlob(profileImage)}
+                                    alt=""
+                                />
+                            </Box>
+                        )}
                         <Button
                             onClick={handleSubmit(onSave)}
                             colorScheme="blue"

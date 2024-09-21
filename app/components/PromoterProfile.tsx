@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+    Box,
     Button,
     Card,
     CardBody,
@@ -9,22 +10,23 @@ import {
     Flex,
     Heading,
     HStack,
+    Image,
     SimpleGrid,
     Text,
     useToast,
     VStack,
 } from "@chakra-ui/react";
-import ImageGrid from "./ImageGrid";
 import PromoterForm from "./PromoterForm";
 import { FirebaseImageBlob, PromoterDetails } from "@/types";
+import { getUrlFromBlob } from "@/utils";
 
 interface Props {
     promoter: PromoterDetails;
-    images: FirebaseImageBlob[];
+    profileImage: FirebaseImageBlob | null;
     onGetPromoter: () => void;
 }
 
-const PromoterProfile = ({ promoter, images, onGetPromoter }: Props) => {
+const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
     const toast = useToast();
     const [isEditing, setEditing] = useState(false);
 
@@ -77,18 +79,20 @@ const PromoterProfile = ({ promoter, images, onGetPromoter }: Props) => {
                                     <Text>{promoter.email}</Text>
                                 </VStack>
                             </SimpleGrid>
-                            <ImageGrid
-                                columns={[2, 3, 5, 6, 8]}
-                                images={images}
-                            />
+                            {profileImage && (
+                                <Box position="relative" w="200px">
+                                    <Image
+                                        src={getUrlFromBlob(profileImage)}
+                                        alt=""
+                                    />
+                                </Box>
+                            )}
                         </Flex>
                     )}
-                </CardBody>
-                <CardFooter>
                     <Flex w="full" alignItems="center" direction="column">
                         {isEditing && (
                             <PromoterForm
-                                existingImages={images}
+                                existingProfileImage={profileImage}
                                 isEditing={true}
                                 onSuccess={(promoter) => {
                                     if (promoter) {
@@ -120,7 +124,7 @@ const PromoterProfile = ({ promoter, images, onGetPromoter }: Props) => {
                             />
                         )}
                     </Flex>
-                </CardFooter>
+                </CardBody>
             </Card>
         </>
     );
