@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Center, Heading, VStack } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
@@ -12,6 +12,7 @@ import FileUpload from "./FileUpload";
 import { deleteFirebaseImage, uploadFirebaseImage } from "@/firebase/functions";
 import ImageGrid from "./ImageGrid";
 import { FirebaseImageBlob } from "@/types";
+import ImageCropper from "./ImageCropper";
 
 export interface FormData {
     name: Promoter["name"];
@@ -44,10 +45,21 @@ const PromoterForm = ({
     isEditing = false,
     existingImages,
 }: Props) => {
+    const [imageToCrop, setImageToCrop] = useState<File | null>(null);
+    const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
+        null
+    );
     const [images, setImages] = useState<FirebaseImageBlob[]>(
         existingImages || []
     );
     const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (croppedImage) {
+            setImages(images.concat(croppedImage));
+        }
+    }, [croppedImage]);
+
     const {
         handleSubmit,
         register,
@@ -167,6 +179,16 @@ const PromoterForm = ({
                     <Heading>Saving...</Heading>
                 </Center>
             )}
+            <ImageCropper
+                image={imageToCrop}
+                onCancel={() => {
+                    setImageToCrop(null);
+                }}
+                onSuccess={(image) => {
+                    setCroppedImage(image);
+                    setImageToCrop(null);
+                }}
+            />
             <Box
                 opacity={isSaving ? 0.4 : 1}
                 pointerEvents={isSaving ? "none" : "auto"}
@@ -213,14 +235,7 @@ const PromoterForm = ({
                         />
 
                         <FileUpload
-                            onUpload={(file) => {
-                                setImages(
-                                    images.concat({
-                                        blob: file,
-                                        name: file.name,
-                                    })
-                                );
-                            }}
+                            onImageSelected={setImageToCrop}
                             fieldLabel="Images"
                             accept="image/*"
                             buttonText="Upload an image..."

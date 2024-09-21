@@ -8,16 +8,17 @@ import "cropperjs/dist/cropper.min.css";
 interface Props {
     onCancel: () => void;
     onSuccess: (file: FirebaseImageBlob) => void;
-    onCropping: () => void;
     image: File | null;
 }
 
-const ImageCropper = ({ onSuccess, onCropping, image, onCancel }: Props) => {
+const ImageCropper = ({ onSuccess, image, onCancel }: Props) => {
     const imageRef = useRef<HTMLImageElement>(null);
     const [cropper, setCropper] = useState<Cropper | null>(null);
 
     useEffect(() => {
         if (image && imageRef.current) {
+            imageRef.current.scrollIntoView();
+            window.scrollTo(0, 0);
             setCropper(
                 new Cropper(imageRef.current, {
                     viewMode: 2,
@@ -26,12 +27,10 @@ const ImageCropper = ({ onSuccess, onCropping, image, onCancel }: Props) => {
                     zoomable: false,
                 })
             );
-            imageRef.current.scrollIntoView();
         }
     }, [image]);
 
     const handleCrop = () => {
-        onCropping();
         const croppedimage = cropper?.getCroppedCanvas().toDataURL("image/png");
 
         if (croppedimage && image) {

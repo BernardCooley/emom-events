@@ -120,7 +120,6 @@ const AddEventModal = ({
     onFail,
     eventId,
 }: Props) => {
-    const [isCropping, setIsCropping] = useState(false);
     const [imageToUpload, setImageToUpload] = useState<File | null>(null);
     const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
         null
@@ -447,18 +446,15 @@ const AddEventModal = ({
                     <ImageCropper
                         onCancel={() => {
                             setImageToUpload(null);
-                            setIsCropping(false);
                         }}
                         image={imageToUpload}
-                        onCropping={() => setIsCropping(true)}
                         onSuccess={(image) => {
                             setCroppedImage(image);
-                            setIsCropping(false);
                             setImageToUpload(null);
                         }}
                     />
 
-                    <Collapse in={!isCropping}>
+                    <Collapse in={!imageToUpload}>
                         <form onSubmit={handleSubmit(onSave)}>
                             <VStack gap={6}>
                                 <VStack gap={6} w="full">
