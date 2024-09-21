@@ -36,12 +36,12 @@ import AddressPanel from "./AddressPanel";
 import VenueSearch from "./VenueSearch";
 import AddressSearch from "./AddressSearch";
 import {
-    deleteFirebaseImage,
     getFirebaseImageBlob,
     uploadFirebaseImage,
 } from "@/firebase/functions";
 import { Event, Venue } from "@prisma/client";
 import ImageCropper from "./ImageCropper";
+import { handleProfileImageChange } from "@/utils";
 
 export interface FormData {
     name: Event["name"];
@@ -59,7 +59,7 @@ export interface FormData {
     };
     venueSearchTerm: string;
     artist: Event["lineup"][0];
-    imageIds: Event["imageIds"];
+    imageId: Event["imageIds"][number];
     websites: Event["websites"];
 }
 
@@ -80,8 +80,8 @@ const schema: ZodType<FormData> = z
         }),
         venueSearchTerm: z.string(),
         artist: z.string(),
-        imageIds: z.array(z.string()).min(1, {
-            message: "At least one image is required",
+        imageId: z.string().min(1, {
+            message: "An Event image is required",
         }),
         websites: z.array(z.string()),
     })
@@ -104,7 +104,7 @@ type Props = {
     isOpen: boolean;
     onClose: () => void;
     defaultValues?: FormData;
-    existingImages?: FirebaseImageBlob[];
+    existingEventImage: FirebaseImageBlob | null;
     onSuccess: () => void;
     onFail: () => void;
     eventId?: string;
@@ -114,7 +114,7 @@ const AddEventModal = ({
     isOpen,
     onClose,
     defaultValues,
-    existingImages,
+    existingEventImage,
     promoterId,
     onSuccess,
     onFail,
@@ -128,8 +128,8 @@ const AddEventModal = ({
     const [venueSearched, setVenueSearched] = useState(false);
     const [showAddressPanel, setShowAddressPanel] = useState(false);
     const [selectedVenue, setSelectedVenue] = useState<VenueItem | null>(null);
-    const [images, setImages] = useState<FirebaseImageBlob[]>(
-        existingImages || []
+    const [eventImage, setEventImage] = useState<FirebaseImageBlob | null>(
+        existingEventImage
     );
     const [isVenueManual, setIsVenueManual] = useState(false);
     const [venues, setVenues] = useState<VenueItem[] | null>([]);
@@ -143,12 +143,9 @@ const AddEventModal = ({
 
     useEffect(() => {
         if (croppedImage) {
-            setImages(images.concat(croppedImage));
-            setValue(
-                "imageIds",
-                images.map((image) => image.name)
-            );
-            trigger("imageIds");
+            setEventImage(croppedImage);
+            setValue("imageId", croppedImage.name);
+            trigger("imageId");
         }
     }, [croppedImage]);
 
@@ -171,20 +168,13 @@ const AddEventModal = ({
     }, [defaultValues]);
 
     const getImages = async () => {
-        if (defaultValues?.imageIds && eventId) {
-            const imgs = await Promise.all(
-                defaultValues?.imageIds.map(async (image) => {
-                    return await getFirebaseImageBlob(
-                        `eventImages/${eventId}/${image}`,
-                        image
-                    );
-                })
+        if (defaultValues?.imageId && eventId) {
+            const imageBlob = await getFirebaseImageBlob(
+                `eventImages/${eventId}/${defaultValues.imageId}`,
+                defaultValues.imageId
             );
-            const removeUndefined = imgs.filter(
-                (img) => img !== undefined
-            ) as FirebaseImageBlob[];
 
-            if (imgs) setImages(removeUndefined);
+            if (imageBlob) setEventImage(imageBlob);
         }
     };
 
@@ -213,7 +203,7 @@ const AddEventModal = ({
                 country: "",
                 postcodeZip: "",
             },
-            imageIds: [],
+            imageId: defaultValues?.imageId || "",
         },
     });
 
@@ -249,22 +239,17 @@ const AddEventModal = ({
                     timeTo: formData.timeTo,
                     description: formData.description,
                     websites: [],
-                    imageIds: images.map((image) => image.name),
+                    imageIds: eventImage ? [eventImage.name] : [],
                     tickets: [],
                     lineup: formData.lineup,
                 },
             });
 
-            if (newEvent) {
-                await Promise.all(
-                    images.map(async (image) => {
-                        await uploadFirebaseImage(
-                            "eventImages",
-                            new File([image.blob], image.name),
-                            newEvent.id
-                        );
-                        return image.name;
-                    })
+            if (newEvent && eventImage) {
+                await uploadFirebaseImage(
+                    "eventImages",
+                    new File([eventImage.blob], eventImage.name),
+                    newEvent.id
                 );
                 onSuccess();
                 handleModalClose();
@@ -285,6 +270,13 @@ const AddEventModal = ({
     };
 
     const onUpdateEvent = async (formData: FormData) => {
+        const imageIds = await handleProfileImageChange(
+            "eventImages",
+            eventId as string,
+            eventImage,
+            existingEventImage
+        );
+
         const updatedEvent = await updateEvent({
             id: eventId as string,
             event: {
@@ -292,7 +284,7 @@ const AddEventModal = ({
                 timeFrom: formData.timeFrom,
                 timeTo: formData.timeTo,
                 description: formData.description,
-                imageIds: images.map((image) => image.name),
+                imageIds: imageIds,
                 lineup: formData.lineup,
             },
             venue: {
@@ -306,39 +298,6 @@ const AddEventModal = ({
         });
 
         if (updatedEvent) {
-            const imagesToUpload = images?.filter(
-                (img) => !existingImages?.find((i) => i.name === img.name)
-            );
-
-            const imagesToDelete = existingImages?.filter(
-                (img) => !images.find((i) => i.name === img.name)
-            );
-
-            if (imagesToUpload.length) {
-                await Promise.all(
-                    imagesToUpload.map(async (image) => {
-                        await uploadFirebaseImage(
-                            "eventImages",
-                            new File([image.blob], image.name),
-                            updatedEvent.id
-                        );
-                        return image.name;
-                    })
-                );
-            }
-
-            if (imagesToDelete && imagesToDelete.length) {
-                await Promise.all(
-                    imagesToDelete.map(async (img) => {
-                        const fileToDelete = new File([img.blob], img.name);
-                        await deleteFirebaseImage(
-                            "eventImages",
-                            fileToDelete.name,
-                            updatedEvent.id
-                        );
-                    })
-                );
-            }
             onSuccess();
             handleModalClose();
         } else {
@@ -378,7 +337,7 @@ const AddEventModal = ({
         setVenues(null);
         setIsVenueManual(false);
         setIsAddressManual(true);
-        setImages([]);
+        setEventImage(null);
         setSelectedVenue(null);
         setVenueSearched(false);
         setIsSaving(false);
@@ -467,16 +426,11 @@ const AddEventModal = ({
                                         }
                                         errors={errors}
                                         register={register}
-                                        images={images}
-                                        onImageRemove={(images) => {
-                                            setImages(images);
-                                            setValue(
-                                                "imageIds",
-                                                images.map(
-                                                    (image) => image.name
-                                                )
-                                            );
-                                            trigger("imageIds");
+                                        eventImage={eventImage}
+                                        onImageRemove={() => {
+                                            setEventImage(null);
+                                            setValue("imageId", "");
+                                            trigger("imageId");
                                         }}
                                         onArtistChange={(artist) =>
                                             setValue("artist", artist)

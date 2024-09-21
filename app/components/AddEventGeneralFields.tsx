@@ -1,20 +1,26 @@
 import React, { useEffect, useRef } from "react";
-import { IconButton, VisuallyHidden, VStack } from "@chakra-ui/react";
+import {
+    Box,
+    IconButton,
+    Image,
+    VisuallyHidden,
+    VStack,
+} from "@chakra-ui/react";
 import { TextInput } from "./TextInput";
 import { TextAreaInput } from "./TextAreaInput";
 import FileUpload from "./FileUpload";
-import ImageGrid from "./ImageGrid";
 import ChipGroup from "./ChipGroup";
-import { SmallAddIcon } from "@chakra-ui/icons";
+import { CloseIcon, SmallAddIcon } from "@chakra-ui/icons";
 import { FirebaseImageBlob } from "@/types";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
 import { FormData } from "./AddEventModal";
+import { getUrlFromBlob } from "@/utils";
 
 interface Props {
     register: UseFormRegister<FormData>;
     errors: FieldErrors<FormData>;
-    images: FirebaseImageBlob[];
-    onImageRemove: (images: FirebaseImageBlob[]) => void;
+    eventImage: FirebaseImageBlob | null;
+    onImageRemove: () => void;
     onArtistChange: (artist: string) => void;
     onArtistAdd: () => void;
     artistValue: string;
@@ -25,7 +31,7 @@ interface Props {
 }
 
 const AddEventGeneralFields = ({
-    images,
+    eventImage,
     onImageRemove,
     onArtistChange,
     onArtistAdd,
@@ -74,13 +80,26 @@ const AddEventGeneralFields = ({
                 accept="image/*"
                 buttonText="Upload an image..."
                 required
-                error={errors.imageIds?.message}
+                error={errors.imageId?.message}
             />
-            <ImageGrid
-                columns={[6]}
-                images={images}
-                onRemove={(files) => onImageRemove(files)}
-            />
+            {eventImage && (
+                <Box position="relative" w="300px">
+                    <IconButton
+                        rounded="full"
+                        right={1}
+                        top={1}
+                        h="28px"
+                        w="28px"
+                        minW="unset"
+                        position="absolute"
+                        aria-label="Remove image"
+                        icon={<CloseIcon />}
+                        onClick={onImageRemove}
+                    />
+
+                    <Image src={getUrlFromBlob(eventImage)} alt="" />
+                </Box>
+            )}
             <VisuallyHidden ref={imageGridRef}>image grid ref</VisuallyHidden>
             <TextInput
                 title="From"
@@ -102,7 +121,7 @@ const AddEventGeneralFields = ({
                 error={errors.timeTo?.message}
             />
 
-            {/* TODO fix jumping images when typing */}
+            {/* TODO fix jumping eventImage when typing */}
             <TextInput
                 fieldProps={register("artist")}
                 onChange={(e) => {

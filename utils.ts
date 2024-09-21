@@ -1,3 +1,4 @@
+import { deleteFirebaseImage, uploadFirebaseImage } from "./firebase/functions";
 import { Dimensions, FirebaseImageBlob } from "./types";
 
 export const capitalizeFirstLetter = (str: string): string => {
@@ -121,4 +122,36 @@ export const dataURItoBlob = (dataURI: string) => {
 
 export const convertBytesToMbs = (bytes: number) => {
     return Number((bytes / 1024 / 1024).toFixed(0));
+};
+
+export const handleProfileImageChange = async (
+    folder: string,
+    id: string,
+    newImage?: FirebaseImageBlob | null,
+    existingImage?: FirebaseImageBlob | null
+): Promise<string[]> => {
+    if (!newImage) return [];
+
+    if (!existingImage) {
+        await uploadFirebaseImage(
+            folder,
+            new File([newImage.blob], newImage.name),
+            id
+        );
+        return [newImage.name];
+    }
+
+    if (existingImage.name === newImage.name) return [existingImage.name];
+
+    if (existingImage.name !== newImage.name) {
+        await uploadFirebaseImage(
+            folder,
+            new File([newImage.blob], newImage.name),
+            id
+        );
+        await deleteFirebaseImage(folder, existingImage.name, id);
+        return [newImage.name];
+    }
+
+    return [];
 };

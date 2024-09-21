@@ -22,7 +22,9 @@ const Event = ({}: Props) => {
     const [eventDetails, setEventDetails] = React.useState<EventDetails | null>(
         null
     );
-    const [images, setImages] = useState<FirebaseImageBlob[]>([]);
+    const [eventImage, setEventImage] = useState<FirebaseImageBlob | null>(
+        null
+    );
 
     const {
         imageIds,
@@ -42,35 +44,28 @@ const Event = ({}: Props) => {
         }
     }, [eventId]);
 
-    useEffect(() => {
-        getImages();
-    }, [eventDetails]);
-
-    const getImages = async () => {
-        if (imageIds) {
-            const imageBlobs = await Promise.all(
-                imageIds.map((imageId) =>
-                    getFirebaseImageBlob(
-                        `eventImages/${eventId}/${imageId}`,
-                        imageId
-                    )
-                )
-            );
-
-            setImages(
-                imageBlobs.filter(
-                    (img) => img?.blob !== undefined && img.name !== undefined
-                ) as FirebaseImageBlob[]
-            );
-        }
-    };
-
     const getEventDetails = async () => {
         if (eventId) {
-            const eventDetails = await fetchEvent({
+            const event = await fetchEvent({
                 eventId: eventId as string,
             });
-            if (eventDetails) setEventDetails(eventDetails);
+
+            if (event && event?.imageIds.length > 0) {
+                const imageBlob = await getFirebaseImageBlob(
+                    `eventImages/${eventId}/${event.imageIds[0]}`,
+                    event.imageIds[0]
+                );
+
+                if (imageBlob) {
+                    setEventImage(imageBlob);
+                } else {
+                    setEventImage(null);
+                }
+            } else {
+                setEventImage(null);
+            }
+
+            setEventDetails(event);
             setLoading(false);
         }
     };
@@ -87,7 +82,7 @@ const Event = ({}: Props) => {
             eventDetails ? (
                 <>
                     <AddEventModal
-                        existingImages={images}
+                        existingEventImage={eventImage}
                         eventId={eventId as string}
                         defaultValues={{
                             name: name,
@@ -103,7 +98,7 @@ const Event = ({}: Props) => {
                             timeTo: timeTo !== undefined ? timeTo : "",
                             description: description,
                             lineup: lineup || [],
-                            imageIds: imageIds !== undefined ? imageIds : [],
+                            imageId: eventImage?.name || "",
                             venueSearchTerm: "",
                             artist: "",
                             websites: websites || [],
@@ -130,7 +125,7 @@ const Event = ({}: Props) => {
                         onClose={onClose}
                     />
                     <EventCard
-                        images={images}
+                        image={eventImage}
                         onEditClick={onOpen}
                         canEdit={session?.user?.email === promoter.id}
                         eventDetails={eventDetails}

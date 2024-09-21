@@ -1,5 +1,6 @@
 import React from "react";
 import {
+    Box,
     Button,
     Card,
     CardBody,
@@ -7,27 +8,27 @@ import {
     Flex,
     Heading,
     HStack,
+    Image,
     Stack,
     StackDivider,
 } from "@chakra-ui/react";
 import { EventDetails, FirebaseImageBlob } from "@/types";
-import { formatDateTime } from "@/utils";
+import { formatDateTime, getUrlFromBlob } from "@/utils";
 import "react-multi-carousel/lib/styles.css";
 import EventCardDetail from "./EventCardDetail";
-import ImageCarousel from "./ImageCarousel";
 
 type EventCardProps = {
     eventDetails: EventDetails;
     canEdit?: boolean;
     onEditClick?: () => void;
-    images?: FirebaseImageBlob[];
+    image: FirebaseImageBlob | null;
 };
 
 const EventCard = ({
     eventDetails,
     canEdit,
     onEditClick,
-    images,
+    image,
 }: EventCardProps) => {
     const { name, venue, timeFrom, timeTo, promoter, description, lineup } =
         eventDetails || {};
@@ -58,17 +59,15 @@ const EventCard = ({
                         wrap="wrap"
                         alignItems="flex-start"
                     >
-                        <ImageCarousel
-                            carouselImgHeight={70}
-                            mainImgHeight={400}
-                            factors={{
-                                largeDesk: 100,
-                                desk: 100,
-                                tab: 100,
-                                mob: 100,
-                            }}
-                            images={images}
-                        />
+                        {image && (
+                            <Box position="relative" w="300px">
+                                <Image
+                                    src={getUrlFromBlob(image)}
+                                    alt="main image"
+                                    borderRadius="lg"
+                                />
+                            </Box>
+                        )}
                         <Stack w="60%" divider={<StackDivider />} spacing="4">
                             <EventCardDetail
                                 href={`/venues/${venue.id}`}

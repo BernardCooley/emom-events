@@ -17,10 +17,10 @@ import { TextInput } from "./TextInput";
 import { addPromoter, updatePromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
 import FileUpload from "./FileUpload";
-import { deleteFirebaseImage, uploadFirebaseImage } from "@/firebase/functions";
+import { uploadFirebaseImage } from "@/firebase/functions";
 import { FirebaseImageBlob } from "@/types";
 import ImageCropper from "./ImageCropper";
-import { getUrlFromBlob } from "@/utils";
+import { getUrlFromBlob, handleProfileImageChange } from "@/utils";
 import { CloseIcon } from "@chakra-ui/icons";
 
 export interface FormData {
@@ -116,43 +116,9 @@ const PromoterForm = ({
         }
     };
 
-    const handleProfileImageChange = async (
-        promoterId: string,
-        newImage?: FirebaseImageBlob | null,
-        existingImage?: FirebaseImageBlob | null
-    ): Promise<string[]> => {
-        if (!newImage) return [];
-
-        if (!existingImage) {
-            await uploadFirebaseImage(
-                "promoterImages",
-                new File([newImage.blob], newImage.name),
-                promoterId
-            );
-            return [newImage.name];
-        }
-
-        if (existingImage.name === newImage.name) return [existingImage.name];
-
-        if (existingImage.name !== newImage.name) {
-            await uploadFirebaseImage(
-                "promoterImages",
-                new File([newImage.blob], newImage.name),
-                promoterId
-            );
-            await deleteFirebaseImage(
-                "promoterImages",
-                existingImage.name,
-                promoterId
-            );
-            return [newImage.name];
-        }
-
-        return [];
-    };
-
     const onUpdatePromoter = async (formData: FormData) => {
         const imageIds = await handleProfileImageChange(
+            "promoterImages",
             formData.email,
             profileImage,
             existingProfileImage

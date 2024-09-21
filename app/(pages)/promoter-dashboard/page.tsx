@@ -48,6 +48,8 @@ const PromoterDashboard = ({}: Props) => {
 
                 if (imageBlob) {
                     setProfileImage(imageBlob);
+                } else {
+                    setProfileImage(null);
                 }
             } else {
                 setProfileImage(null);
@@ -140,6 +142,7 @@ const PromoterDashboard = ({}: Props) => {
                 </CardHeader>
             </Card>
             <AddEventModal
+                existingEventImage={null}
                 onFail={() => {
                     toast({
                         title: "Failed to add event. Please try again later.",

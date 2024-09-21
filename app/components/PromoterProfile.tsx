@@ -4,7 +4,6 @@ import {
     Button,
     Card,
     CardBody,
-    CardFooter,
     CardHeader,
     Divider,
     Flex,
@@ -27,15 +26,12 @@ interface Props {
 }
 
 const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
+    const { city, state, country, name, email } = promoter;
     const toast = useToast();
     const [isEditing, setEditing] = useState(false);
 
     const getLocation = () => {
-        const locationParts = [
-            promoter.city,
-            promoter.state,
-            promoter.country,
-        ].filter(Boolean);
+        const locationParts = [city, state, country].filter(Boolean);
 
         return locationParts.join(", ");
     };
@@ -68,7 +64,7 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                             <SimpleGrid columns={[1, 1, 3]} gap={[6, 6, 0]}>
                                 <VStack alignItems="flex-start">
                                     <Text fontWeight={700}>Name</Text>
-                                    <Text>{promoter.name}</Text>
+                                    <Text>{name}</Text>
                                 </VStack>
                                 <VStack alignItems="flex-start">
                                     <Text fontWeight={700}>Location</Text>
@@ -76,7 +72,7 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                                 </VStack>
                                 <VStack alignItems="flex-start">
                                     <Text fontWeight={700}>Email</Text>
-                                    <Text>{promoter.email}</Text>
+                                    <Text>{email}</Text>
                                 </VStack>
                             </SimpleGrid>
                             {profileImage && (
@@ -115,11 +111,11 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                                     });
                                 }}
                                 defaultValues={{
-                                    name: promoter.name || "",
-                                    city: promoter.city || "",
-                                    state: promoter.state || "",
-                                    country: promoter.country || "",
-                                    email: promoter.email || "",
+                                    name,
+                                    city,
+                                    state,
+                                    country,
+                                    email,
                                 }}
                             />
                         )}
