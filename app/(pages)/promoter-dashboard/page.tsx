@@ -40,7 +40,7 @@ const PromoterDashboard = ({}: Props) => {
                 email: session?.user?.email,
             });
 
-            if (promoter) {
+            if (promoter && promoter?.imageIds.length > 0) {
                 const imageBlob = await getFirebaseImageBlob(
                     `promoterImages/${promoter?.email}/${promoter.imageIds[0]}`,
                     promoter.imageIds[0]
@@ -49,6 +49,8 @@ const PromoterDashboard = ({}: Props) => {
                 if (imageBlob) {
                     setProfileImage(imageBlob);
                 }
+            } else {
+                setProfileImage(null);
             }
             setPromoter(promoter);
             setLoading(false);

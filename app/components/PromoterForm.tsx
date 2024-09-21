@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Box, Button, Center, Heading, Image, VStack } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Center,
+    Heading,
+    IconButton,
+    Image,
+    VStack,
+} from "@chakra-ui/react";
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +21,7 @@ import { deleteFirebaseImage, uploadFirebaseImage } from "@/firebase/functions";
 import { FirebaseImageBlob } from "@/types";
 import ImageCropper from "./ImageCropper";
 import { getUrlFromBlob } from "@/utils";
+import { CloseIcon } from "@chakra-ui/icons";
 
 export interface FormData {
     name: Promoter["name"];
@@ -163,6 +172,8 @@ const PromoterForm = ({
 
         if (resp) {
             onSuccess(resp);
+        } else {
+            onFail();
         }
     };
 
@@ -245,7 +256,20 @@ const PromoterForm = ({
                             buttonText="Upload an image..."
                         />
                         {profileImage && (
-                            <Box position="relative" w="200px">
+                            <Box position="relative" w="300px">
+                                <IconButton
+                                    rounded="full"
+                                    right={1}
+                                    top={1}
+                                    h="28px"
+                                    w="28px"
+                                    minW="unset"
+                                    position="absolute"
+                                    aria-label="Remove image"
+                                    icon={<CloseIcon />}
+                                    onClick={() => setProfileImage(null)}
+                                />
+
                                 <Image
                                     src={getUrlFromBlob(profileImage)}
                                     alt=""
