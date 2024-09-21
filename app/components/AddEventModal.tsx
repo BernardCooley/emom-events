@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -7,7 +7,6 @@ import {
     Divider,
     Flex,
     HStack,
-    Image,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -42,9 +41,7 @@ import {
     uploadFirebaseImage,
 } from "@/firebase/functions";
 import { Event, Venue } from "@prisma/client";
-import Cropper from "cropperjs";
-import "cropperjs/dist/cropper.min.css";
-import { dataURItoBlob } from "@/utils";
+import ImageCropper from "./ImageCropper";
 
 export interface FormData {
     name: Event["name"];
@@ -123,11 +120,11 @@ const AddEventModal = ({
     onFail,
     eventId,
 }: Props) => {
-    const imageRef = useRef<HTMLImageElement>(null);
+    const [isCropping, setIsCropping] = useState(false);
     const [imageToUpload, setImageToUpload] = useState<File | null>(null);
-    const [croppedImageToUpload, setCroppedImageToUpload] =
-        useState<FirebaseImageBlob | null>(null);
-    let cropper: Cropper;
+    const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
+        null
+    );
     const [isSaving, setIsSaving] = useState(false);
     const [venueSearched, setVenueSearched] = useState(false);
     const [showAddressPanel, setShowAddressPanel] = useState(false);
@@ -146,26 +143,15 @@ const AddEventModal = ({
     });
 
     useEffect(() => {
-        if (croppedImageToUpload) {
-            setImages(images.concat(croppedImageToUpload));
+        if (croppedImage) {
+            setImages(images.concat(croppedImage));
             setValue(
                 "imageIds",
                 images.map((image) => image.name)
             );
             trigger("imageIds");
         }
-    }, [croppedImageToUpload]);
-
-    useEffect(() => {
-        if (imageToUpload && imageRef.current) {
-            cropper = new Cropper(imageRef.current, {
-                viewMode: 2,
-                dragMode: "move",
-                movable: false,
-                zoomable: false,
-            });
-        }
-    }, [imageToUpload]);
+    }, [croppedImage]);
 
     useEffect(() => {
         reset(defaultValues);
@@ -399,7 +385,7 @@ const AddEventModal = ({
         setIsSaving(false);
         setShowAddressPanel(false);
         setImageToUpload(null);
-        cropper?.destroy();
+        setCroppedImage(null);
         reset();
         onClose();
     };
@@ -420,19 +406,6 @@ const AddEventModal = ({
         setValue("venue.state", venue.state);
         setValue("venue.country", venue.country);
         setValue("venue.postcodeZip", venue.postcodeZip);
-    };
-
-    const handleCrop = () => {
-        const croppedimage = cropper.getCroppedCanvas().toDataURL("image/png");
-
-        if (croppedimage && imageToUpload) {
-            setCroppedImageToUpload({
-                blob: dataURItoBlob(croppedimage),
-                name: imageToUpload.name,
-            });
-            setImageToUpload(null);
-            cropper?.destroy();
-        }
     };
 
     return (
@@ -471,47 +444,28 @@ const AddEventModal = ({
                     pointerEvents={isSaving ? "none" : "auto"}
                     mt={6}
                 >
-                    <Collapse
-                        transition={{
-                            enter: { duration: 0.5 },
-                            exit: { duration: 0.5 },
+                    <ImageCropper
+                        onCancel={() => {
+                            setImageToUpload(null);
+                            setIsCropping(false);
                         }}
-                        in={!!imageToUpload}
-                    >
-                        <VStack w="400px" m="auto">
-                            <Box h="400px">
-                                <Image
-                                    ref={imageRef}
-                                    src={
-                                        imageToUpload
-                                            ? URL.createObjectURL(imageToUpload)
-                                            : ""
-                                    }
-                                />
-                            </Box>
-                            <HStack w="full" justifyContent="center" gap={6}>
-                                <Button
-                                    variant="outline"
-                                    colorScheme="red"
-                                    onClick={() => {
-                                        setImageToUpload(null);
-                                        cropper?.destroy();
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button colorScheme="blue" onClick={handleCrop}>
-                                    Crop and add
-                                </Button>
-                            </HStack>
-                        </VStack>
-                    </Collapse>
+                        image={imageToUpload}
+                        onCropping={() => setIsCropping(true)}
+                        onSuccess={(image) => {
+                            setCroppedImage(image);
+                            setIsCropping(false);
+                            setImageToUpload(null);
+                        }}
+                    />
 
-                    <Collapse in={!imageToUpload}>
+                    <Collapse in={!isCropping}>
                         <form onSubmit={handleSubmit(onSave)}>
                             <VStack gap={6}>
                                 <VStack gap={6} w="full">
                                     <AddEventGeneralFields
+                                        isCropCompleted={
+                                            croppedImage ? true : false
+                                        }
                                         onImageSelected={(file) =>
                                             setImageToUpload(file)
                                         }

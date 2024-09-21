@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { IconButton, VStack } from "@chakra-ui/react";
+import React, { useEffect, useRef } from "react";
+import { IconButton, VisuallyHidden, VStack } from "@chakra-ui/react";
 import { TextInput } from "./TextInput";
 import { TextAreaInput } from "./TextAreaInput";
 import FileUpload from "./FileUpload";
@@ -21,6 +21,7 @@ interface Props {
     lineupValue: string[];
     onArtistRemove: (index: number) => void;
     onImageSelected: (file: File) => void;
+    isCropCompleted: boolean;
 }
 
 const AddEventGeneralFields = ({
@@ -34,7 +35,16 @@ const AddEventGeneralFields = ({
     register,
     errors,
     onImageSelected,
+    isCropCompleted,
 }: Props) => {
+    const imageGridRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isCropCompleted) {
+            imageGridRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [isCropCompleted]);
+
     return (
         <VStack gap={6} w="full">
             <TextInput
@@ -71,6 +81,7 @@ const AddEventGeneralFields = ({
                 images={images}
                 onRemove={(files) => onImageRemove(files)}
             />
+            <VisuallyHidden ref={imageGridRef}>image grid ref</VisuallyHidden>
             <TextInput
                 title="From"
                 type="datetime-local"
