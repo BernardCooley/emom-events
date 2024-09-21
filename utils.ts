@@ -105,28 +105,6 @@ type HandleImageUploadProps = {
     onSuccess: () => void;
 };
 
-export const handleImageUpload = ({
-    fileSizeLimit,
-    dimensions,
-    file,
-    onError,
-    onSuccess,
-}: HandleImageUploadProps) => {
-    const fileSize = Number((file.size / 1024 / 1024).toFixed(0));
-    if (dimensions.width !== dimensions.height || fileSize > fileSizeLimit) {
-        let errorMessage = "";
-        if (dimensions.width !== dimensions.height) {
-            errorMessage += "Images must be square. ";
-        }
-        if (fileSize > fileSizeLimit) {
-            errorMessage += `File size must be less than ${fileSizeLimit} MB.`;
-        }
-        onError(errorMessage);
-    } else {
-        onSuccess();
-    }
-};
-
 export const dataURItoBlob = (dataURI: string) => {
     var byteString = atob(dataURI.split(",")[1]);
     var mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
@@ -139,4 +117,8 @@ export const dataURItoBlob = (dataURI: string) => {
 
     var blob = new Blob([ab], { type: mimeString });
     return blob;
+};
+
+export const convertBytesToMbs = (bytes: number) => {
+    return Number((bytes / 1024 / 1024).toFixed(0));
 };

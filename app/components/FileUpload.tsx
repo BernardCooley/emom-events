@@ -16,7 +16,7 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import Upload from "rc-upload";
-import { getImageDimensions, handleImageUpload } from "@/utils";
+import { convertBytesToMbs } from "@/utils";
 
 type Props = {
     fieldLabel?: string;
@@ -77,23 +77,16 @@ const FileUpload = ({
                 </FormLabel>
                 <Upload
                     customRequest={(options) => {
-                        getImageDimensions(
-                            options.file as File,
-                            (dimensions) => {
-                                handleImageUpload({
-                                    fileSizeLimit: 2,
-                                    dimensions,
-                                    file: options.file as File,
-                                    onError: (errorMessage) => {
-                                        setErrorMessage(errorMessage);
-                                        onOpen();
-                                    },
-                                    onSuccess: () => {
-                                        onImageSelected(options.file as File);
-                                    },
-                                });
-                            }
-                        );
+                        if (
+                            convertBytesToMbs((options.file as File).size) > 2
+                        ) {
+                            setErrorMessage(
+                                `File size must be less than ${2} MB.`
+                            );
+                            onOpen();
+                        } else {
+                            onImageSelected(options.file as File);
+                        }
                     }}
                     accept={accept}
                     style={{
