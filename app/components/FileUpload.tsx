@@ -19,23 +19,23 @@ import Upload from "rc-upload";
 import { getImageDimensions, handleImageUpload } from "@/utils";
 
 type Props = {
-    onUpload: (file: File) => void;
     fieldLabel?: string;
     accept: string;
     buttonText?: string;
     required?: boolean;
     allowErrors?: boolean;
     error?: string;
+    onImageSelected: (file: File) => void;
 };
 
 const FileUpload = ({
-    onUpload,
     fieldLabel,
     accept,
     buttonText,
     required,
     allowErrors,
     error,
+    onImageSelected,
 }: Props) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef<HTMLButtonElement>(null);
@@ -89,7 +89,7 @@ const FileUpload = ({
                                         onOpen();
                                     },
                                     onSuccess: () => {
-                                        onUpload(options.file as File);
+                                        onImageSelected(options.file as File);
                                     },
                                 });
                             }

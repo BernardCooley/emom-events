@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Box,
     Button,
     Center,
+    Collapse,
     Divider,
     Flex,
     HStack,
+    Image,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -40,6 +42,9 @@ import {
     uploadFirebaseImage,
 } from "@/firebase/functions";
 import { Event, Venue } from "@prisma/client";
+import Cropper from "cropperjs";
+import "cropperjs/dist/cropper.min.css";
+import { dataURItoBlob } from "@/utils";
 
 export interface FormData {
     name: Event["name"];
@@ -118,6 +123,11 @@ const AddEventModal = ({
     onFail,
     eventId,
 }: Props) => {
+    const imageRef = useRef<HTMLImageElement>(null);
+    const [imageToUpload, setImageToUpload] = useState<File | null>(null);
+    const [croppedImageToUpload, setCroppedImageToUpload] =
+        useState<FirebaseImageBlob | null>(null);
+    let cropper: Cropper;
     const [isSaving, setIsSaving] = useState(false);
     const [venueSearched, setVenueSearched] = useState(false);
     const [showAddressPanel, setShowAddressPanel] = useState(false);
@@ -134,6 +144,17 @@ const AddEventModal = ({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
         libraries: libraries,
     });
+
+    useEffect(() => {
+        if (imageToUpload && imageRef.current) {
+            cropper = new Cropper(imageRef.current, {
+                viewMode: 2,
+                dragMode: "move",
+                movable: false,
+                zoomable: false,
+            });
+        }
+    }, [imageToUpload]);
 
     useEffect(() => {
         reset(defaultValues);
@@ -366,6 +387,8 @@ const AddEventModal = ({
         setVenueSearched(false);
         setIsSaving(false);
         setShowAddressPanel(false);
+        setImageToUpload(null);
+        cropper?.destroy();
         reset();
         onClose();
     };
@@ -386,6 +409,19 @@ const AddEventModal = ({
         setValue("venue.state", venue.state);
         setValue("venue.country", venue.country);
         setValue("venue.postcodeZip", venue.postcodeZip);
+    };
+
+    const handleCrop = () => {
+        const croppedimage = cropper.getCroppedCanvas().toDataURL("image/png");
+
+        if (croppedimage && imageToUpload) {
+            setCroppedImageToUpload({
+                blob: dataURItoBlob(croppedimage),
+                name: imageToUpload.name,
+            });
+            setImageToUpload(null);
+            cropper?.destroy();
+        }
     };
 
     return (
@@ -424,213 +460,295 @@ const AddEventModal = ({
                     pointerEvents={isSaving ? "none" : "auto"}
                     mt={6}
                 >
-                    <form onSubmit={handleSubmit(onSave)}>
-                        <VStack gap={6}>
-                            <VStack gap={6} w="full">
-                                <AddEventGeneralFields
-                                    errors={errors}
-                                    register={register}
-                                    images={images}
-                                    onImageSelect={(images) => {
-                                        setImages(images);
-                                        setValue(
-                                            "imageIds",
-                                            images.map((image) => image.name)
-                                        );
-                                        trigger("imageIds");
-                                    }}
-                                    onImageRemove={(images) => {
-                                        setImages(images);
-                                        setValue(
-                                            "imageIds",
-                                            images.map((image) => image.name)
-                                        );
-                                        trigger("imageIds");
-                                    }}
-                                    onArtistChange={(artist) =>
-                                        setValue("artist", artist)
-                                    }
-                                    onArtistAdd={handleArtistAdd}
-                                    artistValue={watchArtist}
-                                    lineupValue={watchLineup}
-                                    onArtistRemove={(index) =>
-                                        setValue(
-                                            "lineup",
-                                            watchLineup.filter(
-                                                (_, i) => i !== index
-                                            )
-                                        )
+                    <Collapse
+                        transition={{
+                            enter: { duration: 0.5 },
+                            exit: { duration: 0.5 },
+                        }}
+                        in={!!imageToUpload}
+                    >
+                        <VStack w="400px" m="auto">
+                            <Box h="400px">
+                                <Image
+                                    ref={imageRef}
+                                    src={
+                                        imageToUpload
+                                            ? URL.createObjectURL(imageToUpload)
+                                            : ""
                                     }
                                 />
-                                <Divider />
-                                <VStack w="full" alignItems="start">
-                                    <Flex w="full">
-                                        <Text fontSize="lg">Venue</Text>
-                                        <Box color="gpRed.500" pl={1}>
-                                            *
-                                        </Box>
-                                    </Flex>
-
-                                    {selectedVenue || showAddressPanel ? (
-                                        <AddressPanel
-                                            address={{
-                                                name: getValues("venue.name"),
-                                                address:
-                                                    getValues("venue.address"),
-                                                city: getValues("venue.city"),
-                                                state: getValues("venue.state"),
-                                                country:
-                                                    getValues("venue.country"),
-                                                postcodeZip:
-                                                    getValues(
-                                                        "venue.postcodeZip"
-                                                    ),
-                                            }}
-                                            onEdit={() => {
-                                                setShowAddressPanel(false);
-                                                setSelectedVenue(null);
-                                                setIsVenueManual(true);
-                                                setIsAddressManual(true);
-                                            }}
-                                        />
-                                    ) : (
-                                        <VStack
-                                            p={6}
-                                            border="1px solid"
-                                            borderColor={
-                                                errors.venue
-                                                    ? "red"
-                                                    : "gray.300"
-                                            }
-                                            w="full"
-                                            spacing={6}
-                                            rounded="lg"
-                                            alignItems="flex-start"
-                                        >
-                                            <VenueSearch
-                                                isManual={isVenueManual}
-                                                register={register}
-                                                onAddManuallyClick={() => {
-                                                    setIsVenueManual(true);
-                                                    setIsAddressManual(false);
-                                                    setVenueSearched(false);
-                                                }}
-                                                onVenueSearchChange={(val) =>
-                                                    setValue(
-                                                        "venueSearchTerm",
-                                                        val
-                                                    )
-                                                }
-                                                handleSearchVenue={
-                                                    handleSearchVenue
-                                                }
-                                                venueSearchTerm={
-                                                    watchVenueSearchTerm
-                                                }
-                                                onSearchClick={() => {
-                                                    setVenues(null);
-                                                    setIsVenueManual(false);
-                                                    setValue(
-                                                        "venueSearchTerm",
-                                                        ""
-                                                    );
-                                                    setVenueSearched(false);
-                                                }}
-                                                showResults={
-                                                    venues !== null &&
-                                                    venues.length > 0 &&
-                                                    !selectedVenue
-                                                }
-                                                venues={venues}
-                                                handleVenueClick={(val) =>
-                                                    handleVenueClick(val)
-                                                }
-                                                venueSearched={venueSearched}
-                                            />
-
-                                            <Box
-                                                w="full"
-                                                opacity={isVenueManual ? 1 : 0}
-                                                h={isVenueManual ? "unset" : 0}
-                                                overflow={
-                                                    isVenueManual
-                                                        ? "unset"
-                                                        : "hidden"
-                                                }
-                                            >
-                                                <TextInput
-                                                    title="Name"
-                                                    type="text"
-                                                    size="lg"
-                                                    fieldProps={register(
-                                                        "venue.name"
-                                                    )}
-                                                    height="60px"
-                                                    variant="outline"
-                                                    error={
-                                                        errors.venue?.name
-                                                            ?.message
-                                                    }
-                                                    required
-                                                />
-
-                                                <AddressSearch
-                                                    onAcceptVenue={() => {
-                                                        trigger("venue").then(
-                                                            (validated) => {
-                                                                if (validated) {
-                                                                    setShowAddressPanel(
-                                                                        true
-                                                                    );
-                                                                }
-                                                            }
-                                                        );
-                                                    }}
-                                                    register={register}
-                                                    errors={errors}
-                                                    isManual={isAddressManual}
-                                                    onManualButtonClick={() =>
-                                                        setIsAddressManual(true)
-                                                    }
-                                                    onPlaceChange={(place) => {
-                                                        setIsAddressManual(
-                                                            true
-                                                        );
-                                                        setVenueAddressFields(
-                                                            place
-                                                        );
-                                                    }}
-                                                    onSearchClick={() =>
-                                                        setIsAddressManual(
-                                                            false
-                                                        )
-                                                    }
-                                                />
-                                            </Box>
-                                        </VStack>
-                                    )}
-                                </VStack>
-                            </VStack>
-                            <HStack w="full" justifyContent="flex-end">
+                            </Box>
+                            <HStack w="full" justifyContent="center" gap={6}>
                                 <Button
-                                    isDisabled={isSaving}
-                                    variant="ghost"
+                                    variant="outline"
                                     colorScheme="red"
-                                    mr={3}
-                                    onClick={handleModalClose}
+                                    onClick={() => {
+                                        setImageToUpload(null);
+                                        cropper?.destroy();
+                                    }}
                                 >
                                     Cancel
                                 </Button>
-                                <Button
-                                    isDisabled={isSaving}
-                                    onClick={handleSubmit(onSave)}
-                                    colorScheme="blue"
-                                >
-                                    {eventId ? "Update Event" : "Create Event"}
+                                <Button colorScheme="blue" onClick={handleCrop}>
+                                    Crop and add
                                 </Button>
                             </HStack>
                         </VStack>
-                    </form>
+                    </Collapse>
+
+                    <Collapse in={!imageToUpload}>
+                        <form onSubmit={handleSubmit(onSave)}>
+                            <VStack gap={6}>
+                                <VStack gap={6} w="full">
+                                    <AddEventGeneralFields
+                                        onImageSelected={(file) =>
+                                            setImageToUpload(file)
+                                        }
+                                        croppedImageToUpload={
+                                            croppedImageToUpload
+                                        }
+                                        errors={errors}
+                                        register={register}
+                                        images={images}
+                                        onImageSelect={(images) => {
+                                            setImages(images);
+                                            setValue(
+                                                "imageIds",
+                                                images.map(
+                                                    (image) => image.name
+                                                )
+                                            );
+                                            trigger("imageIds");
+                                        }}
+                                        onImageRemove={(images) => {
+                                            setImages(images);
+                                            setValue(
+                                                "imageIds",
+                                                images.map(
+                                                    (image) => image.name
+                                                )
+                                            );
+                                            trigger("imageIds");
+                                        }}
+                                        onArtistChange={(artist) =>
+                                            setValue("artist", artist)
+                                        }
+                                        onArtistAdd={handleArtistAdd}
+                                        artistValue={watchArtist}
+                                        lineupValue={watchLineup}
+                                        onArtistRemove={(index) =>
+                                            setValue(
+                                                "lineup",
+                                                watchLineup.filter(
+                                                    (_, i) => i !== index
+                                                )
+                                            )
+                                        }
+                                    />
+                                    <Divider />
+                                    <VStack w="full" alignItems="start">
+                                        <Flex w="full">
+                                            <Text fontSize="lg">Venue</Text>
+                                            <Box color="gpRed.500" pl={1}>
+                                                *
+                                            </Box>
+                                        </Flex>
+
+                                        {selectedVenue || showAddressPanel ? (
+                                            <AddressPanel
+                                                address={{
+                                                    name: getValues(
+                                                        "venue.name"
+                                                    ),
+                                                    address:
+                                                        getValues(
+                                                            "venue.address"
+                                                        ),
+                                                    city: getValues(
+                                                        "venue.city"
+                                                    ),
+                                                    state: getValues(
+                                                        "venue.state"
+                                                    ),
+                                                    country:
+                                                        getValues(
+                                                            "venue.country"
+                                                        ),
+                                                    postcodeZip:
+                                                        getValues(
+                                                            "venue.postcodeZip"
+                                                        ),
+                                                }}
+                                                onEdit={() => {
+                                                    setShowAddressPanel(false);
+                                                    setSelectedVenue(null);
+                                                    setIsVenueManual(true);
+                                                    setIsAddressManual(true);
+                                                }}
+                                            />
+                                        ) : (
+                                            <VStack
+                                                p={6}
+                                                border="1px solid"
+                                                borderColor={
+                                                    errors.venue
+                                                        ? "red"
+                                                        : "gray.300"
+                                                }
+                                                w="full"
+                                                spacing={6}
+                                                rounded="lg"
+                                                alignItems="flex-start"
+                                            >
+                                                <VenueSearch
+                                                    isManual={isVenueManual}
+                                                    register={register}
+                                                    onAddManuallyClick={() => {
+                                                        setIsVenueManual(true);
+                                                        setIsAddressManual(
+                                                            false
+                                                        );
+                                                        setVenueSearched(false);
+                                                    }}
+                                                    onVenueSearchChange={(
+                                                        val
+                                                    ) =>
+                                                        setValue(
+                                                            "venueSearchTerm",
+                                                            val
+                                                        )
+                                                    }
+                                                    handleSearchVenue={
+                                                        handleSearchVenue
+                                                    }
+                                                    venueSearchTerm={
+                                                        watchVenueSearchTerm
+                                                    }
+                                                    onSearchClick={() => {
+                                                        setVenues(null);
+                                                        setIsVenueManual(false);
+                                                        setValue(
+                                                            "venueSearchTerm",
+                                                            ""
+                                                        );
+                                                        setVenueSearched(false);
+                                                    }}
+                                                    showResults={
+                                                        venues !== null &&
+                                                        venues.length > 0 &&
+                                                        !selectedVenue
+                                                    }
+                                                    venues={venues}
+                                                    handleVenueClick={(val) =>
+                                                        handleVenueClick(val)
+                                                    }
+                                                    venueSearched={
+                                                        venueSearched
+                                                    }
+                                                />
+
+                                                <Box
+                                                    w="full"
+                                                    opacity={
+                                                        isVenueManual ? 1 : 0
+                                                    }
+                                                    h={
+                                                        isVenueManual
+                                                            ? "unset"
+                                                            : 0
+                                                    }
+                                                    overflow={
+                                                        isVenueManual
+                                                            ? "unset"
+                                                            : "hidden"
+                                                    }
+                                                >
+                                                    <TextInput
+                                                        title="Name"
+                                                        type="text"
+                                                        size="lg"
+                                                        fieldProps={register(
+                                                            "venue.name"
+                                                        )}
+                                                        height="60px"
+                                                        variant="outline"
+                                                        error={
+                                                            errors.venue?.name
+                                                                ?.message
+                                                        }
+                                                        required
+                                                    />
+
+                                                    <AddressSearch
+                                                        onAcceptVenue={() => {
+                                                            trigger(
+                                                                "venue"
+                                                            ).then(
+                                                                (validated) => {
+                                                                    if (
+                                                                        validated
+                                                                    ) {
+                                                                        setShowAddressPanel(
+                                                                            true
+                                                                        );
+                                                                    }
+                                                                }
+                                                            );
+                                                        }}
+                                                        register={register}
+                                                        errors={errors}
+                                                        isManual={
+                                                            isAddressManual
+                                                        }
+                                                        onManualButtonClick={() =>
+                                                            setIsAddressManual(
+                                                                true
+                                                            )
+                                                        }
+                                                        onPlaceChange={(
+                                                            place
+                                                        ) => {
+                                                            setIsAddressManual(
+                                                                true
+                                                            );
+                                                            setVenueAddressFields(
+                                                                place
+                                                            );
+                                                        }}
+                                                        onSearchClick={() =>
+                                                            setIsAddressManual(
+                                                                false
+                                                            )
+                                                        }
+                                                    />
+                                                </Box>
+                                            </VStack>
+                                        )}
+                                    </VStack>
+                                </VStack>
+                                <HStack w="full" justifyContent="flex-end">
+                                    <Button
+                                        isDisabled={isSaving}
+                                        variant="ghost"
+                                        colorScheme="red"
+                                        mr={3}
+                                        onClick={handleModalClose}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        isDisabled={isSaving}
+                                        onClick={handleSubmit(onSave)}
+                                        colorScheme="blue"
+                                    >
+                                        {eventId
+                                            ? "Update Event"
+                                            : "Create Event"}
+                                    </Button>
+                                </HStack>
+                            </VStack>
+                        </form>
+                    </Collapse>
                 </ModalBody>
             </ModalContent>
         </Modal>

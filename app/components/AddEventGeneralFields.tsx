@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { IconButton, VStack } from "@chakra-ui/react";
 import { TextInput } from "./TextInput";
 import { TextAreaInput } from "./TextAreaInput";
@@ -21,6 +21,8 @@ interface Props {
     artistValue: string;
     lineupValue: string[];
     onArtistRemove: (index: number) => void;
+    croppedImageToUpload: FirebaseImageBlob | null;
+    onImageSelected: (file: File) => void;
 }
 
 const AddEventGeneralFields = ({
@@ -34,7 +36,15 @@ const AddEventGeneralFields = ({
     onArtistRemove,
     register,
     errors,
+    croppedImageToUpload,
+    onImageSelected,
 }: Props) => {
+    useEffect(() => {
+        if (croppedImageToUpload) {
+            onImageSelect(images.concat(croppedImageToUpload));
+        }
+    }, [croppedImageToUpload]);
+
     return (
         <VStack gap={6} w="full">
             <TextInput
@@ -58,15 +68,8 @@ const AddEventGeneralFields = ({
                 required
             />
             <FileUpload
+                onImageSelected={onImageSelected}
                 allowErrors
-                onUpload={(file) => {
-                    onImageSelect(
-                        images.concat({
-                            blob: file,
-                            name: file.name,
-                        })
-                    );
-                }}
                 fieldLabel="Images"
                 accept="image/*"
                 buttonText="Upload an image..."
