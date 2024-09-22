@@ -87,3 +87,8 @@ export type Dimensions = {
     width: number;
     height: number;
 };
+
+export type EventRequestProps = {
+    skip: number;
+    limit: number | null;
+};

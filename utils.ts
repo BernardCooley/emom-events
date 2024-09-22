@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { deleteFirebaseImage, uploadFirebaseImage } from "./firebase/functions";
 import { Dimensions, FirebaseImageBlob } from "./types";
 
@@ -154,4 +155,47 @@ export const handleProfileImageChange = async (
     }
 
     return [];
+};
+
+export const generateRandomEvent = () => {
+    const randomString = () => Math.random().toString(36).substring(2, 15);
+    const randomDate = () =>
+        new Date(Date.now() + Math.random() * 1e10).toISOString();
+
+    return {
+        id: uuidv4(),
+        name: randomString(),
+        timeFrom: randomDate(),
+        timeTo: "",
+        description: randomString(),
+        imageIds: [
+            `DALL·E ${new Date().getFullYear()}-${String(
+                Math.floor(Math.random() * 12) + 1
+            ).padStart(2, "0")}-${String(
+                Math.floor(Math.random() * 31) + 1
+            ).padStart(2, "0")} ${String(
+                Math.floor(Math.random() * 24)
+            ).padStart(2, "0")}.${String(
+                Math.floor(Math.random() * 60)
+            ).padStart(2, "0")}.${String(
+                Math.floor(Math.random() * 60)
+            ).padStart(2, "0")} - Abstract image.png`,
+        ],
+        promoter: {
+            id: "bernardcooley@gmail.com",
+            name: `Pulsewave ${randomString()}`,
+        },
+        venue: {
+            id: uuidv4(),
+            name: randomString(),
+            address: `${Math.floor(
+                Math.random() * 100
+            )} ${randomString()} Street`,
+            city: randomString(),
+            state: randomString(),
+            country: randomString(),
+            postcodeZip: `${Math.floor(Math.random() * 10000)}`,
+        },
+        lineup: [randomString()],
+    };
 };

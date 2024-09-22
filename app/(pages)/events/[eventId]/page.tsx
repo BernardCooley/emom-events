@@ -10,10 +10,12 @@ import PageLoading from "@/app/components/PageLoading";
 import AddEventModal from "@/app/components/AddEventModal";
 import { getFirebaseImageBlob } from "@/firebase/functions";
 import { useSession } from "next-auth/react";
+import { useEventContext } from "@/context/eventContext";
 
 interface Props {}
 
 const Event = ({}: Props) => {
+    const { updateCurrentEventId } = useEventContext();
     const { data: session } = useSession();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
@@ -26,20 +28,12 @@ const Event = ({}: Props) => {
         null
     );
 
-    const {
-        imageIds,
-        name,
-        timeFrom,
-        timeTo,
-        description,
-        promoter,
-        venue,
-        lineup,
-        websites,
-    } = eventDetails || {};
+    const { name, timeFrom, timeTo, description, promoter, venue, lineup } =
+        eventDetails || {};
 
     useEffect(() => {
         if (eventId) {
+            updateCurrentEventId(eventId as string);
             getEventDetails();
         }
     }, [eventId]);
@@ -101,7 +95,6 @@ const Event = ({}: Props) => {
                             imageId: eventImage?.name || "",
                             venueSearchTerm: "",
                             artist: "",
-                            websites: websites || [],
                         }}
                         onFail={() => {
                             toast({

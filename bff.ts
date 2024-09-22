@@ -3,6 +3,7 @@ import {
     AddEventInput,
     AddVenueInput,
     EventDetails,
+    EventRequestProps,
     PromoterDetails,
     VenueItem,
 } from "./types";
@@ -246,12 +247,18 @@ export const fetchEvent = async ({
     }
 };
 
-export const fetchEvents = async (): Promise<EventDetails[] | null> => {
+type FetchEventsProps = {
+    data?: EventRequestProps | {};
+};
+
+export const fetchEvents = async ({
+    data,
+}: FetchEventsProps): Promise<EventDetails[] | null> => {
     try {
         const events: EventDetails[] | null = await fetchWithErrorHandling(
             "/api/getEvents",
             "POST",
-            {}
+            { data: data }
         );
 
         return events;

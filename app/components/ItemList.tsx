@@ -36,6 +36,7 @@ const ItemList = ({ data, page, fields, title }: Props) => {
             <SimpleGrid spacing={4} columns={{ base: 1, md: 2, lg: 3 }}>
                 {data.map((item) => (
                     <Card
+                        id={item.id}
                         onClick={() => router.push(`/${page}/${item.id}`)}
                         key={item.id}
                         _hover={{

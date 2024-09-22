@@ -6,6 +6,8 @@ export async function POST(req: Request) {
 
     try {
         const event = await prisma?.event.findMany({
+            skip: data.skip,
+            take: data.limit,
             select: {
                 id: true,
                 name: true,

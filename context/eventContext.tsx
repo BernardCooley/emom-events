@@ -6,6 +6,10 @@ import React, { createContext, ReactNode, useContext, useState } from "react";
 interface EventContextProps {
     events: EventDetails[];
     updateEvents: (events: EventDetails[]) => void;
+    skip: number;
+    updateSkip: (skip: number) => void;
+    currentEventId: string | null;
+    updateCurrentEventId: (event: string) => void;
 }
 
 export const EventContext = createContext<EventContextProps | null>(null);
@@ -24,9 +28,19 @@ export const useEventContext = () => {
 
 export const EventContextProvider = ({ children }: { children: ReactNode }) => {
     const [events, setEvents] = useState<EventDetails[]>([]);
+    const [skip, setSkip] = useState<number>(0);
+    const [currentEventId, setCurrentEvent] = useState<string | null>(null);
 
     const updateEvents = (events: EventDetails[]) => {
         setEvents(events);
+    };
+
+    const updateSkip = (skip: number) => {
+        setSkip(skip);
+    };
+
+    const updateCurrentEventId = (event: string) => {
+        setCurrentEvent(event);
     };
 
     return (
@@ -34,6 +48,10 @@ export const EventContextProvider = ({ children }: { children: ReactNode }) => {
             value={{
                 events,
                 updateEvents,
+                skip,
+                updateSkip,
+                currentEventId,
+                updateCurrentEventId,
             }}
         >
             {children}
