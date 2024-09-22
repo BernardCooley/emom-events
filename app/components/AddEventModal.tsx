@@ -315,7 +315,7 @@ const AddEventModal = ({
 
     const handleSearchVenue = async () => {
         const venues = await searchVenue({
-            name: getValues("venueSearchTerm"),
+            searchTerm: getValues("venueSearchTerm"),
         });
 
         setVenueSearched(true);

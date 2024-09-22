@@ -138,18 +138,18 @@ export const updatePromoter = async ({
 };
 
 type SearchVenueProps = {
-    name: string;
+    searchTerm: string;
 };
 
 export const searchVenue = async ({
-    name,
+    searchTerm,
 }: SearchVenueProps): Promise<VenueItem[] | null> => {
     try {
         const venue: VenueItem[] | null = await fetchWithErrorHandling(
             "/api/searchVenue",
             "POST",
             {
-                name,
+                searchTerm,
             }
         );
 
