@@ -258,7 +258,7 @@ export const fetchEvents = async ({
         const events: EventDetails[] | null = await fetchWithErrorHandling(
             "/api/getEvents",
             "POST",
-            { data: data }
+            { data }
         );
 
         return events;

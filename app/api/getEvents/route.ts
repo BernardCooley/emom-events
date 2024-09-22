@@ -1,13 +1,40 @@
 import prisma from "@/lib/prisma";
+import { formatDateString } from "@/utils";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     const { data } = await req.json();
 
+    const date = data.dateFrom
+        ? data.dateFrom
+        : `${formatDateString(new Date().toISOString()).date}T00:00`;
+
+    const dataRangeQuery = data.dateTo
+        ? {
+              AND: [
+                  {
+                      timeFrom: {
+                          gte: date,
+                      },
+                  },
+                  {
+                      timeFrom: {
+                          lte: data.dateTo,
+                      },
+                  },
+              ],
+          }
+        : {
+              timeFrom: {
+                  gte: date,
+              },
+          };
+
     try {
         const event = await prisma?.event.findMany({
             skip: data.skip,
             take: data.limit,
+            where: dataRangeQuery,
             select: {
                 id: true,
                 name: true,

@@ -11,6 +11,7 @@ import useScrollPosition from "@/hooks/useScrollPosition";
 import { generateRandomEvent } from "@/utils";
 import FloatingIconButton from "@/app/components/FloatingIconButton";
 import { ArrowRightIcon } from "@chakra-ui/icons";
+import { useSearchParams } from "next/navigation";
 
 const fields = [
     "description",
@@ -21,7 +22,10 @@ const fields = [
 interface Props {}
 
 const Page = ({}: Props) => {
-    const testMode = true;
+    const searchParams = useSearchParams();
+    const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
+    const testMode = false;
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollPosition = useScrollPosition();
     const [loading, setLoading] = useState(true);
@@ -40,10 +44,16 @@ const Page = ({}: Props) => {
         handleScroll();
     }, [scrollPosition]);
 
-    const getRequestOptions = (skip: number | null): EventRequestProps => {
+    const getRequestOptions = (
+        skip: number | null,
+        dateFrom: string | null,
+        dateTo: string | null
+    ): EventRequestProps => {
         return {
             skip: skip ? skip : 0,
             limit: limit,
+            dateFrom,
+            dateTo,
         };
     };
 
@@ -66,7 +76,7 @@ const Page = ({}: Props) => {
             if (!fetching && !hasAllEvents) {
                 setFetching(true);
                 const newEvents = await fetchEvents({
-                    data: getRequestOptions(skip + limit),
+                    data: getRequestOptions(skip + limit, dateFrom, dateTo),
                 });
 
                 if (newEvents && newEvents.length > 0) {
@@ -88,7 +98,7 @@ const Page = ({}: Props) => {
                 events = generateTestData(50);
             } else {
                 events = await fetchEvents({
-                    data: getRequestOptions(null),
+                    data: getRequestOptions(null, dateFrom, dateTo),
                 });
             }
 

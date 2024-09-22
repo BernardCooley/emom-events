@@ -199,3 +199,36 @@ export const generateRandomEvent = () => {
         lineup: [randomString()],
     };
 };
+
+
+export const formatDateString = (
+    input: string
+): {
+    dateTime: string;
+    date: string;
+    time: string;
+    year: string;
+    month: string;
+    day: string;
+    hours: string;
+    minutes: string;
+} => {
+    const date = new Date(input);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return {
+        dateTime: `${year}-${month}-${day}T${hours}:${minutes}`,
+        date: `${year}-${month}-${day}`,
+        time: `${hours}:${minutes}`,
+        year: year.toString(),
+        month,
+        day,
+        hours,
+        minutes,
+    };
+};
