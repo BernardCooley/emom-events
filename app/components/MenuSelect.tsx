@@ -34,6 +34,9 @@ interface MenuSelectProps extends SelectProps {
     testId?: string;
     onOptionChange: (selected: string[]) => void;
     clearAllButton?: boolean;
+    useCheckIcon?: boolean;
+    handleCantFind?: () => void;
+    cantFindText?: string;
 }
 
 const MenuSelect = ({
@@ -51,6 +54,9 @@ const MenuSelect = ({
     testId,
     onOptionChange,
     clearAllButton = false,
+    useCheckIcon = true,
+    handleCantFind,
+    cantFindText,
     ...rest
 }: MenuSelectProps) => {
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -204,7 +210,7 @@ const MenuSelect = ({
                                                 handleChange(option.value)
                                             }
                                         >
-                                            {option.label}
+                                            <Text p={2}>{option.label}</Text>
                                         </MenuItem>
                                     );
                                 })}
@@ -231,23 +237,67 @@ const MenuSelect = ({
                                             variant="tertiary"
                                             justifyContent="flex-start"
                                         >
-                                            {option.label}
+                                            <Text p={2}>{option.label}</Text>
                                         </MenuItem>
                                     ) : (
-                                        <MenuItemOption
-                                            key={option.value}
-                                            value={option.value}
-                                            isChecked={selectedValues.includes(
-                                                option.value
+                                        <>
+                                            {useCheckIcon ? (
+                                                <MenuItemOption
+                                                    pl={-12}
+                                                    key={option.value}
+                                                    value={option.value}
+                                                    isChecked={selectedValues.includes(
+                                                        option.value
+                                                    )}
+                                                    onClick={() =>
+                                                        handleChange(
+                                                            option.value
+                                                        )
+                                                    }
+                                                >
+                                                    <Text
+                                                        overflow="hidden"
+                                                        maxHeight="30px"
+                                                        whiteSpace="nowrap"
+                                                        textOverflow="ellipsis"
+                                                        p={2}
+                                                    >
+                                                        {option.label}
+                                                    </Text>
+                                                </MenuItemOption>
+                                            ) : (
+                                                <Flex
+                                                    key={option.value}
+                                                    onClick={() =>
+                                                        handleChange(
+                                                            option.value
+                                                        )
+                                                    }
+                                                    p={2}
+                                                    ml={1}
+                                                    _hover={{
+                                                        bg: "gray.100",
+                                                        cursor: "pointer",
+                                                    }}
+                                                    w="full"
+                                                    direction="column"
+                                                >
+                                                    <Text noOfLines={1}>
+                                                        {option.label}
+                                                    </Text>
+                                                </Flex>
                                             )}
-                                            onClick={() =>
-                                                handleChange(option.value)
-                                            }
-                                        >
-                                            {option.label}
-                                        </MenuItemOption>
+                                        </>
                                     );
                                 })}
+                                <Button
+                                    pt={3}
+                                    pl={3}
+                                    onClick={handleCantFind}
+                                    variant="link"
+                                >
+                                    {cantFindText}
+                                </Button>
                             </MenuOptionGroup>
                         )}
                     </MenuList>

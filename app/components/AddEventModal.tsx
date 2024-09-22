@@ -60,7 +60,6 @@ export interface FormData {
     venueSearchTerm: string;
     artist: Event["lineup"][0];
     imageId: Event["imageIds"][number];
-    websites: Event["websites"];
 }
 
 const schema: ZodType<FormData> = z
@@ -83,7 +82,6 @@ const schema: ZodType<FormData> = z
         imageId: z.string().min(1, {
             message: "An Event image is required",
         }),
-        websites: z.array(z.string()),
     })
     .refine(
         (data) => {
@@ -350,7 +348,6 @@ const AddEventModal = ({
 
     const handleVenueClick = (venue: VenueItem) => {
         setSelectedVenue(venue);
-        setIsVenueManual(true);
         if (venues) {
             setValue("venue.name", venue.name);
             setVenueAddressFields(venue);
@@ -458,6 +455,13 @@ const AddEventModal = ({
 
                                         {selectedVenue || showAddressPanel ? (
                                             <AddressPanel
+                                                onSearchAgainClick={() => {
+                                                    setShowAddressPanel(false);
+                                                    setSelectedVenue(null);
+                                                    setIsVenueManual(false);
+                                                    setIsAddressManual(false);
+                                                }}
+                                                isManual={isVenueManual}
                                                 address={{
                                                     name: getValues(
                                                         "venue.name"
@@ -526,7 +530,7 @@ const AddEventModal = ({
                                                     venueSearchTerm={
                                                         watchVenueSearchTerm
                                                     }
-                                                    onSearchClick={() => {
+                                                    onExistingVenueSearchClick={() => {
                                                         setVenues(null);
                                                         setIsVenueManual(false);
                                                         setValue(

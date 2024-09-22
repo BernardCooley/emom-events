@@ -47,6 +47,7 @@ export type FirebaseImageBlob = {
 export type SelectOption = {
     value: string;
     label: string;
+    icon?: JSX.Element;
 };
 
 export type VenueItem = {

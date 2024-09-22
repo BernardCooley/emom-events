@@ -11,9 +11,16 @@ interface Props {
         postcodeZip: string;
     };
     onEdit: () => void;
+    isManual: boolean;
+    onSearchAgainClick: () => void;
 }
 
-const AddressPanel = ({ address, onEdit }: Props) => {
+const AddressPanel = ({
+    address,
+    onEdit,
+    isManual,
+    onSearchAgainClick,
+}: Props) => {
     return (
         <HStack
             rounded="lg"
@@ -30,9 +37,15 @@ const AddressPanel = ({ address, onEdit }: Props) => {
                 <Text>{address.country}</Text>
                 <Text>{address.postcodeZip}</Text>
             </VStack>
-            <Button onClick={onEdit} variant="link">
-                Edit
-            </Button>
+            {isManual ? (
+                <Button onClick={onEdit} variant="link">
+                    Edit
+                </Button>
+            ) : (
+                <Button onClick={onSearchAgainClick} variant="link">
+                    Search again
+                </Button>
+            )}
         </HStack>
     );
 };

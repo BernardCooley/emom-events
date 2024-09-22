@@ -121,7 +121,7 @@ const AddressSearch = ({
                         onClick={onManualButtonClick}
                         variant="link"
                     >
-                        Enter location manually
+                        Enter address manually
                     </Button>
                     <Flex w="full" alignItems="center" gap={4}>
                         <GooglePlacesSearch
