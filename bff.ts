@@ -232,7 +232,7 @@ export const fetchEvent = async ({
     eventId,
 }: FetchEventProps): Promise<EventDetails | null> => {
     try {
-        const deleteEvent: EventDetails | null = await fetchWithErrorHandling(
+        const event: EventDetails | null = await fetchWithErrorHandling(
             "/api/getEvent",
             "POST",
             {
@@ -240,7 +240,21 @@ export const fetchEvent = async ({
             }
         );
 
-        return deleteEvent;
+        return event;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const fetchEvents = async (): Promise<EventDetails[] | null> => {
+    try {
+        const events: EventDetails[] | null = await fetchWithErrorHandling(
+            "/api/getEvents",
+            "POST",
+            {}
+        );
+
+        return events;
     } catch (error) {
         throw error;
     }
