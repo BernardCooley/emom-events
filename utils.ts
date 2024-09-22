@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { deleteFirebaseImage, uploadFirebaseImage } from "./firebase/functions";
 import { Dimensions, FirebaseImageBlob } from "./types";
+import { ReadonlyURLSearchParams } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const capitalizeFirstLetter = (str: string): string => {
     if (!str) return str;
@@ -200,7 +202,6 @@ export const generateRandomEvent = () => {
     };
 };
 
-
 export const formatDateString = (
     input: string
 ): {
@@ -231,4 +232,27 @@ export const formatDateString = (
         hours,
         minutes,
     };
+};
+
+export const setQueryParam = (
+    key: string,
+    value: string,
+    pathname: string,
+    searchParams: ReadonlyURLSearchParams,
+    router: AppRouterInstance
+) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    router.push(`${pathname}?${params.toString()}`);
+};
+
+export const removeQueryParam = (
+    key: string,
+    pathname: string,
+    searchParams: ReadonlyURLSearchParams,
+    router: AppRouterInstance
+) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
+    router.push(`${pathname}?${params.toString()}`);
 };

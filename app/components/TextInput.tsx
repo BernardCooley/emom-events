@@ -37,6 +37,7 @@ interface Props {
     allowHelperText?: boolean;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onEnter?: () => void;
+    min?: string;
 }
 
 export const TextInput = forwardRef(
@@ -60,6 +61,7 @@ export const TextInput = forwardRef(
             allowHelperText = false,
             onChange,
             onEnter,
+            min,
         }: Props,
         ref: LegacyRef<HTMLInputElement>
     ) => {
@@ -90,6 +92,7 @@ export const TextInput = forwardRef(
                         <InputLeftElement>{leftIcon}</InputLeftElement>
                     )}
                     <Input
+                        min={min}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 e.preventDefault();
