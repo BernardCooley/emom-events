@@ -234,15 +234,19 @@ export const formatDateString = (
     };
 };
 
-export const setQueryParam = (
-    key: string,
-    value: string,
+export const setQueryParams = (
+    paramsObj: { [key: string]: string[] },
     pathname: string,
     searchParams: ReadonlyURLSearchParams,
     router: AppRouterInstance
 ) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set(key, value);
+
+    Object.keys(paramsObj).forEach((key) => {
+        params.delete(key);
+        paramsObj[key].forEach((value) => params.append(key, value));
+    });
+
     router.push(`${pathname}?${params.toString()}`);
 };
 

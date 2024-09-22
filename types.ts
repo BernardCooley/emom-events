@@ -92,5 +92,5 @@ export type EventRequestProps = {
     skip: number;
     limit: number | null;
     dateFrom: string | null;
-    dateTo: string | null;
+    searchTerm: string | null;
 };

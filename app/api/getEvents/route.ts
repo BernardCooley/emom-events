@@ -9,73 +9,96 @@ export async function POST(req: Request) {
         ? data.dateFrom
         : `${formatDateString(new Date().toISOString()).date}T00:00`;
 
-    const dataRangeQuery = data.dateTo
-        ? {
-              AND: [
-                  {
-                      timeFrom: {
-                          gte: date,
+        const searchTermQuery = data.searchTerm
+            ? {
+                  OR: [
+                      {
+                          name: {
+                              contains: data.searchTerm,
+                          },
                       },
-                  },
-                  {
-                      timeFrom: {
-                          lte: data.dateTo,
+                      {
+                          lineup: {
+                              has: data.searchTerm,
+                          },
                       },
-                  },
-              ],
-          }
-        : {
-              timeFrom: {
-                  gte: date,
-              },
-          };
+                      {
+                          promoter: {
+                              name: {
+                                  contains: data.searchTerm,
+                              },
+                          },
+                      },
+                      {
+                          venue: {
+                              name: {
+                                  contains: data.searchTerm,
+                              },
+                          },
+                      },
+                  ],
+              }
+            : {};
 
-    try {
-        const event = await prisma?.event.findMany({
-            skip: data.skip,
-            take: data.limit,
-            where: dataRangeQuery,
-            select: {
-                id: true,
-                name: true,
-                timeFrom: true,
-                timeTo: true,
-                description: true,
-                imageIds: true,
-                promoter: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-                venue: {
-                    select: {
-                        id: true,
-                        name: true,
-                        address: true,
-                        city: true,
-                        state: true,
-                        country: true,
-                        postcodeZip: true,
-                    },
-                },
-                lineup: true,
+        const dataRangeQuery = {
+            timeFrom: {
+                gte: date,
             },
-        });
+        };
 
-        const response = NextResponse.json(event, {
-            status: 200,
-        });
+        const combinedQuery = {
+            AND: [
+                ...(data.searchTerm ? [searchTermQuery] : []),
+                dataRangeQuery,
+            ],
+        };
 
-        return response;
-    } catch (error: any) {
-        console.error(error);
+        try {
+            const event = await prisma?.event.findMany({
+                skip: data.skip,
+                take: data.limit,
+                where: combinedQuery,
+                select: {
+                    id: true,
+                    name: true,
+                    timeFrom: true,
+                    timeTo: true,
+                    description: true,
+                    imageIds: true,
+                    promoter: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                    venue: {
+                        select: {
+                            id: true,
+                            name: true,
+                            address: true,
+                            city: true,
+                            state: true,
+                            country: true,
+                            postcodeZip: true,
+                        },
+                    },
+                    lineup: true,
+                },
+            });
 
-        return NextResponse.json(
-            { error: error },
-            {
-                status: error.status || 500,
-            }
-        );
-    }
+            const response = NextResponse.json(event, {
+                status: 200,
+            });
+
+            return response;
+        } catch (error: any) {
+            console.error(error);
+
+            return NextResponse.json(
+                { error: error },
+                {
+                    status: error.status || 500,
+                }
+            );
+        }
 }
