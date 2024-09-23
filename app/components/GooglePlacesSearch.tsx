@@ -43,12 +43,12 @@ const GooglePlacesSearch = ({ onPlaceChange, control }: Props) => {
                 onPlacesChanged={handlePlaceChange}
             >
                 <TextInput
+                    placeholder=""
                     name="googlePlaceSearch"
                     control={control}
                     title="Search for an address"
                     type="text"
                     size="lg"
-                    height="60px"
                 />
             </StandaloneSearchBox>
         </Box>

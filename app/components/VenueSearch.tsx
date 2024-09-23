@@ -71,7 +71,7 @@ const VenueSearch = ({
                             }
                         />
                     </VStack>
-                    <VStack alignItems="start" gap={2} w="full" mt={-10}>
+                    <VStack alignItems="start" gap={2} w="full">
                         {showResults && venues && (
                             <MenuSelect
                                 handleCantFind={() => onAddManuallyClick()}

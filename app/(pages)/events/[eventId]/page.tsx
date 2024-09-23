@@ -97,6 +97,7 @@ const Event = ({}: Props) => {
                             imageId: eventImage?.name || "",
                             venueSearchTerm: "",
                             artist: "",
+                            googlePlaceSearch: "",
                         }}
                         onFail={() => {
                             toast({

@@ -34,7 +34,6 @@ import { FirebaseImageBlob, VenueItem } from "@/types";
 import AddEventGeneralFields from "./AddEventGeneralFields";
 import AddressPanel from "./AddressPanel";
 import VenueSearch from "./VenueSearch";
-import AddressSearch from "./AddressSearch";
 import {
     getFirebaseImageBlob,
     uploadFirebaseImage,
@@ -42,6 +41,7 @@ import {
 import { Event, Venue } from "@prisma/client";
 import ImageCropper from "./ImageCropper";
 import { handleProfileImageChange } from "@/utils";
+import GooglePlacesSearch from "./GooglePlacesSearch";
 
 export interface FormData {
     name: Event["name"];
@@ -137,7 +137,6 @@ const AddEventModal = ({
     );
     const [isVenueManual, setIsVenueManual] = useState(false);
     const [venues, setVenues] = useState<VenueItem[] | null>([]);
-    const [isAddressManual, setIsAddressManual] = useState(true);
     const [libraries] = useState<Library[]>(["places"]);
     useJsApiLoader({
         id: "google-map-script",
@@ -193,13 +192,15 @@ const AddEventModal = ({
             timeTo: defaultValues?.timeTo || "",
             description: defaultValues?.description || "",
             lineup: defaultValues?.lineup || [],
-            venue: defaultValues?.venue || {
-                name: "",
-                address: "",
-                city: "",
-                state: "",
-                country: "",
-                postcodeZip: "",
+            venue: {
+                name: defaultValues?.venue.name || "",
+                address: defaultValues?.venue.address || "",
+                city: defaultValues?.venue.city || "",
+                state: defaultValues?.venue.state || "",
+                country: defaultValues?.venue.country || "",
+                postcodeZip: defaultValues?.venue.postcodeZip || "",
+                latitude: defaultValues?.venue.latitude || 0,
+                longitude: defaultValues?.venue.longitude || 0,
             },
             imageId: defaultValues?.imageId || "",
             googlePlaceSearch: "",
@@ -350,7 +351,6 @@ const AddEventModal = ({
     const handleModalClose = () => {
         setVenues(null);
         setIsVenueManual(false);
-        setIsAddressManual(true);
         setEventImage(null);
         setSelectedVenue(null);
         setVenueSearched(false);
@@ -379,6 +379,7 @@ const AddEventModal = ({
         setValue("venue.postcodeZip", venue.postcodeZip);
         setValue("venue.latitude", venue.latitude);
         setValue("venue.longitude", venue.longitude);
+        setShowAddressPanel(true);
     };
 
     return (
@@ -474,7 +475,6 @@ const AddEventModal = ({
                                                     setShowAddressPanel(false);
                                                     setSelectedVenue(null);
                                                     setIsVenueManual(false);
-                                                    setIsAddressManual(false);
                                                 }}
                                                 isManual={isVenueManual}
                                                 address={{
@@ -504,7 +504,6 @@ const AddEventModal = ({
                                                     setShowAddressPanel(false);
                                                     setSelectedVenue(null);
                                                     setIsVenueManual(true);
-                                                    setIsAddressManual(true);
                                                 }}
                                             />
                                         ) : (
@@ -527,9 +526,6 @@ const AddEventModal = ({
                                                     isManual={isVenueManual}
                                                     onAddManuallyClick={() => {
                                                         setIsVenueManual(true);
-                                                        setIsAddressManual(
-                                                            false
-                                                        );
                                                         setVenueSearched(false);
                                                     }}
                                                     handleSearchVenue={
@@ -561,7 +557,8 @@ const AddEventModal = ({
                                                     }
                                                 />
 
-                                                <Box
+                                                <VStack
+                                                    gap={10}
                                                     w="full"
                                                     opacity={
                                                         isVenueManual ? 1 : 0
@@ -580,7 +577,6 @@ const AddEventModal = ({
                                                     <TextInput
                                                         type="text"
                                                         title="Name"
-                                                        height="60px"
                                                         size="lg"
                                                         name="venue.name"
                                                         error={
@@ -590,49 +586,23 @@ const AddEventModal = ({
                                                         control={control}
                                                     />
 
-                                                    <AddressSearch
+                                                    <GooglePlacesSearch
                                                         control={control}
-                                                        onAcceptVenue={() => {
-                                                            trigger(
-                                                                "venue"
-                                                            ).then(
-                                                                (validated) => {
-                                                                    if (
-                                                                        validated
-                                                                    ) {
-                                                                        setShowAddressPanel(
-                                                                            true
-                                                                        );
-                                                                    }
-                                                                }
-                                                            );
-                                                        }}
-                                                        errors={errors}
-                                                        isManual={
-                                                            isAddressManual
-                                                        }
-                                                        onManualButtonClick={() =>
-                                                            setIsAddressManual(
-                                                                true
-                                                            )
-                                                        }
                                                         onPlaceChange={(
                                                             place
                                                         ) => {
-                                                            setIsAddressManual(
-                                                                true
-                                                            );
                                                             setVenueAddressFields(
-                                                                place
+                                                                {
+                                                                    name: getValues(
+                                                                        "venue.name"
+                                                                    ),
+                                                                    id: "",
+                                                                    ...place,
+                                                                }
                                                             );
                                                         }}
-                                                        onSearchClick={() =>
-                                                            setIsAddressManual(
-                                                                false
-                                                            )
-                                                        }
                                                     />
-                                                </Box>
+                                                </VStack>
                                             </VStack>
                                         )}
                                     </VStack>

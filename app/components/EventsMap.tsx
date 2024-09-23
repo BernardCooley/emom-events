@@ -34,7 +34,6 @@ const EventsMap = ({ events, itemHovered }: Props) => {
     }, [events, map]);
 
     const getNewBounds = (events: EventDetails[], map: google.maps.Map) => {
-        console.log("===========");
         const bounds = new google.maps.LatLngBounds();
 
         events

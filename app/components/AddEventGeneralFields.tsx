@@ -127,9 +127,9 @@ const AddEventGeneralFields = ({
                 rightIcon={
                     artistValue?.length > 0 && (
                         <IconButton
-                            mt={5}
-                            h="58px"
-                            w="58px"
+                            mt={2}
+                            h="44px"
+                            w="36px"
                             minW="unset"
                             aria-label="Search"
                             icon={<SmallAddIcon fontSize="28px" />}
@@ -138,17 +138,18 @@ const AddEventGeneralFields = ({
                     )
                 }
             />
-
-            <ChipGroup
-                title="Lineup: "
-                onRemoveChip={(index) => {
-                    onArtistRemove(index);
-                }}
-                chips={lineupValue.map((artist) => ({
-                    label: artist,
-                    value: artist.toLowerCase(),
-                }))}
-            />
+            <Box w="full" mt={6}>
+                <ChipGroup
+                    title="Lineup: "
+                    onRemoveChip={(index) => {
+                        onArtistRemove(index);
+                    }}
+                    chips={lineupValue.map((artist) => ({
+                        label: artist,
+                        value: artist.toLowerCase(),
+                    }))}
+                />
+            </Box>
         </VStack>
     );
 };
