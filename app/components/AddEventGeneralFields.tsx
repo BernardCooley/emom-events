@@ -6,7 +6,7 @@ import {
     VisuallyHidden,
     VStack,
 } from "@chakra-ui/react";
-import { TextInput2 } from "./TextInput2";
+import { TextInput } from "./TextInput";
 import FileUpload from "./FileUpload";
 import ChipGroup from "./ChipGroup";
 import { CloseIcon, SmallAddIcon } from "@chakra-ui/icons";
@@ -50,7 +50,7 @@ const AddEventGeneralFields = ({
 
     return (
         <VStack gap={6} w="full">
-            <TextInput2
+            <TextInput
                 type="text"
                 title="Name"
                 size="lg"
@@ -59,7 +59,7 @@ const AddEventGeneralFields = ({
                 control={control}
                 required
             />
-            <TextInput2
+            <TextInput
                 type="text"
                 title="Description"
                 size="lg"
@@ -97,7 +97,7 @@ const AddEventGeneralFields = ({
                 </Box>
             )}
             <VisuallyHidden ref={imageGridRef}>image grid ref</VisuallyHidden>
-            <TextInput2
+            <TextInput
                 type="datetime-local"
                 title="From"
                 size="lg"
@@ -106,7 +106,7 @@ const AddEventGeneralFields = ({
                 control={control}
                 required
             />
-            <TextInput2
+            <TextInput
                 type="datetime-local"
                 title="To"
                 size="lg"
@@ -116,7 +116,7 @@ const AddEventGeneralFields = ({
             />
 
             {/* TODO fix jumping eventImage when typing */}
-            <TextInput2
+            <TextInput
                 type="text"
                 title="Add Artist"
                 size="lg"

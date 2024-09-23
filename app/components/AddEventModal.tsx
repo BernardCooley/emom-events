@@ -20,7 +20,7 @@ import {
 import { z, ZodType } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { TextInput2 } from "./TextInput2";
+import { TextInput } from "./TextInput";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
 import {
@@ -577,7 +577,7 @@ const AddEventModal = ({
                                                             : "hidden"
                                                     }
                                                 >
-                                                    <TextInput2
+                                                    <TextInput
                                                         type="text"
                                                         title="Name"
                                                         height="60px"

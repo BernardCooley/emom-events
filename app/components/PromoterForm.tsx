@@ -69,11 +69,8 @@ const PromoterForm = ({
         }
     }, [croppedImage]);
 
-    const {
-        handleSubmit,
-        register,
-        formState: { errors },
-    } = useForm<FormData>({
+    const formMethods = useForm<FormData>({
+        mode: "onChange",
         resolver: zodResolver(schema),
         defaultValues: {
             name: defaultValues?.name || "",
@@ -83,6 +80,12 @@ const PromoterForm = ({
             email: defaultValues?.email || "",
         },
     });
+
+    const {
+        handleSubmit,
+        formState: { errors },
+        control,
+    } = formMethods;
 
     const onCreatePromoter = async (formData: FormData) => {
         let imageIds: string[] = [];
@@ -177,42 +180,38 @@ const PromoterForm = ({
                 <form onSubmit={handleSubmit(onSave)}>
                     <VStack gap={6}>
                         <TextInput
+                            type="text"
                             title="Name"
-                            type="text"
                             size="lg"
-                            fieldProps={register("name")}
-                            height="60px"
-                            variant="outline"
+                            name="name"
                             error={errors.name?.message}
+                            control={control}
                             required
                         />
                         <TextInput
+                            type="text"
                             title="Country"
-                            type="text"
                             size="lg"
-                            fieldProps={register("country")}
-                            height="60px"
-                            variant="outline"
+                            name="country"
                             error={errors.country?.message}
+                            control={control}
                             required
                         />
                         <TextInput
-                            title="County/State"
                             type="text"
+                            title="County/State"
                             size="lg"
-                            fieldProps={register("state")}
-                            height="60px"
-                            variant="outline"
+                            name="state"
                             error={errors.state?.message}
+                            control={control}
                         />
                         <TextInput
-                            title="City/Town"
                             type="text"
+                            title="City/Town"
                             size="lg"
-                            fieldProps={register("city")}
-                            height="60px"
-                            variant="outline"
+                            name="city"
                             error={errors.city?.message}
+                            control={control}
                         />
 
                         <FileUpload

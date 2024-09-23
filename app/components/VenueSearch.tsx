@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, IconButton, Text, VStack } from "@chakra-ui/react";
-import { TextInput2 } from "./TextInput2";
+import { TextInput } from "./TextInput";
 import { SearchIcon } from "@chakra-ui/icons";
 import { Control, FieldErrors } from "react-hook-form";
 import { FormData } from "./AddEventModal";
@@ -47,7 +47,7 @@ const VenueSearch = ({
             ) : (
                 <VStack w="full" gap={6}>
                     <VStack gap={6} w="full" alignItems="start">
-                        <TextInput2
+                        <TextInput
                             onEnter={handleSearchVenue}
                             type="text"
                             title="Search for an existing Venue"

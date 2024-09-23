@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
 import GooglePlacesSearch from "./GooglePlacesSearch";
-import { TextInput2 } from "./TextInput2";
+import { TextInput } from "./TextInput";
 import { Control, FieldErrors } from "react-hook-form";
 import { FormData } from "./AddEventModal";
 
@@ -45,7 +45,7 @@ const AddressSearch = ({
                         w="full"
                         spacing={4}
                     >
-                        <TextInput2
+                        <TextInput
                             type="text"
                             title="Street Address"
                             size="lg"
@@ -53,7 +53,7 @@ const AddressSearch = ({
                             error={errors.venue?.address?.message}
                             control={control}
                         />
-                        <TextInput2
+                        <TextInput
                             type="text"
                             title="City/Town"
                             size="lg"
@@ -62,7 +62,7 @@ const AddressSearch = ({
                             control={control}
                             required
                         />
-                        <TextInput2
+                        <TextInput
                             type="text"
                             title="County/State"
                             size="lg"
@@ -71,7 +71,7 @@ const AddressSearch = ({
                             control={control}
                             required
                         />
-                        <TextInput2
+                        <TextInput
                             type="text"
                             title="Country"
                             size="lg"
@@ -80,7 +80,7 @@ const AddressSearch = ({
                             control={control}
                             required
                         />
-                        <TextInput2
+                        <TextInput
                             type="text"
                             title="Postcode/Zip"
                             size="lg"

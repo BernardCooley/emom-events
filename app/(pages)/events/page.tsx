@@ -4,7 +4,7 @@ import EventsMap from "@/app/components/EventsMap";
 import FloatingIconButton from "@/app/components/FloatingIconButton";
 import ItemList from "@/app/components/ItemList";
 import PageLoading from "@/app/components/PageLoading";
-import { TextInput2 } from "@/app/components/TextInput2";
+import { TextInput } from "@/app/components/TextInput";
 import { fetchEvents } from "@/bff";
 import { useEventContext } from "@/context/eventContext";
 import { EventDetails, EventRequestProps } from "@/types";
@@ -223,7 +223,7 @@ const Page = ({}: Props) => {
                     alignItems="flex-end"
                     justifyContent="flex-end"
                 >
-                    <TextInput2
+                    <TextInput
                         width="180px"
                         type="date"
                         title="Date from"
@@ -234,7 +234,7 @@ const Page = ({}: Props) => {
                         control={control}
                         min={todayDateFormatted}
                     />
-                    <TextInput2
+                    <TextInput
                         width="full"
                         onEnter={handleSearch}
                         placeholder="Search by Title, Venue, Address, Promoter, or Artist"

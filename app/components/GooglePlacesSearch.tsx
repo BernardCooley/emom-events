@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Box } from "@chakra-ui/react";
 import { StandaloneSearchBox } from "@react-google-maps/api";
-import { TextInput2 } from "./TextInput2";
+import { TextInput } from "./TextInput";
 import { getAddress } from "@/utils";
 import { Control } from "react-hook-form";
 import { FormData } from "./AddEventModal";
@@ -42,7 +42,7 @@ const GooglePlacesSearch = ({ onPlaceChange, control }: Props) => {
                 onLoad={(ref) => (placesRef.current = ref)}
                 onPlacesChanged={handlePlaceChange}
             >
-                <TextInput2
+                <TextInput
                     name="googlePlaceSearch"
                     control={control}
                     title="Search for an address"
