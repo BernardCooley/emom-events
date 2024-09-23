@@ -1,16 +1,16 @@
 datasource db {
-    provider = "postgresql"
-    url      = env("POSTGRES_URL")
+    provider  = "postgresql"
+    url       = env("POSTGRES_URL")
     directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
     previewFeatures = ["fullTextSearch"]
 }
 
 model Event {
-    id          String    @id @default(uuid())
+    id          String   @id @default(uuid())
     name        String
     status      String?
     timeFrom    String
@@ -20,22 +20,22 @@ model Event {
     imageIds    String[]
     tickets     String[]
     lineup      String[]
-    promoter    Promoter  @relation(fields: [promoterId], references: [id])
+    promoter    Promoter @relation(fields: [promoterId], references: [id])
     promoterId  String
-    venue       Venue     @relation(fields: [venueId], references: [id])
+    venue       Venue    @relation(fields: [venueId], references: [id])
     venueId     String
 }
 
 model Promoter {
-    id         String    @id @default(uuid())
-    name       String
-    email      String    @unique
-    city       String?
-    state      String?
-    country    String
-    websites   String[]
-    imageIds   String[]
-    events     Event[]
+    id       String   @id @default(uuid())
+    name     String
+    email    String   @unique
+    city     String?
+    state    String?
+    country  String
+    websites String[]
+    imageIds String[]
+    events   Event[]
 }
 
 model Venue {
@@ -46,6 +46,8 @@ model Venue {
     state       String
     country     String
     postcodeZip String
+    latitude    Float    @default(0)
+    longitude   Float    @default(0)
     links       String[]
     events      Event[]
 }

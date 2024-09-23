@@ -284,6 +284,8 @@ type UpdateEventProps = {
         state: VenueItem["state"];
         country: VenueItem["country"];
         postcodeZip: VenueItem["postcodeZip"];
+        latitude: VenueItem["latitude"];
+        longitude: VenueItem["longitude"];
     };
 };
 

@@ -58,6 +58,8 @@ export type VenueItem = {
     state: Venue["state"];
     country: Venue["country"];
     postcodeZip: Venue["postcodeZip"];
+    latitude: Venue["latitude"];
+    longitude: Venue["longitude"];
 };
 
 export type AddEventInput = {
@@ -81,6 +83,8 @@ export type AddVenueInput = {
     country: Venue["country"];
     postcodeZip: Venue["postcodeZip"];
     links?: Venue["links"];
+    latitude: Venue["latitude"];
+    longitude: Venue["longitude"];
 };
 
 export type Dimensions = {

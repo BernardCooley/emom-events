@@ -11,6 +11,8 @@ interface Props {
         state: string;
         country: string;
         postcodeZip: string;
+        latitude: number;
+        longitude: number;
     }) => void;
 }
 
@@ -26,6 +28,8 @@ const GooglePlacesSearch = ({ onPlaceChange }: Props) => {
             state: addressComponents.state,
             country: addressComponents.country,
             postcodeZip: addressComponents.postcodeZip,
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
         });
     };
 

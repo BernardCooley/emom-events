@@ -13,6 +13,8 @@ export async function POST(req: Request) {
                 state: data.state,
                 country: data.country,
                 postcodeZip: data.postcodeZip,
+                latitude: data.latitude,
+                longitude: data.longitude,
             },
         });
 

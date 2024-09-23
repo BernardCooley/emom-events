@@ -56,6 +56,8 @@ export interface FormData {
         state: Venue["state"];
         country: Venue["country"];
         postcodeZip: Venue["postcodeZip"];
+        latitude: Venue["latitude"];
+        longitude: Venue["longitude"];
     };
     venueSearchTerm: string;
     artist: Event["lineup"][0];
@@ -76,6 +78,8 @@ const schema: ZodType<FormData> = z
             state: z.string().min(1, "Venue state is required"),
             country: z.string().min(1, "Venue country is required"),
             postcodeZip: z.string(),
+            latitude: z.number(),
+            longitude: z.number(),
         }),
         venueSearchTerm: z.string(),
         artist: z.string(),
@@ -158,6 +162,8 @@ const AddEventModal = ({
                 state: defaultValues.venue.state,
                 country: defaultValues.venue.country,
                 postcodeZip: defaultValues.venue.postcodeZip,
+                latitude: defaultValues.venue.latitude,
+                longitude: defaultValues.venue.longitude,
             });
             setIsVenueManual(true);
         }
@@ -221,6 +227,8 @@ const AddEventModal = ({
                     state: formData.venue.state,
                     country: formData.venue.country,
                     postcodeZip: formData.venue.postcodeZip,
+                    latitude: formData.venue.latitude,
+                    longitude: formData.venue.longitude,
                 },
             });
         } else {
@@ -292,6 +300,8 @@ const AddEventModal = ({
                 state: formData.venue.state,
                 country: formData.venue.country,
                 postcodeZip: formData.venue.postcodeZip,
+                latitude: formData.venue.latitude,
+                longitude: formData.venue.longitude,
             },
         });
 
@@ -361,6 +371,8 @@ const AddEventModal = ({
         setValue("venue.state", venue.state);
         setValue("venue.country", venue.country);
         setValue("venue.postcodeZip", venue.postcodeZip);
+        setValue("venue.latitude", venue.latitude);
+        setValue("venue.longitude", venue.longitude);
     };
 
     return (
