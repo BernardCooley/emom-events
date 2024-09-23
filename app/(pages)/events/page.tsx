@@ -51,7 +51,6 @@ const fields = [
 interface Props {}
 
 const Page = ({}: Props) => {
-    const [isEventsLoading, setIsEventsLoading] = useState<boolean>(true);
     const [itemHovered, setItemHovered] = useState<string | null>(null);
     const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
     const pathname = usePathname();
@@ -195,7 +194,6 @@ const Page = ({}: Props) => {
 
     const getEvents = async (force?: boolean | false) => {
         if (!currentEventId || force) {
-            setIsEventsLoading(true);
             let events;
 
             if (testMode) {
@@ -213,7 +211,6 @@ const Page = ({}: Props) => {
             if (events) {
                 updateEvents(events as EventDetails[]);
             }
-            setIsEventsLoading(false);
         }
         setLoading(false);
     };
@@ -405,7 +402,6 @@ const Page = ({}: Props) => {
             ) : (
                 <HStack h="500px" alignItems="start" w="full">
                     <ItemList
-                        isLoading={isEventsLoading}
                         onHover={(id) => setItemHovered(id)}
                         overflowY="scroll"
                         columns={{ base: 1 }}
