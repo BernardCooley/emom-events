@@ -263,7 +263,7 @@ const Page = ({}: Props) => {
                             }}
                         />
                     </HStack>
-                    <Box w="500px">
+                    <Box w="600px">
                         <TextInput
                             onEnter={() =>
                                 setQueryParams(
@@ -275,7 +275,7 @@ const Page = ({}: Props) => {
                                     router
                                 )
                             }
-                            placeholder="Search for events"
+                            placeholder="Search by Title, Venue, Address, Promoter, or Artist"
                             type="text"
                             size="lg"
                             fieldProps={register("searchTerm")}
