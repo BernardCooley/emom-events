@@ -51,51 +51,55 @@ const ItemList = ({
                     {capitalizeFirstLetter(title)}
                 </Heading>
             )}
-            <SimpleGrid w="full" spacing={4} columns={columns}>
-                {data.map((item) => (
-                    <Card
-                        id={item.id}
-                        onClick={() => router.push(`/${page}/${item.id}`)}
-                        key={item.id}
-                        onMouseEnter={() => onHover && onHover(item.id)}
-                        onMouseLeave={() => onHover && onHover("")}
-                        _hover={{
-                            cursor: "pointer",
-                            shadow: "lg",
-                            bg: "gray.50",
-                            outline: "1px solid",
-                            outlineColor: "gray.300",
-                        }}
-                        transition="transform 0.2s"
-                    >
-                        <CardHeader>
-                            <Heading size="md">{item.name}</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            {fields?.map((field) => {
-                                const fieldValue =
-                                    item[field as keyof typeof item];
-                                if (
-                                    fieldValue &&
-                                    (typeof fieldValue === "string" ||
-                                        Array.isArray(fieldValue)) &&
-                                    fieldValue.length > 0
-                                ) {
-                                    return (
-                                        <Box key={field}>
-                                            <Divider my={2} />
-                                            <Text pt="2" fontSize="sm">
-                                                {fieldValue}
-                                            </Text>
-                                        </Box>
-                                    );
-                                }
-                                return null;
-                            })}
-                        </CardBody>
-                    </Card>
-                ))}
-            </SimpleGrid>
+            {data.length > 0 ? (
+                <SimpleGrid w="full" spacing={4} columns={columns}>
+                    {data.map((item) => (
+                        <Card
+                            id={item.id}
+                            onClick={() => router.push(`/${page}/${item.id}`)}
+                            key={item.id}
+                            onMouseEnter={() => onHover && onHover(item.id)}
+                            onMouseLeave={() => onHover && onHover("")}
+                            _hover={{
+                                cursor: "pointer",
+                                shadow: "lg",
+                                bg: "gray.50",
+                                outline: "1px solid",
+                                outlineColor: "gray.300",
+                            }}
+                            transition="transform 0.2s"
+                        >
+                            <CardHeader>
+                                <Heading size="md">{item.name}</Heading>
+                            </CardHeader>
+                            <CardBody>
+                                {fields?.map((field) => {
+                                    const fieldValue =
+                                        item[field as keyof typeof item];
+                                    if (
+                                        fieldValue &&
+                                        (typeof fieldValue === "string" ||
+                                            Array.isArray(fieldValue)) &&
+                                        fieldValue.length > 0
+                                    ) {
+                                        return (
+                                            <Box key={field}>
+                                                <Divider my={2} />
+                                                <Text pt="2" fontSize="sm">
+                                                    {fieldValue}
+                                                </Text>
+                                            </Box>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                            </CardBody>
+                        </Card>
+                    ))}
+                </SimpleGrid>
+            ) : (
+                <Heading pt={20}>No Events found</Heading>
+            )}
         </VStack>
     );
 };

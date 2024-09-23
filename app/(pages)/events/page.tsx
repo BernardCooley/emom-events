@@ -330,18 +330,20 @@ const Page = ({}: Props) => {
                             </Button>
                         ) : null}
                     </HStack>
-                    <Button
-                        onClick={() => {
-                            if (isMapShowing) {
-                                setIsMapShowing(false);
-                            } else {
-                                setIsMapShowing(true);
-                            }
-                        }}
-                        variant="link"
-                    >
-                        {isMapShowing ? "Show list" : "Show on map"}
-                    </Button>
+                    {events.length > 0 && (
+                        <Button
+                            onClick={() => {
+                                if (isMapShowing) {
+                                    setIsMapShowing(false);
+                                } else {
+                                    setIsMapShowing(true);
+                                }
+                            }}
+                            variant="link"
+                        >
+                            {isMapShowing ? "Show list" : "Show on map"}
+                        </Button>
+                    )}
                 </HStack>
             </Box>
             {!isMapShowing ? (
