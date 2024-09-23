@@ -33,7 +33,7 @@ import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 
 const fields = ["description", "timeFrom"] satisfies (keyof EventDetails)[];
-const testMode = true;
+const testMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
 const limit = 50;
 
 export interface FormData {
