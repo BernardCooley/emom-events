@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { formatDateString } from "@/utils";
-import { ca } from "date-fns/locale";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -125,6 +124,8 @@ export async function POST(req: Request) {
                         state: true,
                         country: true,
                         postcodeZip: true,
+                        latitude: true,
+                        longitude: true,
                     },
                 },
                 lineup: true,

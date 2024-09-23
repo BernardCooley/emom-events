@@ -30,6 +30,7 @@ import { TextInput } from "@/app/components/TextInput";
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import EventsMap from "@/app/components/EventsMap";
 
 export interface FormData {
     dateFrom: string;
@@ -50,6 +51,8 @@ const fields = [
 interface Props {}
 
 const Page = ({}: Props) => {
+    const [itemHovered, setItemHovered] = useState<string | null>(null);
+    const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -188,7 +191,7 @@ const Page = ({}: Props) => {
             }
 
             if (events) {
-                updateEvents(events);
+                updateEvents(events as EventDetails[]);
             }
         }
         setLoading(false);
@@ -325,42 +328,71 @@ const Page = ({}: Props) => {
             </form>
             <Divider />
             <Box h="24px">
-                <HStack>
-                    <Text>Showing: </Text>
-                    <Text fontWeight={700}>
-                        {searchTermParam || "All events"}
-                    </Text>
-                    {dateFromParam !== todayDateFormatted && (
-                        <HStack>
-                            <Text>from</Text>
-                            <Text fontWeight={700}>{dateFromParam}</Text>
-                        </HStack>
-                    )}
-                    {searchTermParam || dateFromParam !== todayDateFormatted ? (
-                        <Button
-                            ml={6}
-                            variant="link"
-                            onClick={() => {
-                                setQueryParams(
-                                    {
-                                        dateFrom: [todayDateFormatted],
-                                        searchTerm: [""],
-                                    },
-                                    pathname,
-                                    searchParams,
-                                    router
-                                );
-                                setValue("searchTerm", "");
-                                setSearchTermWatch("");
-                                setValue("dateFrom", todayDateFormatted);
-                            }}
-                        >
-                            Clear
-                        </Button>
-                    ) : null}
+                <HStack justifyContent="space-between">
+                    <HStack>
+                        <Text>Showing: </Text>
+                        <Text fontWeight={700}>
+                            {searchTermParam || "All events"}
+                        </Text>
+                        {dateFromParam !== todayDateFormatted && (
+                            <HStack>
+                                <Text>from</Text>
+                                <Text fontWeight={700}>{dateFromParam}</Text>
+                            </HStack>
+                        )}
+                        {searchTermParam ||
+                        dateFromParam !== todayDateFormatted ? (
+                            <Button
+                                ml={6}
+                                variant="link"
+                                onClick={() => {
+                                    setQueryParams(
+                                        {
+                                            dateFrom: [todayDateFormatted],
+                                            searchTerm: [""],
+                                        },
+                                        pathname,
+                                        searchParams,
+                                        router
+                                    );
+                                    setValue("searchTerm", "");
+                                    setSearchTermWatch("");
+                                    setValue("dateFrom", todayDateFormatted);
+                                }}
+                            >
+                                Clear
+                            </Button>
+                        ) : null}
+                    </HStack>
+                    <Button
+                        onClick={() => setIsMapShowing((prev) => !prev)}
+                        variant="link"
+                    >
+                        {isMapShowing ? "Show list" : "Show on map"}
+                    </Button>
                 </HStack>
             </Box>
-            <ItemList page="events" fields={fields} data={events} />
+
+            {!isMapShowing ? (
+                <ItemList page="events" fields={fields} data={events} />
+            ) : (
+                <HStack h="500px" alignItems="start" w="full">
+                    <ItemList
+                        onHover={(id) => setItemHovered(id)}
+                        overflowY="scroll"
+                        columns={{ base: 1 }}
+                        page="events"
+                        fields={fields}
+                        data={events}
+                    />
+                    <Box minW="800px" h="500px">
+                        <EventsMap
+                            itemHovered={itemHovered || ""}
+                            events={events}
+                        />
+                    </Box>
+                </HStack>
+            )}
         </Flex>
     );
 };

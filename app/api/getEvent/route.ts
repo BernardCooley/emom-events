@@ -31,6 +31,8 @@ export async function POST(req: Request) {
                         state: true,
                         country: true,
                         postcodeZip: true,
+                        latitude: true,
+                        longitude: true,
                     },
                 },
                 lineup: true,
