@@ -1,6 +1,20 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import EventsMap from "@/app/components/EventsMap";
+import FloatingIconButton from "@/app/components/FloatingIconButton";
+import ItemList from "@/app/components/ItemList";
+import PageLoading from "@/app/components/PageLoading";
+import { TextInput } from "@/app/components/TextInput2";
+import { fetchEvents } from "@/bff";
+import { useEventContext } from "@/context/eventContext";
+import { EventDetails, EventRequestProps } from "@/types";
+import {
+    formatDateString,
+    generateRandomEvent,
+    removeQueryParam,
+    setQueryParams,
+} from "@/utils";
+import { ArrowRightIcon, CloseIcon, Search2Icon } from "@chakra-ui/icons";
 import {
     Box,
     Button,
@@ -11,26 +25,15 @@ import {
     IconButton,
     Text,
 } from "@chakra-ui/react";
-import { EventDetails, EventRequestProps } from "@/types";
-import { fetchEvents } from "@/bff";
-import ItemList from "@/app/components/ItemList";
-import { useEventContext } from "@/context/eventContext";
-import PageLoading from "@/app/components/PageLoading";
-import useScrollPosition from "@/hooks/useScrollPosition";
-import {
-    formatDateString,
-    generateRandomEvent,
-    removeQueryParam,
-    setQueryParams,
-} from "@/utils";
-import FloatingIconButton from "@/app/components/FloatingIconButton";
-import { ArrowRightIcon, CloseIcon, Search2Icon } from "@chakra-ui/icons";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { TextInput } from "@/app/components/TextInput";
-import { z, ZodType } from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import EventsMap from "@/app/components/EventsMap";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z, ZodType } from "zod";
+
+const fields = ["description", "timeFrom"] satisfies (keyof EventDetails)[];
+const testMode = false;
+const limit = 50;
 
 export interface FormData {
     dateFrom: string;
@@ -42,34 +45,21 @@ const schema: ZodType<FormData> = z.object({
     searchTerm: z.string(),
 });
 
-const fields = [
-    "description",
-    "timeFrom",
-    "timeTo",
-] satisfies (keyof EventDetails)[];
-
 interface Props {}
 
 const Page = ({}: Props) => {
-    const [itemHovered, setItemHovered] = useState<string | null>(null);
-    const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
-    const pathname = usePathname();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const dateFromParam = searchParams.get("dateFrom");
-    const searchTermParam = searchParams.get("searchTerm");
-    const showMap = searchParams.get("showMap");
-    const [searchTermWatch, setSearchTermWatch] = useState<string>("");
-    const testMode = false;
+    const pathname = usePathname();
     const containerRef = useRef<HTMLDivElement>(null);
-    const scrollPosition = useScrollPosition();
-    const [loading, setLoading] = useState(true);
-    const { events, updateEvents, skip, updateSkip, currentEventId } =
-        useEventContext();
     const [showToTopButton, setShowToTopButton] = useState<boolean>(false);
-    const limit = 50;
-    const [fetching, setFetching] = useState<boolean>(false);
-    const [hasAllEvents, setHasAllEvents] = useState<boolean>(false);
+    const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
+    const { events, currentEventId, updateEvents } = useEventContext();
+    const [itemHovered, setItemHovered] = useState<string | null>(null);
+    const searchParams = useSearchParams();
+    const dateFrom = searchParams.get("dateFrom");
+    const searchTerm = searchParams.get("searchTerm");
+    const [loading, setLoading] = useState(true);
+
     const todayDate = formatDateString(new Date().toISOString());
     const todayDateFormatted = `${[
         todayDate.year,
@@ -77,70 +67,75 @@ const Page = ({}: Props) => {
         todayDate.day,
     ].join("-")}`;
 
-    useEffect(() => {
-        getEvents();
-    }, []);
-
-    useEffect(() => {
-        showMap ? setIsMapShowing(true) : setIsMapShowing(false);
-    }, []);
-
-    useEffect(() => {
-        isMapShowing
-            ? setQueryParams(
-                  {
-                      showMap: ["true"],
-                  },
-                  pathname,
-                  searchParams,
-                  router
-              )
-            : removeQueryParam("showMap", pathname, searchParams, router);
-    }, [isMapShowing]);
-
-    useEffect(() => {
-        getEvents(true);
-
-        if (!searchTermParam && !dateFromParam)
-            setQueryParams(
-                {
-                    dateFrom: [todayDateFormatted],
-                },
-                pathname,
-                searchParams,
-                router
-            );
-        setValue("dateFrom", dateFromParam || "");
-    }, [dateFromParam]);
-
-    useEffect(() => {
-        getEvents(true);
-
-        if (searchTermParam) {
-            setSearchTermWatch(searchTermParam);
-            setQueryParams(
-                {
-                    dateFrom: [todayDateFormatted],
-                },
-                pathname,
-                searchParams,
-                router
-            );
-            setValue("searchTerm", searchTermParam);
-        }
-    }, [searchTermParam]);
-
-    useEffect(() => {
-        handleScroll();
-    }, [scrollPosition]);
-
-    const { register, setValue } = useForm<FormData>({
+    const formMethods = useForm<FormData>({
+        mode: "onChange",
         resolver: zodResolver(schema),
         defaultValues: {
-            dateFrom: dateFromParam || todayDateFormatted,
-            searchTerm: searchTermParam || "",
+            dateFrom: dateFrom || todayDateFormatted,
+            searchTerm: searchTerm || "",
         },
     });
+
+    const {
+        formState: { errors },
+        control,
+        watch,
+        setValue,
+    } = formMethods;
+
+    const dateFromWatch = watch("dateFrom");
+    const searchTermWatch = watch("searchTerm");
+
+    useEffect(() => {
+        if (dateFromWatch.length > 0) {
+            setQueryParams(
+                {
+                    dateFrom: [dateFromWatch],
+                },
+                pathname,
+                searchParams,
+                router
+            );
+        } else {
+            setQueryParams(
+                {
+                    dateFrom: [todayDateFormatted],
+                },
+                pathname,
+                searchParams,
+                router
+            );
+            setValue("dateFrom", todayDateFormatted);
+        }
+        getEvents(dateFromWatch, searchTermWatch);
+    }, [dateFromWatch]);
+
+    useEffect(() => {
+        getEvents(dateFrom, searchTerm);
+    }, []);
+
+    const getEvents = async (
+        dateFrom: string | null,
+        searchTerm: string | null,
+        force?: boolean | false
+    ) => {
+        if (!currentEventId || force) {
+            let events;
+
+            if (testMode) {
+                events = generateTestData(50);
+            } else {
+                events = await fetchEvents({
+                    data: getRequestOptions(null, dateFrom, searchTerm),
+                });
+            }
+
+            if (events) {
+                updateEvents(events as EventDetails[]);
+            }
+        }
+        setLoading(false);
+    };
 
     const getRequestOptions = (
         skip: number | null,
@@ -159,60 +154,39 @@ const Page = ({}: Props) => {
         return Array.from({ length: count }, generateRandomEvent);
     };
 
-    const handleScroll = async () => {
-        if (scrollPosition > window.innerHeight - 500) {
-            setShowToTopButton(true);
-        } else {
-            setShowToTopButton(false);
-        }
-
-        if (
-            containerRef.current?.getBoundingClientRect().height &&
-            scrollPosition >
-                containerRef.current?.getBoundingClientRect().height - 1200
-        ) {
-            if (!fetching && !hasAllEvents) {
-                setFetching(true);
-                const newEvents = await fetchEvents({
-                    data: getRequestOptions(
-                        skip + limit,
-                        dateFromParam,
-                        searchTermParam
-                    ),
-                });
-
-                if (newEvents && newEvents.length > 0) {
-                    updateEvents([...events, ...newEvents]);
-                    updateSkip(skip + limit);
-                    setFetching(false);
-                } else {
-                    setHasAllEvents(true);
-                }
-            }
-        }
+    const handleSearch = () => {
+        setQueryParams(
+            {
+                searchTerm: [searchTermWatch],
+                dateFrom: [todayDateFormatted],
+            },
+            pathname,
+            searchParams,
+            router
+        );
+        setValue("dateFrom", todayDateFormatted);
+        getEvents(todayDateFormatted, searchTermWatch);
     };
 
-    const getEvents = async (force?: boolean | false) => {
-        if (!currentEventId || force) {
-            let events;
+    const handleSearchClear = () => {
+        removeQueryParam("searchTerm", pathname, searchParams, router);
+        getEvents(dateFromWatch, "");
+        setValue("searchTerm", "");
+    };
 
-            if (testMode) {
-                events = generateTestData(50);
-            } else {
-                events = await fetchEvents({
-                    data: getRequestOptions(
-                        null,
-                        dateFromParam,
-                        searchTermParam
-                    ),
-                });
-            }
-
-            if (events) {
-                updateEvents(events as EventDetails[]);
-            }
-        }
-        setLoading(false);
+    const handleClearAll = () => {
+        setQueryParams(
+            {
+                dateFrom: [todayDateFormatted],
+            },
+            pathname,
+            searchParams,
+            router
+        );
+        removeQueryParam("searchTerm", pathname, searchParams, router);
+        setValue("searchTerm", "");
+        setValue("dateFrom", todayDateFormatted);
+        getEvents(todayDateFormatted, "");
     };
 
     if (loading) {
@@ -249,99 +223,48 @@ const Page = ({}: Props) => {
                     alignItems="flex-end"
                     justifyContent="flex-end"
                 >
-                    <HStack>
-                        <TextInput
-                            type="date"
-                            size="lg"
-                            height="40px"
-                            variant="outline"
-                            {...register("dateFrom")}
-                            min={todayDateFormatted}
-                            onChange={(e) => {
-                                if (e.target.value.length > 0) {
-                                    setQueryParams(
-                                        {
-                                            dateFrom: [e.target.value],
-                                        },
-                                        pathname,
-                                        searchParams,
-                                        router
-                                    );
-                                } else {
-                                    setQueryParams(
-                                        {
-                                            dateFrom: [todayDateFormatted],
-                                        },
-                                        pathname,
-                                        searchParams,
-                                        router
-                                    );
-                                    setValue("dateFrom", todayDateFormatted);
-                                }
-                            }}
-                        />
-                    </HStack>
-                    <Box w="600px">
-                        <TextInput
-                            onEnter={() =>
-                                setQueryParams(
-                                    {
-                                        searchTerm: [searchTermWatch],
-                                    },
-                                    pathname,
-                                    searchParams,
-                                    router
-                                )
-                            }
-                            placeholder="Search by Title, Venue, Address, Promoter, or Artist"
-                            type="text"
-                            size="lg"
-                            fieldProps={register("searchTerm")}
-                            height="40px"
-                            variant="outline"
-                            onChange={(e) => setSearchTermWatch(e.target.value)}
-                            rightIcon={
-                                searchTermWatch.trim().length > 0 ? (
-                                    <HStack mt={0} gap={0} h="38px" mr={10}>
-                                        <IconButton
-                                            h="full"
-                                            bg="transparent"
-                                            aria-label="Search"
-                                            icon={<Search2Icon />}
-                                            onClick={() => {
-                                                setQueryParams(
-                                                    {
-                                                        searchTerm: [
-                                                            searchTermWatch,
-                                                        ],
-                                                    },
-                                                    pathname,
-                                                    searchParams,
-                                                    router
-                                                );
-                                            }}
-                                        />
-                                        <IconButton
-                                            h="full"
-                                            bg="transparent"
-                                            aria-label="Search"
-                                            icon={<CloseIcon />}
-                                            onClick={() => {
-                                                removeQueryParam(
-                                                    "searchTerm",
-                                                    pathname,
-                                                    searchParams,
-                                                    router
-                                                );
-                                                setValue("searchTerm", "");
-                                                setSearchTermWatch("");
-                                            }}
-                                        />
-                                    </HStack>
-                                ) : null
-                            }
-                        />
-                    </Box>
+                    <TextInput
+                        width="180px"
+                        type="date"
+                        title="Date from"
+                        height="40px"
+                        size="md"
+                        name="dateFrom"
+                        error={errors.dateFrom?.message}
+                        control={control}
+                        min={todayDateFormatted}
+                    />
+                    <TextInput
+                        width="full"
+                        onEnter={handleSearch}
+                        placeholder="Search by Title, Venue, Address, Promoter, or Artist"
+                        type="text"
+                        height="40px"
+                        size="md"
+                        name="searchTerm"
+                        error={errors.searchTerm?.message}
+                        control={control}
+                        rightIcon={
+                            searchTermWatch.trim().length > 0 ? (
+                                <HStack mt={0} gap={0} h="38px" mr={10}>
+                                    <IconButton
+                                        h="full"
+                                        bg="transparent"
+                                        aria-label="Search"
+                                        icon={<Search2Icon />}
+                                        onClick={handleSearch}
+                                    />
+                                    <IconButton
+                                        h="full"
+                                        bg="transparent"
+                                        aria-label="Search"
+                                        icon={<CloseIcon />}
+                                        onClick={handleSearchClear}
+                                    />
+                                </HStack>
+                            ) : null
+                        }
+                    />
                 </HStack>
             </form>
             <Divider />
@@ -350,33 +273,20 @@ const Page = ({}: Props) => {
                     <HStack>
                         <Text>Showing: </Text>
                         <Text fontWeight={700}>
-                            {searchTermParam || "All events"}
+                            {searchTermWatch || "All events"}
                         </Text>
-                        {dateFromParam !== todayDateFormatted && (
+                        {dateFromWatch !== todayDateFormatted && (
                             <HStack>
                                 <Text>from</Text>
-                                <Text fontWeight={700}>{dateFromParam}</Text>
+                                <Text fontWeight={700}>{dateFromWatch}</Text>
                             </HStack>
                         )}
-                        {searchTermParam ||
-                        dateFromParam !== todayDateFormatted ? (
+                        {searchTermWatch ||
+                        dateFromWatch !== todayDateFormatted ? (
                             <Button
                                 ml={6}
                                 variant="link"
-                                onClick={() => {
-                                    setQueryParams(
-                                        {
-                                            dateFrom: [todayDateFormatted],
-                                            searchTerm: [""],
-                                        },
-                                        pathname,
-                                        searchParams,
-                                        router
-                                    );
-                                    setValue("searchTerm", "");
-                                    setSearchTermWatch("");
-                                    setValue("dateFrom", todayDateFormatted);
-                                }}
+                                onClick={handleClearAll}
                             >
                                 Clear
                             </Button>
@@ -396,7 +306,6 @@ const Page = ({}: Props) => {
                     </Button>
                 </HStack>
             </Box>
-
             {!isMapShowing ? (
                 <ItemList page="events" fields={fields} data={events} />
             ) : (
