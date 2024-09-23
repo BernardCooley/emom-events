@@ -242,6 +242,7 @@ const PromoterForm = ({
                             </Box>
                         )}
                         <Button
+                            isLoading={isSaving}
                             onClick={handleSubmit(onSave)}
                             colorScheme="blue"
                             mt={10}

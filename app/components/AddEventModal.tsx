@@ -648,7 +648,7 @@ const AddEventModal = ({
                                         Cancel
                                     </Button>
                                     <Button
-                                        isDisabled={isSaving}
+                                        isLoading={isSaving}
                                         onClick={handleSubmit(onSave)}
                                         colorScheme="blue"
                                     >
