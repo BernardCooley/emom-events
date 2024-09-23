@@ -70,8 +70,8 @@ const EventsMap = ({ events, itemHovered }: Props) => {
     };
 
     const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-        getNewBounds(events, map);
         setMap(map);
+        getNewBounds(events, map);
     }, []);
 
     useEffect(() => {

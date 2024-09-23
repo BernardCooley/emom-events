@@ -13,6 +13,7 @@ import {
 import { EventDetails, VenueDetails, PromoterDetails } from "@/types";
 import { useRouter } from "next/navigation";
 import { capitalizeFirstLetter } from "@/utils";
+import PageLoading from "./PageLoading";
 
 interface Props {
     data: EventDetails[] | VenueDetails[] | PromoterDetails[];
@@ -25,6 +26,7 @@ interface Props {
     columns?: { [key: string]: number };
     overflowY?: "hidden" | "scroll";
     onHover?: (id: string) => void;
+    isLoading?: boolean;
 }
 
 const ItemList = ({
@@ -35,8 +37,13 @@ const ItemList = ({
     columns = { base: 1, md: 2, lg: 3 },
     overflowY = "hidden",
     onHover,
+    isLoading = false,
 }: Props) => {
     const router = useRouter();
+
+    if (isLoading) {
+        return <PageLoading />;
+    }
 
     return (
         <VStack
