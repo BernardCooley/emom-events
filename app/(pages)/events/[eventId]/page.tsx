@@ -87,6 +87,8 @@ const Event = ({}: Props) => {
                                 state: venue.state,
                                 country: venue.country,
                                 postcodeZip: venue.postcodeZip,
+                                latitude: venue.latitude,
+                                longitude: venue.longitude,
                             },
                             timeFrom: timeFrom,
                             timeTo: timeTo !== undefined ? timeTo : "",

@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { formatDateString } from "@/utils";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
                   {
                       name: {
                           contains: data.searchTerm,
-                          mode: "insensitive",
+                          mode: Prisma.QueryMode.insensitive,
                       },
                   },
                   {
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
                       promoter: {
                           name: {
                               contains: data.searchTerm,
-                              mode: "insensitive",
+                              mode: Prisma.QueryMode.insensitive,
                           },
                       },
                   },
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
                               venue: {
                                   name: {
                                       contains: data.searchTerm,
-                                      mode: "insensitive",
+                                      mode: Prisma.QueryMode.insensitive,
                                   },
                               },
                           },
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
                               venue: {
                                   address: {
                                       contains: data.searchTerm,
-                                      mode: "insensitive",
+                                      mode: Prisma.QueryMode.insensitive,
                                   },
                               },
                           },
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
                               venue: {
                                   city: {
                                       contains: data.searchTerm,
-                                      mode: "insensitive",
+                                      mode: Prisma.QueryMode.insensitive,
                                   },
                               },
                           },
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
                               venue: {
                                   state: {
                                       contains: data.searchTerm,
-                                      mode: "insensitive",
+                                      mode: Prisma.QueryMode.insensitive,
                                   },
                               },
                           },
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
                               venue: {
                                   country: {
                                       contains: data.searchTerm,
-                                      mode: "insensitive",
+                                      mode: Prisma.QueryMode.insensitive,
                                   },
                               },
                           },
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
                               venue: {
                                   postcodeZip: {
                                       contains: data.searchTerm,
-                                      mode: "insensitive",
+                                      mode: Prisma.QueryMode.insensitive,
                                   },
                               },
                           },
