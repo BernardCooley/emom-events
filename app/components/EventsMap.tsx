@@ -17,8 +17,13 @@ interface Props {
 const EventsMap = ({ events, itemHovered }: Props) => {
     const [hoveredId, setHoveredId] = useState<string | null>(itemHovered);
     const router = useRouter();
-    const [libraries] = useState<Library[]>(["places"]);
     const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [libraries] = useState<Library[]>(["places"]);
+    const { isLoaded } = useJsApiLoader({
+        id: "google-map-script",
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+        libraries: libraries,
+    });
 
     useEffect(() => {
         setHoveredId(itemHovered);
@@ -26,30 +31,23 @@ const EventsMap = ({ events, itemHovered }: Props) => {
 
     useEffect(() => {
         if (map) getNewBounds(events, map);
-    }, [events]);
-
-    const getCoordinates = (events: EventDetails[]) => {
-        return events.map((event) => {
-            return {
-                lat: event.venue.latitude,
-                lng: event.venue.longitude,
-            };
-        });
-    };
-
-    const { isLoaded } = useJsApiLoader({
-        id: "google-map-script",
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-        libraries: libraries,
-    });
+    }, [events, map]);
 
     const getNewBounds = (events: EventDetails[], map: google.maps.Map) => {
+        console.log("===========");
         const bounds = new google.maps.LatLngBounds();
 
-        getCoordinates(events).forEach((marker) => {
-            const newPoint = new google.maps.LatLng(marker.lat, marker.lng);
-            bounds.extend(newPoint);
-        });
+        events
+            .map((event) => {
+                return {
+                    lat: event.venue.latitude,
+                    lng: event.venue.longitude,
+                };
+            })
+            .forEach((marker) => {
+                const newPoint = new google.maps.LatLng(marker.lat, marker.lng);
+                bounds.extend(newPoint);
+            });
 
         const newBounds = new window.google.maps.LatLngBounds(
             {
@@ -61,9 +59,12 @@ const EventsMap = ({ events, itemHovered }: Props) => {
                 lng: bounds.getNorthEast().lng(),
             }
         );
+
         map.fitBounds(newBounds);
         if (events.length === 1) {
-            map.setZoom(10);
+            setTimeout(() => {
+                map.setZoom(10);
+            }, 10);
         }
 
         return newBounds;
@@ -71,12 +72,7 @@ const EventsMap = ({ events, itemHovered }: Props) => {
 
     const onLoad = React.useCallback(function callback(map: google.maps.Map) {
         setMap(map);
-        getNewBounds(events, map);
     }, []);
-
-    useEffect(() => {
-        console.log(map);
-    }, [map]);
 
     const onUnmount = React.useCallback(function callback() {
         setMap(null);
