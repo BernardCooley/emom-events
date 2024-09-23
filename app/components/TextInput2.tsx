@@ -5,6 +5,7 @@ import {
     InputGroup,
     InputLeftElement,
     InputRightElement,
+    Textarea,
 } from "@chakra-ui/react";
 import React, { CSSProperties, ReactNode } from "react";
 import { useController, Control, FieldValues, Path } from "react-hook-form";
@@ -13,7 +14,7 @@ import FieldTitle from "./FieldTitle";
 export interface TextInputProps<T extends FieldValues> {
     placeholder?: string;
     size: string;
-    height: string;
+    height?: string;
     title?: string;
     error?: string;
     helperText?: ReactNode;
@@ -28,8 +29,9 @@ export interface TextInputProps<T extends FieldValues> {
     min?: string;
     onEnter?: () => void;
     width?: string;
+    isTextArea?: boolean;
 }
-export const TextInput = <T extends FieldValues>({
+export const TextInput2 = <T extends FieldValues>({
     control,
     name,
     required,
@@ -46,7 +48,8 @@ export const TextInput = <T extends FieldValues>({
     type = "text",
     min,
     onEnter,
-    width = "auto",
+    width = "full",
+    isTextArea = false,
 }: TextInputProps<T>) => {
     const { field } = useController({
         control: control,
@@ -62,24 +65,44 @@ export const TextInput = <T extends FieldValues>({
             />
             <InputGroup>
                 {leftIcon && <InputLeftElement>{leftIcon}</InputLeftElement>}
-                <Input
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-                            onEnter && onEnter();
-                        }
-                    }}
-                    min={min}
-                    type={type}
-                    {...field}
-                    placeholder={placeholder}
-                    size={size}
-                    value={field?.value ?? ""}
-                    backgroundColor="white"
-                    height={height}
-                    disabled={disabled}
-                    aria-label={title}
-                />
+                {isTextArea ? (
+                    <Textarea
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                onEnter && onEnter();
+                            }
+                        }}
+                        {...field}
+                        placeholder={placeholder}
+                        size={size}
+                        value={field?.value ?? ""}
+                        backgroundColor="white"
+                        height={height}
+                        disabled={disabled}
+                        aria-label={title}
+                    />
+                ) : (
+                    <Input
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                onEnter && onEnter();
+                            }
+                        }}
+                        min={min}
+                        type={type}
+                        {...field}
+                        placeholder={placeholder}
+                        size={size}
+                        value={field?.value ?? ""}
+                        backgroundColor="white"
+                        height={height}
+                        disabled={disabled}
+                        aria-label={title}
+                    />
+                )}
+
                 {rightIcon && (
                     <InputRightElement>{rightIcon}</InputRightElement>
                 )}
@@ -89,4 +112,4 @@ export const TextInput = <T extends FieldValues>({
         </FormControl>
     );
 };
-TextInput.displayName = "TextInput";
+TextInput2.displayName = "TextInput2";

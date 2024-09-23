@@ -20,7 +20,7 @@ import {
 import { z, ZodType } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { TextInput } from "./TextInput";
+import { TextInput2 } from "./TextInput2";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
 import {
@@ -62,6 +62,7 @@ export interface FormData {
     venueSearchTerm: string;
     artist: Event["lineup"][0];
     imageId: Event["imageIds"][number];
+    googlePlaceSearch: string;
 }
 
 const schema: ZodType<FormData> = z
@@ -86,6 +87,7 @@ const schema: ZodType<FormData> = z
         imageId: z.string().min(1, {
             message: "An Event image is required",
         }),
+        googlePlaceSearch: z.string(),
     })
     .refine(
         (data) => {
@@ -182,16 +184,8 @@ const AddEventModal = ({
         }
     };
 
-    const {
-        handleSubmit,
-        register,
-        setValue,
-        getValues,
-        watch,
-        reset,
-        trigger,
-        formState: { errors },
-    } = useForm<FormData>({
+    const formMethods = useForm<FormData>({
+        mode: "onChange",
         resolver: zodResolver(schema),
         defaultValues: {
             name: defaultValues?.name || "",
@@ -208,8 +202,20 @@ const AddEventModal = ({
                 postcodeZip: "",
             },
             imageId: defaultValues?.imageId || "",
+            googlePlaceSearch: "",
         },
     });
+
+    const {
+        handleSubmit,
+        setValue,
+        getValues,
+        watch,
+        reset,
+        trigger,
+        control,
+        formState: { errors },
+    } = formMethods;
 
     const watchLineup = watch("lineup");
     const watchVenueSearchTerm = watch("venueSearchTerm");
@@ -427,6 +433,7 @@ const AddEventModal = ({
                             <VStack gap={6}>
                                 <VStack gap={6} w="full">
                                     <AddEventGeneralFields
+                                        control={control}
                                         isCropCompleted={
                                             croppedImage ? true : false
                                         }
@@ -434,16 +441,12 @@ const AddEventModal = ({
                                             setImageToUpload(file)
                                         }
                                         errors={errors}
-                                        register={register}
                                         eventImage={eventImage}
                                         onImageRemove={() => {
                                             setEventImage(null);
                                             setValue("imageId", "");
                                             trigger("imageId");
                                         }}
-                                        onArtistChange={(artist) =>
-                                            setValue("artist", artist)
-                                        }
                                         onArtistAdd={handleArtistAdd}
                                         artistValue={watchArtist}
                                         lineupValue={watchLineup}
@@ -519,8 +522,9 @@ const AddEventModal = ({
                                                 alignItems="flex-start"
                                             >
                                                 <VenueSearch
+                                                    control={control}
+                                                    errors={errors}
                                                     isManual={isVenueManual}
-                                                    register={register}
                                                     onAddManuallyClick={() => {
                                                         setIsVenueManual(true);
                                                         setIsAddressManual(
@@ -528,14 +532,6 @@ const AddEventModal = ({
                                                         );
                                                         setVenueSearched(false);
                                                     }}
-                                                    onVenueSearchChange={(
-                                                        val
-                                                    ) =>
-                                                        setValue(
-                                                            "venueSearchTerm",
-                                                            val
-                                                        )
-                                                    }
                                                     handleSearchVenue={
                                                         handleSearchVenue
                                                     }
@@ -581,23 +577,21 @@ const AddEventModal = ({
                                                             : "hidden"
                                                     }
                                                 >
-                                                    <TextInput
-                                                        title="Name"
+                                                    <TextInput2
                                                         type="text"
-                                                        size="lg"
-                                                        fieldProps={register(
-                                                            "venue.name"
-                                                        )}
+                                                        title="Name"
                                                         height="60px"
-                                                        variant="outline"
+                                                        size="lg"
+                                                        name="venue.name"
                                                         error={
                                                             errors.venue?.name
                                                                 ?.message
                                                         }
-                                                        required
+                                                        control={control}
                                                     />
 
                                                     <AddressSearch
+                                                        control={control}
                                                         onAcceptVenue={() => {
                                                             trigger(
                                                                 "venue"
@@ -613,7 +607,6 @@ const AddEventModal = ({
                                                                 }
                                                             );
                                                         }}
-                                                        register={register}
                                                         errors={errors}
                                                         isManual={
                                                             isAddressManual

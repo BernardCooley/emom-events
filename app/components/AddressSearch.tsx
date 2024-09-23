@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
 import GooglePlacesSearch from "./GooglePlacesSearch";
-import { TextInput } from "./TextInput";
-import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { TextInput2 } from "./TextInput2";
+import { Control, FieldErrors } from "react-hook-form";
 import { FormData } from "./AddEventModal";
 
 interface Props {
@@ -10,9 +10,9 @@ interface Props {
     onPlaceChange: (place: any) => void;
     isManual: boolean;
     onSearchClick: () => void;
-    register: UseFormRegister<FormData>;
     errors: FieldErrors<FormData>;
     onAcceptVenue: () => void;
+    control: Control<FormData, any>;
 }
 
 const AddressSearch = ({
@@ -20,9 +20,9 @@ const AddressSearch = ({
     onPlaceChange,
     isManual,
     onSearchClick,
-    register,
     errors,
     onAcceptVenue,
+    control,
 }: Props) => {
     return (
         <Box w="full">
@@ -45,53 +45,48 @@ const AddressSearch = ({
                         w="full"
                         spacing={4}
                     >
-                        <TextInput
+                        <TextInput2
+                            type="text"
                             title="Street Address"
-                            type="text"
                             size="lg"
-                            fieldProps={register("venue.address")}
-                            height="60px"
-                            variant="outline"
+                            name="venue.address"
                             error={errors.venue?.address?.message}
+                            control={control}
                         />
-                        <TextInput
+                        <TextInput2
+                            type="text"
                             title="City/Town"
-                            type="text"
                             size="lg"
-                            fieldProps={register("venue.city")}
-                            height="60px"
-                            variant="outline"
+                            name="venue.city"
                             error={errors.venue?.city?.message}
+                            control={control}
                             required
                         />
-                        <TextInput
+                        <TextInput2
+                            type="text"
                             title="County/State"
-                            type="text"
                             size="lg"
-                            fieldProps={register("venue.state")}
-                            height="60px"
-                            variant="outline"
+                            name="venue.state"
                             error={errors.venue?.state?.message}
+                            control={control}
                             required
                         />
-                        <TextInput
+                        <TextInput2
+                            type="text"
                             title="Country"
-                            type="text"
                             size="lg"
-                            fieldProps={register("venue.country")}
-                            height="60px"
-                            variant="outline"
+                            name="venue.country"
                             error={errors.venue?.country?.message}
+                            control={control}
                             required
                         />
-                        <TextInput
-                            title="Postcode/Zip"
+                        <TextInput2
                             type="text"
+                            title="Postcode/Zip"
                             size="lg"
-                            fieldProps={register("venue.postcodeZip")}
-                            height="60px"
-                            variant="outline"
+                            name="venue.postcodeZip"
                             error={errors.venue?.postcodeZip?.message}
+                            control={control}
                         />
                         <VStack
                             h="80px"
@@ -125,6 +120,7 @@ const AddressSearch = ({
                     </Button>
                     <Flex w="full" alignItems="center" gap={4}>
                         <GooglePlacesSearch
+                            control={control}
                             onPlaceChange={(place) => {
                                 onPlaceChange(place);
                                 onAcceptVenue();

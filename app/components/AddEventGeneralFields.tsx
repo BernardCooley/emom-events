@@ -6,42 +6,39 @@ import {
     VisuallyHidden,
     VStack,
 } from "@chakra-ui/react";
-import { TextInput } from "./TextInput";
-import { TextAreaInput } from "./TextAreaInput";
+import { TextInput2 } from "./TextInput2";
 import FileUpload from "./FileUpload";
 import ChipGroup from "./ChipGroup";
 import { CloseIcon, SmallAddIcon } from "@chakra-ui/icons";
 import { FirebaseImageBlob } from "@/types";
-import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { Control, FieldErrors } from "react-hook-form";
 import { FormData } from "./AddEventModal";
 import { getUrlFromBlob } from "@/utils";
 
 interface Props {
-    register: UseFormRegister<FormData>;
     errors: FieldErrors<FormData>;
     eventImage: FirebaseImageBlob | null;
     onImageRemove: () => void;
-    onArtistChange: (artist: string) => void;
     onArtistAdd: () => void;
     artistValue: string;
     lineupValue: string[];
     onArtistRemove: (index: number) => void;
     onImageSelected: (file: File) => void;
     isCropCompleted: boolean;
+    control: Control<FormData, any>;
 }
 
 const AddEventGeneralFields = ({
     eventImage,
     onImageRemove,
-    onArtistChange,
     onArtistAdd,
     artistValue,
     lineupValue,
     onArtistRemove,
-    register,
     errors,
     onImageSelected,
     isCropCompleted,
+    control,
 }: Props) => {
     const imageGridRef = useRef<HTMLDivElement>(null);
 
@@ -53,25 +50,24 @@ const AddEventGeneralFields = ({
 
     return (
         <VStack gap={6} w="full">
-            <TextInput
-                title="Name"
+            <TextInput2
                 type="text"
+                title="Name"
                 size="lg"
-                fieldProps={register("name")}
-                height="60px"
-                variant="outline"
+                name="name"
                 error={errors.name?.message}
+                control={control}
                 required
             />
-            <TextAreaInput
-                title="Description"
+            <TextInput2
                 type="text"
+                title="Description"
                 size="lg"
-                fieldProps={register("description")}
-                height="60px"
-                variant="outline"
+                name="description"
                 error={errors.description?.message}
+                control={control}
                 required
+                isTextArea
             />
             <FileUpload
                 onImageSelected={onImageSelected}
@@ -101,37 +97,32 @@ const AddEventGeneralFields = ({
                 </Box>
             )}
             <VisuallyHidden ref={imageGridRef}>image grid ref</VisuallyHidden>
-            <TextInput
-                title="From"
+            <TextInput2
                 type="datetime-local"
+                title="From"
                 size="lg"
-                fieldProps={register("timeFrom")}
-                height="60px"
-                variant="outline"
+                name="timeFrom"
                 error={errors.timeFrom?.message}
+                control={control}
                 required
             />
-            <TextInput
-                title="To"
+            <TextInput2
                 type="datetime-local"
+                title="To"
                 size="lg"
-                fieldProps={register("timeTo")}
-                height="60px"
-                variant="outline"
+                name="timeTo"
                 error={errors.timeTo?.message}
+                control={control}
             />
 
             {/* TODO fix jumping eventImage when typing */}
-            <TextInput
-                fieldProps={register("artist")}
-                onChange={(e) => {
-                    onArtistChange(e.target.value);
-                }}
-                title="Add Artist"
+            <TextInput2
                 type="text"
+                title="Add Artist"
                 size="lg"
-                height="60px"
-                variant="outline"
+                name="artist"
+                error={errors.artist?.message}
+                control={control}
                 onEnter={onArtistAdd}
                 rightIcon={
                     artistValue?.length > 0 && (

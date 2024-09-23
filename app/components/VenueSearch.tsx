@@ -1,16 +1,14 @@
 import React from "react";
 import { Button, IconButton, Text, VStack } from "@chakra-ui/react";
-import { TextInput } from "./TextInput";
+import { TextInput2 } from "./TextInput2";
 import { SearchIcon } from "@chakra-ui/icons";
-import { UseFormRegister } from "react-hook-form";
+import { Control, FieldErrors } from "react-hook-form";
 import { FormData } from "./AddEventModal";
 import { VenueItem } from "@/types";
 import MenuSelect from "./MenuSelect";
 
 interface Props {
-    register: UseFormRegister<FormData>;
     onAddManuallyClick: () => void;
-    onVenueSearchChange: (searchTerm: string) => void;
     handleSearchVenue: () => void;
     venueSearchTerm: string;
     isManual: boolean;
@@ -19,12 +17,12 @@ interface Props {
     venues: VenueItem[] | null;
     handleVenueClick: (venue: VenueItem) => void;
     venueSearched: boolean;
+    control: Control<FormData, any>;
+    errors: FieldErrors<FormData>;
 }
 
 const VenueSearch = ({
     onAddManuallyClick,
-    register,
-    onVenueSearchChange,
     handleSearchVenue,
     venueSearchTerm,
     isManual,
@@ -33,6 +31,8 @@ const VenueSearch = ({
     venues,
     handleVenueClick,
     venueSearched,
+    control,
+    errors,
 }: Props) => {
     return (
         <>
@@ -47,17 +47,15 @@ const VenueSearch = ({
             ) : (
                 <VStack w="full" gap={6}>
                     <VStack gap={6} w="full" alignItems="start">
-                        <TextInput
-                            fieldProps={register("venueSearchTerm")}
-                            onChange={(e) => {
-                                onVenueSearchChange(e.target.value);
-                            }}
-                            title="Search for an existing Venue"
-                            type="text"
-                            size="lg"
-                            height="60px"
-                            variant="outline"
+                        <TextInput2
                             onEnter={handleSearchVenue}
+                            type="text"
+                            title="Search for an existing Venue"
+                            size="lg"
+                            name="venueSearchTerm"
+                            error={errors.venueSearchTerm?.message}
+                            control={control}
+                            required
                             rightIcon={
                                 venueSearchTerm?.length > 0 && (
                                     <IconButton

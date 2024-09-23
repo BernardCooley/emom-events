@@ -1,8 +1,10 @@
 import React, { useRef } from "react";
 import { Box } from "@chakra-ui/react";
 import { StandaloneSearchBox } from "@react-google-maps/api";
-import { TextInput } from "./TextInput";
+import { TextInput2 } from "./TextInput2";
 import { getAddress } from "@/utils";
+import { Control } from "react-hook-form";
+import { FormData } from "./AddEventModal";
 
 interface Props {
     onPlaceChange: (address: {
@@ -14,9 +16,10 @@ interface Props {
         latitude: number;
         longitude: number;
     }) => void;
+    control: Control<FormData, any>;
 }
 
-const GooglePlacesSearch = ({ onPlaceChange }: Props) => {
+const GooglePlacesSearch = ({ onPlaceChange, control }: Props) => {
     const placesRef = useRef<any>(null);
 
     const handlePlaceChange = () => {
@@ -39,12 +42,13 @@ const GooglePlacesSearch = ({ onPlaceChange }: Props) => {
                 onLoad={(ref) => (placesRef.current = ref)}
                 onPlacesChanged={handlePlaceChange}
             >
-                <TextInput
+                <TextInput2
+                    name="googlePlaceSearch"
+                    control={control}
                     title="Search for an address"
                     type="text"
                     size="lg"
                     height="60px"
-                    variant="outline"
                 />
             </StandaloneSearchBox>
         </Box>
