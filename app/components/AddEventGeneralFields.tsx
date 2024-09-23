@@ -115,7 +115,6 @@ const AddEventGeneralFields = ({
                 control={control}
             />
 
-            {/* TODO fix jumping eventImage when typing */}
             <TextInput
                 type="text"
                 title="Add Artist"

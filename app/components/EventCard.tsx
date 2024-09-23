@@ -90,7 +90,6 @@ const EventCard = ({
                                     value={formatDateTime(timeTo)}
                                 />
                             )}
-                            {/* TODO - Url shows promoters email address */}
                             <EventCardDetail
                                 title="Organiser/Promoter"
                                 value={promoter.name || ""}

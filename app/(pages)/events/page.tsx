@@ -7,6 +7,7 @@ import PageLoading from "@/app/components/PageLoading";
 import { TextInput } from "@/app/components/TextInput";
 import { fetchEvents } from "@/bff";
 import { useEventContext } from "@/context/eventContext";
+import useScrollPosition from "@/hooks/useScrollPosition";
 import { EventDetails, EventRequestProps } from "@/types";
 import {
     formatDateString,
@@ -32,7 +33,7 @@ import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 
 const fields = ["description", "timeFrom"] satisfies (keyof EventDetails)[];
-const testMode = false;
+const testMode = true;
 const limit = 50;
 
 export interface FormData {
@@ -48,13 +49,16 @@ const schema: ZodType<FormData> = z.object({
 interface Props {}
 
 const Page = ({}: Props) => {
+    const [fetching, setFetching] = useState<boolean>(false);
+    const [hasAllEvents, setHasAllEvents] = useState<boolean>(false);
+    const scrollPosition = useScrollPosition();
     const router = useRouter();
     const pathname = usePathname();
     const containerRef = useRef<HTMLDivElement>(null);
-    // TODO - implement showToTopButton
     const [showToTopButton, setShowToTopButton] = useState<boolean>(false);
     const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
-    const { events, currentEventId, updateEvents } = useEventContext();
+    const { events, currentEventId, updateEvents, skip, updateSkip } =
+        useEventContext();
     const [itemHovered, setItemHovered] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const dateFrom = searchParams.get("dateFrom");
@@ -86,6 +90,10 @@ const Page = ({}: Props) => {
 
     const dateFromWatch = watch("dateFrom");
     const searchTermWatch = watch("searchTerm");
+
+    useEffect(() => {
+        handleScroll();
+    }, [scrollPosition]);
 
     useEffect(() => {
         if (dateFromWatch.length > 0) {
@@ -153,6 +161,35 @@ const Page = ({}: Props) => {
 
     const generateTestData = (count: number) => {
         return Array.from({ length: count }, generateRandomEvent);
+    };
+
+    const handleScroll = async () => {
+        if (scrollPosition > window.innerHeight - 500) {
+            setShowToTopButton(true);
+        } else {
+            setShowToTopButton(false);
+        }
+
+        if (
+            containerRef.current?.getBoundingClientRect().height &&
+            scrollPosition >
+                containerRef.current?.getBoundingClientRect().height - 1200
+        ) {
+            if (!fetching && !hasAllEvents) {
+                setFetching(true);
+                const newEvents = await fetchEvents({
+                    data: getRequestOptions(skip + limit, dateFrom, searchTerm),
+                });
+
+                if (newEvents && newEvents.length > 0) {
+                    updateEvents([...events, ...newEvents]);
+                    updateSkip(skip + limit);
+                    setFetching(false);
+                } else {
+                    setHasAllEvents(true);
+                }
+            }
+        }
     };
 
     const handleSearch = () => {
