@@ -60,12 +60,11 @@ const ItemList = ({
                         onMouseEnter={() => onHover && onHover(item.id)}
                         onMouseLeave={() => onHover && onHover("")}
                         _hover={{
-                            transform: "scale(1.05)",
-                            transition: "transform 0.2s",
                             cursor: "pointer",
                             shadow: "lg",
                             bg: "gray.50",
-                            border: "2px solid gray.200",
+                            outline: "1px solid",
+                            outlineColor: "gray.300",
                         }}
                         transition="transform 0.2s"
                     >

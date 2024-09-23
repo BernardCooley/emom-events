@@ -58,6 +58,7 @@ const Page = ({}: Props) => {
     const searchParams = useSearchParams();
     const dateFromParam = searchParams.get("dateFrom");
     const searchTermParam = searchParams.get("searchTerm");
+    const showMap = searchParams.get("showMap");
     const [searchTermWatch, setSearchTermWatch] = useState<string>("");
     const testMode = false;
     const containerRef = useRef<HTMLDivElement>(null);
@@ -79,6 +80,23 @@ const Page = ({}: Props) => {
     useEffect(() => {
         getEvents();
     }, []);
+
+    useEffect(() => {
+        showMap ? setIsMapShowing(true) : setIsMapShowing(false);
+    }, []);
+
+    useEffect(() => {
+        isMapShowing
+            ? setQueryParams(
+                  {
+                      showMap: ["true"],
+                  },
+                  pathname,
+                  searchParams,
+                  router
+              )
+            : removeQueryParam("showMap", pathname, searchParams, router);
+    }, [isMapShowing]);
 
     useEffect(() => {
         getEvents(true);
@@ -365,7 +383,13 @@ const Page = ({}: Props) => {
                         ) : null}
                     </HStack>
                     <Button
-                        onClick={() => setIsMapShowing((prev) => !prev)}
+                        onClick={() => {
+                            if (isMapShowing) {
+                                setIsMapShowing(false);
+                            } else {
+                                setIsMapShowing(true);
+                            }
+                        }}
                         variant="link"
                     >
                         {isMapShowing ? "Show list" : "Show on map"}
