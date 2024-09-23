@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     Box,
     Button,
+    Divider,
     Flex,
     Heading,
     HStack,
@@ -198,7 +199,7 @@ const Page = ({}: Props) => {
     }
 
     return (
-        <Flex ref={containerRef} direction="column" gap={6}>
+        <Flex ref={containerRef} direction="column" gap={2}>
             <FloatingIconButton
                 icon={
                     <IconButton
@@ -223,19 +224,15 @@ const Page = ({}: Props) => {
             <form>
                 <HStack
                     rounded="lg"
-                    px={8}
-                    pt={4}
-                    border="1px solid"
-                    borderColor="gray.200"
+                    pt={2}
                     alignItems="flex-end"
-                    justifyContent="space-between"
+                    justifyContent="flex-end"
                 >
                     <HStack>
                         <TextInput
-                            title="Date from"
                             type="date"
                             size="lg"
-                            height="60px"
+                            height="40px"
                             variant="outline"
                             {...register("dateFrom")}
                             min={todayDateFormatted}
@@ -279,12 +276,12 @@ const Page = ({}: Props) => {
                             type="text"
                             size="lg"
                             fieldProps={register("searchTerm")}
-                            height="60px"
+                            height="40px"
                             variant="outline"
                             onChange={(e) => setSearchTermWatch(e.target.value)}
                             rightIcon={
                                 searchTermWatch.trim().length > 0 ? (
-                                    <HStack mt={5} h="58px" mr={12}>
+                                    <HStack mt={0} gap={0} h="38px" mr={10}>
                                         <IconButton
                                             h="full"
                                             bg="transparent"
@@ -326,6 +323,7 @@ const Page = ({}: Props) => {
                     </Box>
                 </HStack>
             </form>
+            <Divider />
             <Box h="24px">
                 <HStack>
                     <Text>Showing: </Text>
