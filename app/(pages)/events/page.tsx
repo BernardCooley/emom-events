@@ -38,11 +38,13 @@ const limit = 50;
 
 export interface FormData {
     dateFrom: string;
+    dateTo: string;
     searchTerm: string;
 }
 
 const schema: ZodType<FormData> = z.object({
     dateFrom: z.string(),
+    dateTo: z.string(),
     searchTerm: z.string(),
 });
 
@@ -62,6 +64,7 @@ const Page = ({}: Props) => {
     const [itemHovered, setItemHovered] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
     const searchTerm = searchParams.get("searchTerm");
     const [loading, setLoading] = useState(true);
 
@@ -77,6 +80,7 @@ const Page = ({}: Props) => {
         resolver: zodResolver(schema),
         defaultValues: {
             dateFrom: dateFrom || todayDateFormatted,
+            dateTo: dateTo || "",
             searchTerm: searchTerm || "",
         },
     });
@@ -89,6 +93,7 @@ const Page = ({}: Props) => {
     } = formMethods;
 
     const dateFromWatch = watch("dateFrom");
+    const dateToWatch = watch("dateTo");
     const searchTermWatch = watch("searchTerm");
 
     useEffect(() => {
@@ -97,14 +102,16 @@ const Page = ({}: Props) => {
 
     useEffect(() => {
         if (dateFromWatch.length > 0) {
-            setQueryParams(
-                {
-                    dateFrom: [dateFromWatch],
-                },
-                pathname,
-                searchParams,
-                router
-            );
+            setTimeout(() => {
+                setQueryParams(
+                    {
+                        dateFrom: [dateFromWatch],
+                    },
+                    pathname,
+                    searchParams,
+                    router
+                );
+            }, 0);
         } else {
             setQueryParams(
                 {
@@ -116,17 +123,35 @@ const Page = ({}: Props) => {
             );
             setValue("dateFrom", todayDateFormatted);
         }
-        getEvents(dateFromWatch, searchTermWatch);
+        getEvents(dateFromWatch, dateToWatch, searchTermWatch);
     }, [dateFromWatch]);
 
     useEffect(() => {
+        if (dateToWatch.length > 0) {
+            setQueryParams(
+                {
+                    dateTo: [dateToWatch],
+                },
+                pathname,
+                searchParams,
+                router
+            );
+        } else {
+            removeQueryParam("dateTo", pathname, searchParams, router);
+            setValue("dateTo", "");
+        }
+        getEvents(dateFromWatch, dateToWatch, searchTermWatch);
+    }, [dateToWatch]);
+
+    useEffect(() => {
         if (!currentEventId) {
-            getEvents(dateFrom, searchTerm);
+            getEvents(dateFrom, dateTo, searchTerm);
         }
     }, []);
 
     const getEvents = async (
         dateFrom: string | null,
+        dateTo: string | null,
         searchTerm: string | null
     ) => {
         let events;
@@ -135,7 +160,7 @@ const Page = ({}: Props) => {
             events = generateTestData(50);
         } else {
             events = await fetchEvents({
-                data: getRequestOptions(null, dateFrom, searchTerm),
+                data: getRequestOptions(null, dateFrom, dateTo, searchTerm),
             });
         }
 
@@ -149,12 +174,14 @@ const Page = ({}: Props) => {
     const getRequestOptions = (
         skip: number | null,
         dateFrom: string | null,
+        dateTo: string | null,
         searchTerm: string | null
     ): EventRequestProps => {
         return {
             skip: skip ? skip : 0,
             limit: limit,
             dateFrom,
+            dateTo,
             searchTerm,
         };
     };
@@ -178,7 +205,12 @@ const Page = ({}: Props) => {
             if (!fetching && !hasAllEvents) {
                 setFetching(true);
                 const newEvents = await fetchEvents({
-                    data: getRequestOptions(skip + limit, dateFrom, searchTerm),
+                    data: getRequestOptions(
+                        skip + limit,
+                        dateFrom,
+                        dateTo,
+                        searchTerm
+                    ),
                 });
 
                 if (newEvents && newEvents.length > 0) {
@@ -203,12 +235,12 @@ const Page = ({}: Props) => {
             router
         );
         setValue("dateFrom", todayDateFormatted);
-        getEvents(todayDateFormatted, searchTermWatch);
+        getEvents(todayDateFormatted, "", searchTermWatch);
     };
 
     const handleSearchClear = () => {
         removeQueryParam("searchTerm", pathname, searchParams, router);
-        getEvents(dateFromWatch, "");
+        getEvents(dateFromWatch, dateToWatch, "");
         setValue("searchTerm", "");
     };
 
@@ -221,10 +253,12 @@ const Page = ({}: Props) => {
             searchParams,
             router
         );
+        removeQueryParam("dateTo", pathname, searchParams, router);
         removeQueryParam("searchTerm", pathname, searchParams, router);
         setValue("searchTerm", "");
         setValue("dateFrom", todayDateFormatted);
-        getEvents(todayDateFormatted, "");
+        setValue("dateTo", "");
+        getEvents(todayDateFormatted, "", "");
     };
 
     if (loading) {
@@ -268,9 +302,18 @@ const Page = ({}: Props) => {
                         height="40px"
                         size="md"
                         name="dateFrom"
-                        error={errors.dateFrom?.message}
                         control={control}
                         min={todayDateFormatted}
+                    />
+                    <TextInput
+                        width="180px"
+                        type="date"
+                        title="Date to"
+                        height="40px"
+                        size="md"
+                        name="dateTo"
+                        control={control}
+                        min={dateFromWatch}
                     />
                     <TextInput
                         width="full"
@@ -280,7 +323,6 @@ const Page = ({}: Props) => {
                         height="40px"
                         size="md"
                         name="searchTerm"
-                        error={errors.searchTerm?.message}
                         control={control}
                         rightIcon={
                             searchTermWatch.trim().length > 0 ? (
@@ -313,14 +355,24 @@ const Page = ({}: Props) => {
                         <Text fontWeight={700}>
                             {searchParams.get("searchTerm") || "All events"}
                         </Text>
-                        {dateFromWatch !== todayDateFormatted && (
+                        {dateFromWatch !== todayDateFormatted ||
+                            (dateToWatch.length > 0 && (
+                                <HStack>
+                                    <Text>from</Text>
+                                    <Text fontWeight={700}>
+                                        {dateFromWatch}
+                                    </Text>
+                                </HStack>
+                            ))}
+                        {dateToWatch.length > 0 && (
                             <HStack>
-                                <Text>from</Text>
-                                <Text fontWeight={700}>{dateFromWatch}</Text>
+                                <Text>to</Text>
+                                <Text fontWeight={700}>{dateToWatch}</Text>
                             </HStack>
                         )}
                         {searchParams.get("searchTerm") ||
-                        dateFromWatch !== todayDateFormatted ? (
+                        dateFromWatch !== todayDateFormatted ||
+                        dateToWatch.length > 0 ? (
                             <Button
                                 ml={6}
                                 variant="link"

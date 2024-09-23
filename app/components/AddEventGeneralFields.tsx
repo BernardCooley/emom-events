@@ -75,8 +75,8 @@ const AddEventGeneralFields = ({
                 fieldLabel="Images"
                 accept="image/*"
                 buttonText="Upload an image..."
-                required
                 error={errors.imageId?.message}
+                required
             />
             {eventImage && (
                 <Box position="relative" w="300px">
@@ -111,7 +111,6 @@ const AddEventGeneralFields = ({
                 title="To"
                 size="lg"
                 name="timeTo"
-                error={errors.timeTo?.message}
                 control={control}
             />
 
@@ -120,7 +119,6 @@ const AddEventGeneralFields = ({
                 title="Add Artist"
                 size="lg"
                 name="artist"
-                error={errors.artist?.message}
                 control={control}
                 onEnter={onArtistAdd}
                 rightIcon={

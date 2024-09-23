@@ -202,7 +202,6 @@ const PromoterForm = ({
                             title="County/State"
                             size="lg"
                             name="state"
-                            error={errors.state?.message}
                             control={control}
                         />
                         <TextInput
@@ -210,7 +209,6 @@ const PromoterForm = ({
                             title="City/Town"
                             size="lg"
                             name="city"
-                            error={errors.city?.message}
                             control={control}
                         />
 

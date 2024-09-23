@@ -6,9 +6,12 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const { data } = await req.json();
 
-    const date = data.dateFrom
-        ? data.dateFrom
+    const dateFrom = data.dateFrom
+        ? `${data.dateFrom}T00:00`
         : `${formatDateString(new Date().toISOString()).date}T00:00`;
+
+    // TODO returning some events past the dateTo date
+    const dateTo = data.dateTo ? `${data.dateTo}T23:59` : null;
 
     const searchTermQuery = data.searchTerm
         ? {
@@ -89,9 +92,20 @@ export async function POST(req: Request) {
         : {};
 
     const dataRangeQuery = {
-        timeFrom: {
-            gte: date,
-        },
+        AND: [
+            {
+                timeFrom: {
+                    gte: dateFrom,
+                },
+            },
+            dateTo
+                ? {
+                      timeTo: {
+                          lte: dateTo,
+                      },
+                  }
+                : {},
+        ],
     };
 
     const combinedQuery = {
