@@ -51,6 +51,7 @@ const Page = ({}: Props) => {
     const router = useRouter();
     const pathname = usePathname();
     const containerRef = useRef<HTMLDivElement>(null);
+    // TODO - implement showToTopButton
     const [showToTopButton, setShowToTopButton] = useState<boolean>(false);
     const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
     const { events, currentEventId, updateEvents } = useEventContext();
@@ -111,29 +112,29 @@ const Page = ({}: Props) => {
     }, [dateFromWatch]);
 
     useEffect(() => {
-        getEvents(dateFrom, searchTerm);
+        if (!currentEventId) {
+            getEvents(dateFrom, searchTerm);
+        }
     }, []);
 
     const getEvents = async (
         dateFrom: string | null,
-        searchTerm: string | null,
-        force?: boolean | false
+        searchTerm: string | null
     ) => {
-        if (!currentEventId || force) {
-            let events;
+        let events;
 
-            if (testMode) {
-                events = generateTestData(50);
-            } else {
-                events = await fetchEvents({
-                    data: getRequestOptions(null, dateFrom, searchTerm),
-                });
-            }
-
-            if (events) {
-                updateEvents(events as EventDetails[]);
-            }
+        if (testMode) {
+            events = generateTestData(50);
+        } else {
+            events = await fetchEvents({
+                data: getRequestOptions(null, dateFrom, searchTerm),
+            });
         }
+
+        if (events) {
+            updateEvents(events as EventDetails[]);
+        }
+
         setLoading(false);
     };
 
@@ -273,7 +274,7 @@ const Page = ({}: Props) => {
                     <HStack>
                         <Text>Showing: </Text>
                         <Text fontWeight={700}>
-                            {searchTermWatch || "All events"}
+                            {searchParams.get("searchTerm") || "All events"}
                         </Text>
                         {dateFromWatch !== todayDateFormatted && (
                             <HStack>
@@ -281,7 +282,7 @@ const Page = ({}: Props) => {
                                 <Text fontWeight={700}>{dateFromWatch}</Text>
                             </HStack>
                         )}
-                        {searchTermWatch ||
+                        {searchParams.get("searchTerm") ||
                         dateFromWatch !== todayDateFormatted ? (
                             <Button
                                 ml={6}
