@@ -8,20 +8,24 @@ import {
     Flex,
     Heading,
     HStack,
+    IconButton,
     Image,
     Stack,
     StackDivider,
+    VStack,
 } from "@chakra-ui/react";
 import { EventDetails, FirebaseImageBlob } from "@/types";
 import { formatDateTime, getUrlFromBlob } from "@/utils";
 import "react-multi-carousel/lib/styles.css";
 import EventCardDetail from "./EventCardDetail";
+import { MdIosShare } from "react-icons/md";
 
 type EventCardProps = {
     eventDetails: EventDetails;
     canEdit?: boolean;
     onEditClick?: () => void;
     image: FirebaseImageBlob | null;
+    onShareClick: () => void;
 };
 
 const EventCard = ({
@@ -29,6 +33,7 @@ const EventCard = ({
     canEdit,
     onEditClick,
     image,
+    onShareClick,
 }: EventCardProps) => {
     const { name, venue, timeFrom, timeTo, promoter, description, lineup } =
         eventDetails || {};
@@ -60,13 +65,29 @@ const EventCard = ({
                         alignItems="flex-start"
                     >
                         {image && (
-                            <Box position="relative" w="300px">
+                            <VStack
+                                h="full"
+                                justifyContent="space-between"
+                                alignItems="start"
+                                position="relative"
+                                w="300px"
+                            >
                                 <Image
                                     src={getUrlFromBlob(image)}
                                     alt="main image"
                                     borderRadius="lg"
                                 />
-                            </Box>
+                                <IconButton
+                                    mt={2}
+                                    h="44px"
+                                    w="36px"
+                                    minW="unset"
+                                    aria-label="Search"
+                                    bg="transparent"
+                                    icon={<MdIosShare fontSize="38px" />}
+                                    onClick={onShareClick}
+                                />
+                            </VStack>
                         )}
                         <Stack w="60%" divider={<StackDivider />} spacing="4">
                             <EventCardDetail

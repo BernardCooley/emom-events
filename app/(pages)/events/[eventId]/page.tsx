@@ -11,6 +11,10 @@ import AddEventModal from "@/app/components/AddEventModal";
 import { getFirebaseImageBlob } from "@/firebase/functions";
 import { useSession } from "next-auth/react";
 import { useEventContext } from "@/context/eventContext";
+import { getUrlFromBlob } from "@/utils";
+import defaultSEO from "../../../../next-seo.config";
+import JsonLd from "@/app/components/jsonld";
+import ShareModal from "@/app/components/ShareModal";
 
 interface Props {}
 
@@ -18,6 +22,11 @@ const Event = ({}: Props) => {
     const { updateCurrentEventId } = useEventContext();
     const { data: session } = useSession();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: isShareModalOpen,
+        onOpen: onShareModalOpen,
+        onClose: onShareModalClose,
+    } = useDisclosure();
     const toast = useToast();
     const [loading, setLoading] = useState(true);
     const { eventId } = useParams();
@@ -64,6 +73,22 @@ const Event = ({}: Props) => {
 
     if (loading) return <PageLoading />;
 
+    const jsonLd = {
+        "@context": "http://schema.org",
+        "@type": "VideoObject",
+        image: eventImage ? getUrlFromBlob(eventImage) : "",
+        name: name,
+        description: description ? description : "Event from Emom",
+        publisher: {
+            "@type": "Organization",
+            name: "EMOM",
+        },
+        isAccessibleForFree: true,
+        url: `${defaultSEO.openGraph.url}/events/${eventId}`,
+        thumbnailUrl: eventImage ? getUrlFromBlob(eventImage) : "",
+        contentUrl: `${defaultSEO.openGraph.url}/events/${eventId}`,
+    };
+
     return (
         <>
             {name &&
@@ -73,6 +98,13 @@ const Event = ({}: Props) => {
             promoter &&
             eventDetails ? (
                 <>
+                    <JsonLd data={jsonLd} />
+                    <ShareModal
+                        eventImage={eventImage}
+                        event={eventDetails}
+                        isOpen={isShareModalOpen}
+                        onClose={onShareModalClose}
+                    />
                     <AddEventModal
                         existingEventImage={eventImage}
                         eventId={eventId as string}
@@ -120,6 +152,7 @@ const Event = ({}: Props) => {
                         onClose={onClose}
                     />
                     <EventCard
+                        onShareClick={onShareModalOpen}
                         image={eventImage}
                         onEditClick={onOpen}
                         canEdit={promoter.email === session?.user?.email}
