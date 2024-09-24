@@ -19,6 +19,7 @@ interface Props {
     venueSearched: boolean;
     control: Control<FormData, any>;
     errors: FieldErrors<FormData>;
+    onRevert: () => void;
 }
 
 const VenueSearch = ({
@@ -33,6 +34,7 @@ const VenueSearch = ({
     venueSearched,
     control,
     errors,
+    onRevert,
 }: Props) => {
     return (
         <>
@@ -45,8 +47,14 @@ const VenueSearch = ({
                     Search for an existing Venue
                 </Button>
             ) : (
-                <VStack w="full" gap={6}>
-                    <VStack gap={6} w="full" alignItems="start">
+                <VStack w="full" gap={6} alignItems="start">
+                    <VStack
+                        h="full"
+                        gap={6}
+                        w="full"
+                        alignItems="start"
+                        justifyContent="space-between"
+                    >
                         <TextInput
                             onEnter={handleSearchVenue}
                             type="text"
@@ -107,7 +115,7 @@ const VenueSearch = ({
                                     const selectedVenue = venues.find(
                                         (v) => v.id === value[0]
                                     );
-                                    handleVenueClick(selectedVenue!!);
+                                    handleVenueClick(selectedVenue!);
                                 }}
                             />
                         )}
@@ -125,6 +133,9 @@ const VenueSearch = ({
                             </VStack>
                         )}
                     </VStack>
+                    <Button onClick={onRevert} variant="link">
+                        Revert to current venue
+                    </Button>
                 </VStack>
             )}
         </>

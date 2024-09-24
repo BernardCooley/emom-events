@@ -37,6 +37,7 @@ export type EventDetails = {
     venue: VenueItem;
     lineup?: Event["lineup"];
     websites?: Event["websites"];
+    venueId?: Event["venueId"];
 };
 
 export type FirebaseImageBlob = {

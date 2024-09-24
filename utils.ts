@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { deleteFirebaseImage, uploadFirebaseImage } from "./firebase/functions";
-import { Dimensions, FirebaseImageBlob } from "./types";
+import { FirebaseImageBlob } from "./types";
 import { ReadonlyURLSearchParams } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
@@ -101,25 +101,17 @@ export const getImageDimensions = (
     img.src = objectUrl;
 };
 
-type HandleImageUploadProps = {
-    fileSizeLimit: number;
-    dimensions: Dimensions;
-    file: File;
-    onError: (errorMessage: string) => void;
-    onSuccess: () => void;
-};
-
 export const dataURItoBlob = (dataURI: string) => {
-    var byteString = atob(dataURI.split(",")[1]);
-    var mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
-    var ab = new ArrayBuffer(byteString.length);
-    var ia = new Uint8Array(ab);
+    const byteString = atob(dataURI.split(",")[1]);
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
 
-    for (var i = 0; i < byteString.length; i++) {
+    for (let i = 0; i < byteString.length; i++) {
         ia[i] = byteString.charCodeAt(i);
     }
 
-    var blob = new Blob([ab], { type: mimeString });
+    const blob = new Blob([ab], { type: mimeString });
     return blob;
 };
 

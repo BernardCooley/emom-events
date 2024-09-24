@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Box,
     Button,
@@ -7,6 +7,8 @@ import {
     Divider,
     Flex,
     HStack,
+    IconButton,
+    Image,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -15,6 +17,7 @@ import {
     ModalOverlay,
     Spinner,
     Text,
+    VisuallyHidden,
     VStack,
 } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
@@ -31,7 +34,6 @@ import {
     updateEvent,
 } from "@/bff";
 import { FirebaseImageBlob, VenueItem } from "@/types";
-import AddEventGeneralFields from "./AddEventGeneralFields";
 import AddressPanel from "./AddressPanel";
 import VenueSearch from "./VenueSearch";
 import {
@@ -40,8 +42,11 @@ import {
 } from "@/firebase/functions";
 import { Event, Venue } from "@prisma/client";
 import ImageCropper from "./ImageCropper";
-import { handleProfileImageChange } from "@/utils";
+import { getUrlFromBlob, handleProfileImageChange } from "@/utils";
 import GooglePlacesSearch from "./GooglePlacesSearch";
+import FileUpload from "./FileUpload";
+import { CloseIcon, SmallAddIcon } from "@chakra-ui/icons";
+import ChipGroup from "./ChipGroup";
 
 export interface FormData {
     name: Event["name"];
@@ -50,6 +55,7 @@ export interface FormData {
     description: Event["description"];
     lineup: Event["lineup"];
     venue: {
+        id: Venue["id"];
         name: Venue["name"];
         address: Venue["address"];
         city: Venue["city"];
@@ -73,6 +79,7 @@ const schema: ZodType<FormData> = z
         description: z.string().min(1, "Description is required"),
         lineup: z.array(z.string()),
         venue: z.object({
+            id: z.string(),
             name: z.string().min(1, "Venue name is required"),
             address: z.string(),
             city: z.string().min(1, "Venue city is required"),
@@ -124,6 +131,7 @@ const AddEventModal = ({
     onFail,
     eventId,
 }: Props) => {
+    const imageGridRef = useRef<HTMLDivElement>(null);
     const [imageToUpload, setImageToUpload] = useState<File | null>(null);
     const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
         null
@@ -144,45 +152,6 @@ const AddEventModal = ({
         libraries: libraries,
     });
 
-    useEffect(() => {
-        if (croppedImage) {
-            setEventImage(croppedImage);
-            setValue("imageId", croppedImage.name);
-            trigger("imageId");
-        }
-    }, [croppedImage]);
-
-    useEffect(() => {
-        reset(defaultValues);
-        if (defaultValues?.venue) {
-            setSelectedVenue({
-                id: "",
-                name: defaultValues.venue.name,
-                address: defaultValues.venue.address,
-                city: defaultValues.venue.city,
-                state: defaultValues.venue.state,
-                country: defaultValues.venue.country,
-                postcodeZip: defaultValues.venue.postcodeZip,
-                latitude: defaultValues.venue.latitude,
-                longitude: defaultValues.venue.longitude,
-            });
-            setIsVenueManual(true);
-        }
-
-        getImages();
-    }, [defaultValues]);
-
-    const getImages = async () => {
-        if (defaultValues?.imageId && eventId) {
-            const imageBlob = await getFirebaseImageBlob(
-                `eventImages/${eventId}/${defaultValues.imageId}`,
-                defaultValues.imageId
-            );
-
-            if (imageBlob) setEventImage(imageBlob);
-        }
-    };
-
     const formMethods = useForm<FormData>({
         mode: "onChange",
         resolver: zodResolver(schema),
@@ -193,6 +162,7 @@ const AddEventModal = ({
             description: defaultValues?.description || "",
             lineup: defaultValues?.lineup || [],
             venue: {
+                id: defaultValues?.venue.id || "",
                 name: defaultValues?.venue.name || "",
                 address: defaultValues?.venue.address || "",
                 city: defaultValues?.venue.city || "",
@@ -221,6 +191,55 @@ const AddEventModal = ({
     const watchLineup = watch("lineup");
     const watchVenueSearchTerm = watch("venueSearchTerm");
     const watchArtist = watch("artist");
+
+    useEffect(() => {
+        if (showAddressPanel) trigger("venue");
+    }, [showAddressPanel, trigger]);
+
+    useEffect(() => {
+        if (croppedImage ? true : false) {
+            imageGridRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [croppedImage]);
+
+    useEffect(() => {
+        if (croppedImage) {
+            setEventImage(croppedImage);
+            setValue("imageId", croppedImage.name);
+            trigger("imageId");
+        }
+    }, [croppedImage, setValue, trigger]);
+
+    const getImages = useCallback(async () => {
+        if (defaultValues?.imageId && eventId) {
+            const imageBlob = await getFirebaseImageBlob(
+                `eventImages/${eventId}/${defaultValues.imageId}`,
+                defaultValues.imageId
+            );
+
+            if (imageBlob) setEventImage(imageBlob);
+        }
+    }, [defaultValues, eventId]);
+
+    useEffect(() => {
+        reset(defaultValues);
+        if (defaultValues?.venue) {
+            setSelectedVenue({
+                id: defaultValues.venue.id,
+                name: defaultValues.venue.name,
+                address: defaultValues.venue.address,
+                city: defaultValues.venue.city,
+                state: defaultValues.venue.state,
+                country: defaultValues.venue.country,
+                postcodeZip: defaultValues.venue.postcodeZip,
+                latitude: defaultValues.venue.latitude,
+                longitude: defaultValues.venue.longitude,
+            });
+            setIsVenueManual(true);
+        }
+
+        getImages();
+    }, [defaultValues, reset, eventId, getImages]);
 
     const onCreateEvent = async (formData: FormData) => {
         let venue = null;
@@ -283,12 +302,38 @@ const AddEventModal = ({
     };
 
     const onUpdateEvent = async (formData: FormData) => {
+        let newVenue: VenueItem | null = null;
+
         const imageIds = await handleProfileImageChange(
             "eventImages",
             eventId as string,
             eventImage,
             existingEventImage
         );
+
+        const venueUpdated =
+            defaultValues?.venue.address !== formData.venue.address ||
+            defaultValues.venue.city !== formData.venue.city ||
+            defaultValues.venue.state !== formData.venue.state ||
+            defaultValues.venue.country !== formData.venue.country ||
+            defaultValues.venue.postcodeZip !== formData.venue.postcodeZip ||
+            defaultValues.venue.latitude !== formData.venue.latitude ||
+            defaultValues.venue.longitude !== formData.venue.longitude;
+
+        if (venueUpdated) {
+            newVenue = await addVenue({
+                data: {
+                    name: formData.venue.name,
+                    address: formData.venue.address,
+                    city: formData.venue.city,
+                    state: formData.venue.state,
+                    country: formData.venue.country,
+                    postcodeZip: formData.venue.postcodeZip,
+                    latitude: formData.venue.latitude,
+                    longitude: formData.venue.longitude,
+                },
+            });
+        }
 
         const updatedEvent = await updateEvent({
             id: eventId as string,
@@ -299,16 +344,7 @@ const AddEventModal = ({
                 description: formData.description,
                 imageIds: imageIds,
                 lineup: formData.lineup,
-            },
-            venue: {
-                name: formData.venue.name,
-                address: formData.venue.address,
-                city: formData.venue.city,
-                state: formData.venue.state,
-                country: formData.venue.country,
-                postcodeZip: formData.venue.postcodeZip,
-                latitude: formData.venue.latitude,
-                longitude: formData.venue.longitude,
+                venueId: newVenue ? newVenue.id : defaultValues?.venue.id,
             },
         });
 
@@ -430,181 +466,376 @@ const AddEventModal = ({
                     />
 
                     <Collapse in={!imageToUpload}>
-                        <form onSubmit={handleSubmit(onSave)}>
+                        <form
+                            onSubmit={handleSubmit(onSave, (errors) =>
+                                console.log(errors)
+                            )}
+                        >
                             <VStack gap={6}>
                                 <VStack gap={6} w="full">
-                                    <AddEventGeneralFields
-                                        control={control}
-                                        isCropCompleted={
-                                            croppedImage ? true : false
-                                        }
-                                        onImageSelected={(file) =>
-                                            setImageToUpload(file)
-                                        }
-                                        errors={errors}
-                                        eventImage={eventImage}
-                                        onImageRemove={() => {
-                                            setEventImage(null);
-                                            setValue("imageId", "");
-                                            trigger("imageId");
-                                        }}
-                                        onArtistAdd={handleArtistAdd}
-                                        artistValue={watchArtist}
-                                        lineupValue={watchLineup}
-                                        onArtistRemove={(index) =>
-                                            setValue(
-                                                "lineup",
-                                                watchLineup.filter(
-                                                    (_, i) => i !== index
-                                                )
-                                            )
-                                        }
-                                    />
-                                    <Divider />
-                                    <VStack w="full" alignItems="start">
-                                        <Flex w="full">
-                                            <Text fontSize="lg">Venue</Text>
-                                            <Box color="gpRed.500" pl={1}>
-                                                *
-                                            </Box>
-                                        </Flex>
+                                    <VStack gap={6} w="full">
+                                        <TextInput
+                                            type="text"
+                                            title="Name"
+                                            size="lg"
+                                            name="name"
+                                            error={errors.name?.message}
+                                            control={control}
+                                            required
+                                        />
+                                        <TextInput
+                                            type="text"
+                                            title="Description"
+                                            size="lg"
+                                            name="description"
+                                            error={errors.description?.message}
+                                            control={control}
+                                            required
+                                            isTextArea
+                                        />
+                                        <VStack w="full" alignItems="start">
+                                            <Flex w="full">
+                                                <Text fontSize="lg">Venue</Text>
+                                                <Box color="gpRed.500" pl={1}>
+                                                    *
+                                                </Box>
+                                            </Flex>
 
-                                        {selectedVenue || showAddressPanel ? (
-                                            <AddressPanel
-                                                onSearchAgainClick={() => {
-                                                    setShowAddressPanel(false);
-                                                    setSelectedVenue(null);
-                                                    setIsVenueManual(false);
-                                                }}
-                                                isManual={isVenueManual}
-                                                address={{
-                                                    name: getValues(
-                                                        "venue.name"
-                                                    ),
-                                                    address:
-                                                        getValues(
-                                                            "venue.address"
-                                                        ),
-                                                    city: getValues(
-                                                        "venue.city"
-                                                    ),
-                                                    state: getValues(
-                                                        "venue.state"
-                                                    ),
-                                                    country:
-                                                        getValues(
-                                                            "venue.country"
-                                                        ),
-                                                    postcodeZip:
-                                                        getValues(
-                                                            "venue.postcodeZip"
-                                                        ),
-                                                }}
-                                                onEdit={() => {
-                                                    setShowAddressPanel(false);
-                                                    setSelectedVenue(null);
-                                                    setIsVenueManual(true);
-                                                }}
-                                            />
-                                        ) : (
-                                            <VStack
-                                                p={6}
-                                                border="1px solid"
-                                                borderColor={
-                                                    errors.venue
-                                                        ? "red"
-                                                        : "gray.300"
-                                                }
-                                                w="full"
-                                                spacing={6}
-                                                rounded="lg"
-                                                alignItems="flex-start"
-                                            >
-                                                <VenueSearch
-                                                    control={control}
-                                                    errors={errors}
-                                                    isManual={isVenueManual}
-                                                    onAddManuallyClick={() => {
-                                                        setIsVenueManual(true);
-                                                        setVenueSearched(false);
-                                                    }}
-                                                    handleSearchVenue={
-                                                        handleSearchVenue
-                                                    }
-                                                    venueSearchTerm={
-                                                        watchVenueSearchTerm
-                                                    }
-                                                    onExistingVenueSearchClick={() => {
-                                                        setVenues(null);
-                                                        setIsVenueManual(false);
-                                                        setValue(
-                                                            "venueSearchTerm",
-                                                            ""
-                                                        );
-                                                        setVenueSearched(false);
-                                                    }}
-                                                    showResults={
-                                                        venues !== null &&
-                                                        venues.length > 0 &&
-                                                        !selectedVenue
-                                                    }
-                                                    venues={venues}
-                                                    handleVenueClick={(val) =>
-                                                        handleVenueClick(val)
-                                                    }
-                                                    venueSearched={
-                                                        venueSearched
-                                                    }
-                                                />
-
-                                                <VStack
-                                                    gap={10}
-                                                    w="full"
-                                                    opacity={
-                                                        isVenueManual ? 1 : 0
-                                                    }
-                                                    h={
-                                                        isVenueManual
-                                                            ? "unset"
-                                                            : 0
-                                                    }
-                                                    overflow={
-                                                        isVenueManual
-                                                            ? "unset"
-                                                            : "hidden"
-                                                    }
-                                                >
-                                                    <TextInput
-                                                        type="text"
-                                                        title="Name"
-                                                        size="lg"
-                                                        name="venue.name"
-                                                        error={
-                                                            errors.venue?.name
-                                                                ?.message
-                                                        }
-                                                        control={control}
-                                                    />
-
-                                                    <GooglePlacesSearch
-                                                        control={control}
-                                                        onPlaceChange={(
-                                                            place
-                                                        ) => {
-                                                            setVenueAddressFields(
-                                                                {
-                                                                    name: getValues(
-                                                                        "venue.name"
-                                                                    ),
-                                                                    id: "",
-                                                                    ...place,
-                                                                }
+                                            {selectedVenue ||
+                                            showAddressPanel ? (
+                                                <>
+                                                    <AddressPanel
+                                                        errors={errors}
+                                                        address={{
+                                                            name: getValues(
+                                                                "venue.name"
+                                                            ),
+                                                            address:
+                                                                getValues(
+                                                                    "venue.address"
+                                                                ),
+                                                            city: getValues(
+                                                                "venue.city"
+                                                            ),
+                                                            state: getValues(
+                                                                "venue.state"
+                                                            ),
+                                                            country:
+                                                                getValues(
+                                                                    "venue.country"
+                                                                ),
+                                                            postcodeZip:
+                                                                getValues(
+                                                                    "venue.postcodeZip"
+                                                                ),
+                                                        }}
+                                                        onEdit={() => {
+                                                            setVenues(null);
+                                                            setIsVenueManual(
+                                                                false
+                                                            );
+                                                            setValue(
+                                                                "venueSearchTerm",
+                                                                ""
+                                                            );
+                                                            setVenueSearched(
+                                                                false
+                                                            );
+                                                            setShowAddressPanel(
+                                                                false
+                                                            );
+                                                            setSelectedVenue(
+                                                                null
                                                             );
                                                         }}
                                                     />
+                                                    {errors?.venue && (
+                                                        <VStack
+                                                            fontSize="14px"
+                                                            color="#e53e3e"
+                                                        >
+                                                            <Text>
+                                                                {
+                                                                    errors.venue
+                                                                        .city
+                                                                        ?.message
+                                                                }
+                                                            </Text>
+                                                            <Text>
+                                                                {
+                                                                    errors.venue
+                                                                        .country
+                                                                        ?.message
+                                                                }
+                                                            </Text>
+                                                            <Text>
+                                                                {
+                                                                    errors.venue
+                                                                        .state
+                                                                        ?.message
+                                                                }
+                                                            </Text>
+                                                        </VStack>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <VStack
+                                                    p={6}
+                                                    border="1px solid"
+                                                    borderColor={
+                                                        errors.venue
+                                                            ? "red"
+                                                            : "gray.300"
+                                                    }
+                                                    w="full"
+                                                    spacing={6}
+                                                    rounded="lg"
+                                                    alignItems="flex-start"
+                                                >
+                                                    <VenueSearch
+                                                        onRevert={() => {
+                                                            setVenueAddressFields(
+                                                                {
+                                                                    id: "",
+                                                                    name: getValues(
+                                                                        "venue.name"
+                                                                    ),
+                                                                    address:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .address ||
+                                                                        "",
+                                                                    city:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .city ||
+                                                                        "",
+                                                                    state:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .state ||
+                                                                        "",
+                                                                    country:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .country ||
+                                                                        "",
+                                                                    postcodeZip:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .postcodeZip ||
+                                                                        "",
+                                                                    latitude:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .latitude ||
+                                                                        0,
+                                                                    longitude:
+                                                                        defaultValues
+                                                                            ?.venue
+                                                                            .longitude ||
+                                                                        0,
+                                                                }
+                                                            );
+                                                        }}
+                                                        control={control}
+                                                        errors={errors}
+                                                        isManual={isVenueManual}
+                                                        onAddManuallyClick={() => {
+                                                            setIsVenueManual(
+                                                                true
+                                                            );
+                                                            setVenueSearched(
+                                                                false
+                                                            );
+                                                        }}
+                                                        handleSearchVenue={
+                                                            handleSearchVenue
+                                                        }
+                                                        venueSearchTerm={
+                                                            watchVenueSearchTerm
+                                                        }
+                                                        onExistingVenueSearchClick={() => {
+                                                            setVenues(null);
+                                                            setIsVenueManual(
+                                                                false
+                                                            );
+                                                            setValue(
+                                                                "venueSearchTerm",
+                                                                ""
+                                                            );
+                                                            setVenueSearched(
+                                                                false
+                                                            );
+                                                        }}
+                                                        showResults={
+                                                            venues !== null &&
+                                                            venues.length > 0 &&
+                                                            !selectedVenue
+                                                        }
+                                                        venues={venues}
+                                                        handleVenueClick={(
+                                                            val
+                                                        ) =>
+                                                            handleVenueClick(
+                                                                val
+                                                            )
+                                                        }
+                                                        venueSearched={
+                                                            venueSearched
+                                                        }
+                                                    />
+
+                                                    <VStack
+                                                        gap={10}
+                                                        w="full"
+                                                        sx={
+                                                            isVenueManual
+                                                                ? {}
+                                                                : {
+                                                                      opacity: 0,
+                                                                      h: 0,
+                                                                      overflow:
+                                                                          "hidden",
+                                                                  }
+                                                        }
+                                                    >
+                                                        <TextInput
+                                                            type="text"
+                                                            title="Name"
+                                                            size="lg"
+                                                            name="venue.name"
+                                                            error={
+                                                                errors.venue
+                                                                    ?.name
+                                                                    ?.message
+                                                            }
+                                                            control={control}
+                                                        />
+
+                                                        <GooglePlacesSearch
+                                                            control={control}
+                                                            onPlaceChange={(
+                                                                place
+                                                            ) => {
+                                                                setVenueAddressFields(
+                                                                    {
+                                                                        name: getValues(
+                                                                            "venue.name"
+                                                                        ),
+                                                                        id: "",
+                                                                        ...place,
+                                                                    }
+                                                                );
+                                                            }}
+                                                        />
+                                                    </VStack>
                                                 </VStack>
-                                            </VStack>
+                                            )}
+                                        </VStack>
+                                        <FileUpload
+                                            onImageSelected={(file) =>
+                                                setImageToUpload(file)
+                                            }
+                                            allowErrors
+                                            fieldLabel="Images"
+                                            accept="image/*"
+                                            buttonText="Upload an image..."
+                                            error={errors.imageId?.message}
+                                            required
+                                        />
+                                        {eventImage && (
+                                            <Box position="relative" w="300px">
+                                                <IconButton
+                                                    rounded="full"
+                                                    right={1}
+                                                    top={1}
+                                                    h="28px"
+                                                    w="28px"
+                                                    minW="unset"
+                                                    position="absolute"
+                                                    aria-label="Remove image"
+                                                    icon={<CloseIcon />}
+                                                    onClick={() => {
+                                                        setEventImage(null);
+                                                        setValue("imageId", "");
+                                                        trigger("imageId");
+                                                    }}
+                                                />
+
+                                                <Image
+                                                    src={getUrlFromBlob(
+                                                        eventImage
+                                                    )}
+                                                    alt=""
+                                                />
+                                            </Box>
                                         )}
+                                        <VisuallyHidden ref={imageGridRef}>
+                                            image grid ref
+                                        </VisuallyHidden>
+                                        <TextInput
+                                            type="datetime-local"
+                                            title="From"
+                                            size="lg"
+                                            name="timeFrom"
+                                            error={errors.timeFrom?.message}
+                                            control={control}
+                                            required
+                                        />
+                                        <TextInput
+                                            type="datetime-local"
+                                            title="To"
+                                            size="lg"
+                                            name="timeTo"
+                                            control={control}
+                                        />
+
+                                        <TextInput
+                                            type="text"
+                                            title="Add Artist"
+                                            size="lg"
+                                            name="artist"
+                                            control={control}
+                                            onEnter={handleArtistAdd}
+                                            rightIcon={
+                                                watchArtist?.length > 0 && (
+                                                    <IconButton
+                                                        mt={2}
+                                                        h="44px"
+                                                        w="36px"
+                                                        minW="unset"
+                                                        aria-label="Search"
+                                                        icon={
+                                                            <SmallAddIcon fontSize="28px" />
+                                                        }
+                                                        onClick={
+                                                            handleArtistAdd
+                                                        }
+                                                    />
+                                                )
+                                            }
+                                        />
+                                        <Box w="full" mt={6}>
+                                            <ChipGroup
+                                                title="Lineup: "
+                                                onRemoveChip={(index) =>
+                                                    setValue(
+                                                        "lineup",
+                                                        watchLineup.filter(
+                                                            (_, i) =>
+                                                                i !== index
+                                                        )
+                                                    )
+                                                }
+                                                chips={watchLineup.map(
+                                                    (artist) => ({
+                                                        label: artist,
+                                                        value: artist.toLowerCase(),
+                                                    })
+                                                )}
+                                            />
+                                        </Box>
                                     </VStack>
                                 </VStack>
                                 <HStack w="full" justifyContent="flex-end">
@@ -619,7 +850,7 @@ const AddEventModal = ({
                                     </Button>
                                     <Button
                                         isLoading={isSaving}
-                                        onClick={handleSubmit(onSave)}
+                                        type="submit"
                                         colorScheme="blue"
                                     >
                                         {eventId

@@ -81,6 +81,7 @@ const Event = ({}: Props) => {
                         defaultValues={{
                             name: name,
                             venue: {
+                                id: venue.id,
                                 name: venue.name,
                                 address: venue.address,
                                 city: venue.city,

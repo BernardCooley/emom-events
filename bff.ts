@@ -276,23 +276,13 @@ type UpdateEventProps = {
         description: EventDetails["description"];
         imageIds: EventDetails["imageIds"];
         lineup?: EventDetails["lineup"];
-    };
-    venue: {
-        name: VenueItem["name"];
-        address: VenueItem["address"];
-        city: VenueItem["city"];
-        state: VenueItem["state"];
-        country: VenueItem["country"];
-        postcodeZip: VenueItem["postcodeZip"];
-        latitude: VenueItem["latitude"];
-        longitude: VenueItem["longitude"];
+        venueId?: EventDetails["venueId"];
     };
 };
 
 export const updateEvent = async ({
     id,
     event,
-    venue,
 }: UpdateEventProps): Promise<EventDetails | null> => {
     try {
         const updatedEvent: EventDetails | null = await fetchWithErrorHandling(
@@ -301,7 +291,6 @@ export const updateEvent = async ({
             {
                 id,
                 event,
-                venue,
             }
         );
 

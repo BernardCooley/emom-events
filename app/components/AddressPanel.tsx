@@ -1,5 +1,7 @@
 import React from "react";
 import { Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { FieldErrors } from "react-hook-form";
+import { FormData } from "./AddEventModal";
 
 interface Props {
     address: {
@@ -11,18 +13,19 @@ interface Props {
         postcodeZip: string;
     };
     onEdit: () => void;
-    isManual: boolean;
-    onSearchAgainClick: () => void;
+    errors: FieldErrors<FormData>;
 }
 
-const AddressPanel = ({
-    address,
-    onEdit,
-    isManual,
-    onSearchAgainClick,
-}: Props) => {
+const AddressPanel = ({ address, onEdit, errors }: Props) => {
     return (
         <HStack
+            sx={
+                errors?.venue
+                    ? {
+                          border: "2px solid red",
+                      }
+                    : {}
+            }
             rounded="lg"
             gap={10}
             bg="gray.200"
@@ -37,15 +40,10 @@ const AddressPanel = ({
                 <Text>{address.country}</Text>
                 <Text>{address.postcodeZip}</Text>
             </VStack>
-            {isManual ? (
-                <Button onClick={onEdit} variant="link">
-                    Edit
-                </Button>
-            ) : (
-                <Button onClick={onSearchAgainClick} variant="link">
-                    Search again
-                </Button>
-            )}
+
+            <Button onClick={onEdit} variant="link">
+                Edit
+            </Button>
         </HStack>
     );
 };

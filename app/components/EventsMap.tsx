@@ -90,7 +90,7 @@ const EventsMap = ({
                     <Marker
                         icon={{
                             url: "/icons/emom-e.png",
-                            scaledSize: new google.maps.Size(40, 40),
+                            scaledSize: new google.maps.Size(35, 35),
                         }}
                         onMouseOver={() => {
                             onMarkerHovered(true);
