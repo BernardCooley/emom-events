@@ -243,14 +243,16 @@ export const setQueryParams = (
 };
 
 export const removeQueryParams = (
-    keys: string[],
+    paramsObj: string[],
     pathname: string,
     searchParams: ReadonlyURLSearchParams,
     router: AppRouterInstance
 ) => {
     const params = new URLSearchParams(searchParams.toString());
-    keys.forEach((key) => {
+
+    paramsObj.forEach((key) => {
         params.delete(key);
-        router.push(`${pathname}?${params.toString()}`);
     });
+
+    router.push(`${pathname}?${params.toString()}`);
 };

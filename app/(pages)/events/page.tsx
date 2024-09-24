@@ -391,8 +391,8 @@ const Page = ({}: Props) => {
                             onClick={() => {
                                 if (isMapShowing) {
                                     setIsMapShowing(false);
-                                    setQueryParams(
-                                        { showMap: ["false"] },
+                                    removeQueryParams(
+                                        ["showMap"],
                                         pathname,
                                         searchParams,
                                         router
