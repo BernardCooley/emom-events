@@ -31,7 +31,7 @@ const SideMenu = ({ placement = "right" }: Props) => {
     const router = useRouter();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const btnRef = useRef<HTMLButtonElement | null>(null);
-    const pageName = pathname.split("/")[1];
+    const pageName = pathname.split("/")[pathname.split("/").length - 1];
 
     const menuItems = [
         {

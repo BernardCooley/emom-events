@@ -59,7 +59,6 @@ const Page = ({}: Props) => {
     const pathname = usePathname();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showToTopButton, setShowToTopButton] = useState<boolean>(false);
-    const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
     const { events, currentEventId, updateEvents, skip, updateSkip } =
         useEventContext();
     const [itemHoveredId, setItemHovered] = useState<string | null>(null);
@@ -67,7 +66,11 @@ const Page = ({}: Props) => {
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
     const searchTerm = searchParams.get("searchTerm");
+    const showMapParam = searchParams.get("showMap");
     const [loading, setLoading] = useState(true);
+    const [isMapShowing, setIsMapShowing] = useState<boolean>(
+        showMapParam === "true"
+    );
 
     const todayDate = formatDateString(new Date().toISOString());
     const todayDateFormatted = `${[
@@ -388,7 +391,19 @@ const Page = ({}: Props) => {
                             onClick={() => {
                                 if (isMapShowing) {
                                     setIsMapShowing(false);
+                                    setQueryParams(
+                                        { showMap: ["false"] },
+                                        pathname,
+                                        searchParams,
+                                        router
+                                    );
                                 } else {
+                                    setQueryParams(
+                                        { showMap: ["true"] },
+                                        pathname,
+                                        searchParams,
+                                        router
+                                    );
                                     setIsMapShowing(true);
                                 }
                             }}
