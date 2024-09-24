@@ -46,7 +46,7 @@ const ItemList = ({
         if (itemHoveredId && isMarkerHovered) {
             const element = document.getElementById(itemHoveredId);
             if (element) {
-                element.scrollIntoView({ behavior: "smooth" });
+                element.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
     }, [itemHoveredId]);
