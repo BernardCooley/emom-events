@@ -6,6 +6,7 @@ import {
     Button,
     Center,
     Heading,
+    HStack,
     IconButton,
     Image,
     VStack,
@@ -22,6 +23,7 @@ import { FirebaseImageBlob } from "@/types";
 import ImageCropper from "./ImageCropper";
 import { getUrlFromBlob, handleProfileImageChange } from "@/utils";
 import { CloseIcon } from "@chakra-ui/icons";
+import { usePromoterContext } from "@/context/promoterContext";
 
 export interface FormData {
     name: Promoter["name"];
@@ -45,6 +47,7 @@ type Props = {
     onFail: () => void;
     isEditing?: boolean;
     existingProfileImage: FirebaseImageBlob | null;
+    onCancel?: () => void;
 };
 
 const PromoterForm = ({
@@ -53,7 +56,9 @@ const PromoterForm = ({
     onFail,
     isEditing = false,
     existingProfileImage,
+    onCancel,
 }: Props) => {
+    const { promoter } = usePromoterContext();
     const [imageToCrop, setImageToCrop] = useState<File | null>(null);
     const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
         null
@@ -90,45 +95,63 @@ const PromoterForm = ({
     const onCreatePromoter = async (formData: FormData) => {
         let imageIds: string[] = [];
 
-        if (profileImage) {
-            const newImage = await uploadFirebaseImage(
-                "promoterImages",
-                new File([profileImage.blob], profileImage.name),
-                formData.email
-            );
-
-            if (newImage) imageIds.push(profileImage.name);
-        }
-
-        const resp = await addPromoter({
+        const newPromoter = await addPromoter({
             data: {
-                id: formData.email,
+                id: "",
                 name: formData.name,
                 city: formData.city,
                 state: formData.state,
                 country: formData.country,
-                imageIds: imageIds,
+                imageIds: [],
                 email: formData.email,
                 websites: [],
             },
         });
-        if (resp) {
-            onSuccess(resp);
+
+        if (newPromoter) {
+            if (profileImage) {
+                const newImage = await uploadFirebaseImage(
+                    "promoterImages",
+                    new File([profileImage.blob], profileImage.name),
+                    newPromoter.id
+                );
+
+                if (newImage) imageIds.push(profileImage.name);
+
+                if (imageIds.length > 0) {
+                    const resp = await updatePromoter({
+                        id: newPromoter.id,
+                        data: {
+                            imageIds: imageIds,
+                        },
+                    });
+
+                    if (resp) {
+                        onSuccess(resp);
+                    } else {
+                        onFail();
+                    }
+                }
+            } else {
+                onSuccess(newPromoter);
+            }
         } else {
             onFail();
         }
     };
 
     const onUpdatePromoter = async (formData: FormData) => {
+        if (!promoter) return null;
+
         const imageIds = await handleProfileImageChange(
             "promoterImages",
-            formData.email,
+            promoter.id,
             profileImage,
             existingProfileImage
         );
 
         const resp = await updatePromoter({
-            id: formData.email,
+            id: promoter.id,
             data: {
                 name: formData.name,
                 city: formData.city,
@@ -239,14 +262,25 @@ const PromoterForm = ({
                                 />
                             </Box>
                         )}
-                        <Button
-                            isLoading={isSaving}
-                            onClick={handleSubmit(onSave)}
-                            colorScheme="blue"
-                            mt={10}
-                        >
-                            Save
-                        </Button>
+                        <HStack w="full" justifyContent="center" gap={6}>
+                            <Button
+                                variant="outline"
+                                isLoading={isSaving}
+                                onClick={onCancel}
+                                colorScheme="red"
+                                mt={10}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                isLoading={isSaving}
+                                onClick={handleSubmit(onSave)}
+                                colorScheme="blue"
+                                mt={10}
+                            >
+                                Save
+                            </Button>
+                        </HStack>
                     </VStack>
                 </form>
             </Box>

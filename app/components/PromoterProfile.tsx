@@ -88,6 +88,7 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                     <Flex w="full" alignItems="center" direction="column">
                         {isEditing && (
                             <PromoterForm
+                                onCancel={() => setEditing(false)}
                                 existingProfileImage={profileImage}
                                 isEditing={true}
                                 onSuccess={(promoter) => {

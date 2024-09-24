@@ -33,6 +33,7 @@ export type EventDetails = {
     promoter: {
         id: Promoter["id"];
         name: Promoter["name"];
+        email: Promoter["email"];
     };
     venue: VenueItem;
     lineup?: Event["lineup"];

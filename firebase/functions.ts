@@ -13,7 +13,7 @@ export const uploadFirebaseImage = async (
     file: File,
     subFolder?: string
 ): Promise<string> => {
-    const path = `${folder}/${subFolder || ""}/${file.name}`;
+    const path = [folder, subFolder, file.name].join("/");
     try {
         const storageRef = ref(storage, path);
 
@@ -27,9 +27,9 @@ export const uploadFirebaseImage = async (
 export const deleteFirebaseImage = async (
     folder: string,
     name: string,
-    email: string
+    subfolder?: string
 ) => {
-    const path = `${folder}/${email}/${name}`;
+    const path = [folder, subfolder, name].join("/");
     const pathReference = ref(storage, path);
 
     try {

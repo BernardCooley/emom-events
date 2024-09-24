@@ -14,25 +14,33 @@ import {
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { fetchPromoter } from "@/bff";
-import { Event } from "@prisma/client";
 import PromoterForm from "@/app/components/PromoterForm";
 import { getFirebaseImageBlob } from "@/firebase/functions";
-import { FirebaseImageBlob, PromoterDetails } from "@/types";
+import { FirebaseImageBlob } from "@/types";
 import PromoterProfile from "@/app/components/PromoterProfile";
 import AddEventModal from "@/app/components/AddEventModal";
 import ItemList from "@/app/components/ItemList";
+import { usePromoterContext } from "@/context/promoterContext";
 
 interface Props {}
 
 const PromoterDashboard = ({}: Props) => {
+    const { promoter, updatePromoter } = usePromoterContext();
     const toast = useToast();
     const { data: session } = useSession();
-    const [promoter, setPromoter] = useState<PromoterDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [profileImage, setProfileImage] = useState<FirebaseImageBlob | null>(
         null
     );
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    useEffect(() => {
+        if (promoter) {
+            updatePromoter(promoter);
+        } else {
+            updatePromoter(null);
+        }
+    }, [promoter]);
 
     const getPromoter = useCallback(async () => {
         if (session?.user?.email) {
@@ -42,7 +50,7 @@ const PromoterDashboard = ({}: Props) => {
 
             if (promoter && promoter?.imageIds.length > 0) {
                 const imageBlob = await getFirebaseImageBlob(
-                    `promoterImages/${promoter?.email}/${promoter.imageIds[0]}`,
+                    `promoterImages/${promoter?.id}/${promoter.imageIds[0]}`,
                     promoter.imageIds[0]
                 );
 
@@ -54,7 +62,7 @@ const PromoterDashboard = ({}: Props) => {
             } else {
                 setProfileImage(null);
             }
-            setPromoter(promoter);
+            updatePromoter(promoter);
             setLoading(false);
         }
     }, [session?.user?.email]);
@@ -107,12 +115,6 @@ const PromoterDashboard = ({}: Props) => {
         );
     }
 
-    const fields = [
-        "description",
-        "timeFrom",
-        "timeTo",
-    ] satisfies (keyof Event)[];
-
     return (
         <VStack gap={10}>
             <PromoterProfile
@@ -136,8 +138,7 @@ const PromoterDashboard = ({}: Props) => {
                         <ItemList
                             onAddEventClick={onOpen}
                             page="events"
-                            fields={fields}
-                            data={promoter.events}
+                            events={promoter.events}
                         />
                     </Box>
                 </CardHeader>

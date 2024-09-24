@@ -128,6 +128,7 @@ export async function POST(req: Request) {
                     select: {
                         id: true,
                         name: true,
+                        email: true,
                     },
                 },
                 venue: {

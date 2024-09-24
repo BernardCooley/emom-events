@@ -1,29 +1,23 @@
 import React, { useEffect } from "react";
 import {
-    Box,
     Button,
     Card,
     CardBody,
     CardHeader,
     Divider,
     Heading,
-    Link,
     SimpleGrid,
     Text,
     VStack,
 } from "@chakra-ui/react";
-import { EventDetails, VenueDetails, PromoterDetails } from "@/types";
+import { EventDetails } from "@/types";
 import { usePathname, useRouter } from "next/navigation";
 import { capitalizeFirstLetter } from "@/utils";
 
 interface Props {
-    data: EventDetails[] | VenueDetails[] | PromoterDetails[];
+    events: EventDetails[];
     title?: string;
     page: string;
-    fields?:
-        | (keyof EventDetails)[]
-        | (keyof VenueDetails)[]
-        | (keyof PromoterDetails)[];
     columns?: { [key: string]: number };
     overflowY?: "hidden" | "scroll";
     onHover?: (id: string) => void;
@@ -33,9 +27,8 @@ interface Props {
 }
 
 const ItemList = ({
-    data,
+    events,
     page,
-    fields,
     title,
     columns = { base: 1, md: 2, lg: 3 },
     overflowY = "hidden",
@@ -77,45 +70,41 @@ const ItemList = ({
                     {capitalizeFirstLetter(title)}
                 </Heading>
             )}
-            {data.length > 0 ? (
+            {events.length > 0 ? (
                 <SimpleGrid w="full" spacing={4} columns={columns}>
-                    {data.map((item) => (
-                        <Card
-                            sx={itemHoveredId === item.id ? selectedStyles : {}}
-                            id={item.id}
-                            onClick={() => router.push(`/${page}/${item.id}`)}
-                            key={item.id}
-                            onMouseEnter={() => onHover && onHover(item.id)}
-                            _hover={selectedStyles}
-                            transition="transform 0.2s"
-                        >
-                            <CardHeader>
-                                <Heading size="md">{item.name}</Heading>
-                            </CardHeader>
-                            <CardBody>
-                                {fields?.map((field) => {
-                                    const fieldValue =
-                                        item[field as keyof typeof item];
-                                    if (
-                                        fieldValue &&
-                                        (typeof fieldValue === "string" ||
-                                            Array.isArray(fieldValue)) &&
-                                        fieldValue.length > 0
-                                    ) {
-                                        return (
-                                            <Box key={field}>
-                                                <Divider my={2} />
-                                                <Text pt="2" fontSize="sm">
-                                                    {fieldValue}
-                                                </Text>
-                                            </Box>
-                                        );
-                                    }
-                                    return null;
-                                })}
-                            </CardBody>
-                        </Card>
-                    ))}
+                    {events.map((item) => {
+                        return (
+                            <Card
+                                sx={
+                                    itemHoveredId === item.id
+                                        ? selectedStyles
+                                        : {}
+                                }
+                                id={item.id}
+                                onClick={() =>
+                                    router.push(`/${page}/${item.id}`)
+                                }
+                                key={item.id}
+                                onMouseEnter={() => onHover && onHover(item.id)}
+                                _hover={selectedStyles}
+                                transition="transform 0.2s"
+                            >
+                                <CardHeader>
+                                    <Heading size="md">{item.name}</Heading>
+                                </CardHeader>
+                                <CardBody>
+                                    <Divider my={2} />
+                                    <Text pt="2" fontSize="sm">
+                                        {item.name}
+                                    </Text>
+                                    <Divider my={2} />
+                                    <Text pt="2" fontSize="sm">
+                                        {item.promoter?.name}
+                                    </Text>
+                                </CardBody>
+                            </Card>
+                        );
+                    })}
                 </SimpleGrid>
             ) : (
                 <Heading pt={20}>

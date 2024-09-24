@@ -32,7 +32,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 
-const fields = ["description", "timeFrom"] satisfies (keyof EventDetails)[];
 const testMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
 const limit = 50;
 
@@ -415,7 +414,7 @@ const Page = ({}: Props) => {
                 </HStack>
             </Box>
             {!isMapShowing ? (
-                <ItemList page="events" fields={fields} data={events} />
+                <ItemList page="events" events={events} />
             ) : (
                 <HStack h="500px" alignItems="start" w="full">
                     <ItemList
@@ -425,8 +424,7 @@ const Page = ({}: Props) => {
                         overflowY="scroll"
                         columns={{ base: 1 }}
                         page="events"
-                        fields={fields}
-                        data={events}
+                        events={events}
                     />
                     {events.length > 0 && (
                         <Box minW="800px" h="500px">

@@ -19,11 +19,9 @@ const Event = ({}: Props) => {
     const { data: session } = useSession();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
-    const [loading, setLoading] = React.useState(true);
+    const [loading, setLoading] = useState(true);
     const { eventId } = useParams();
-    const [eventDetails, setEventDetails] = React.useState<EventDetails | null>(
-        null
-    );
+    const [eventDetails, setEventDetails] = useState<EventDetails | null>(null);
     const [eventImage, setEventImage] = useState<FirebaseImageBlob | null>(
         null
     );
@@ -124,7 +122,7 @@ const Event = ({}: Props) => {
                     <EventCard
                         image={eventImage}
                         onEditClick={onOpen}
-                        canEdit={session?.user?.email === promoter.id}
+                        canEdit={promoter.email === session?.user?.email}
                         eventDetails={eventDetails}
                     />
                 </>
