@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Box,
     Card,
@@ -25,6 +25,8 @@ interface Props {
     columns?: { [key: string]: number };
     overflowY?: "hidden" | "scroll";
     onHover?: (id: string) => void;
+    itemHoveredId?: string;
+    isMarkerHovered?: boolean;
 }
 
 const ItemList = ({
@@ -35,8 +37,27 @@ const ItemList = ({
     columns = { base: 1, md: 2, lg: 3 },
     overflowY = "hidden",
     onHover,
+    itemHoveredId = "",
+    isMarkerHovered = false,
 }: Props) => {
     const router = useRouter();
+
+    useEffect(() => {
+        if (itemHoveredId && isMarkerHovered) {
+            const element = document.getElementById(itemHoveredId);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    }, [itemHoveredId]);
+
+    const selectedStyles = {
+        cursor: "pointer",
+        shadow: "lg",
+        bg: "gray.50",
+        outline: "1px solid",
+        outlineColor: "gray.700",
+    };
 
     return (
         <VStack
@@ -55,18 +76,12 @@ const ItemList = ({
                 <SimpleGrid w="full" spacing={4} columns={columns}>
                     {data.map((item) => (
                         <Card
+                            sx={itemHoveredId === item.id ? selectedStyles : {}}
                             id={item.id}
                             onClick={() => router.push(`/${page}/${item.id}`)}
                             key={item.id}
                             onMouseEnter={() => onHover && onHover(item.id)}
-                            onMouseLeave={() => onHover && onHover("")}
-                            _hover={{
-                                cursor: "pointer",
-                                shadow: "lg",
-                                bg: "gray.50",
-                                outline: "1px solid",
-                                outlineColor: "gray.300",
-                            }}
+                            _hover={selectedStyles}
                             transition="transform 0.2s"
                         >
                             <CardHeader>

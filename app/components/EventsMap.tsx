@@ -11,11 +11,17 @@ const containerStyle = {
 
 interface Props {
     events: EventDetails[];
-    itemHovered: string;
+    itemHoveredId: string;
+    onHover: (id: string) => void;
+    onMarkerHovered: (isMarkerHovered: boolean) => void;
 }
 
-const EventsMap = ({ events, itemHovered }: Props) => {
-    const [hoveredId, setHoveredId] = useState<string | null>(itemHovered);
+const EventsMap = ({
+    events,
+    itemHoveredId,
+    onHover,
+    onMarkerHovered,
+}: Props) => {
     const router = useRouter();
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [libraries] = useState<Library[]>(["places"]);
@@ -24,10 +30,6 @@ const EventsMap = ({ events, itemHovered }: Props) => {
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
         libraries: libraries,
     });
-
-    useEffect(() => {
-        setHoveredId(itemHovered);
-    }, [itemHovered]);
 
     useEffect(() => {
         if (map) getNewBounds(events, map);
@@ -86,14 +88,19 @@ const EventsMap = ({ events, itemHovered }: Props) => {
             >
                 {events.map((event) => (
                     <Marker
+                        icon={{
+                            url: "/icons/emom-e.png",
+                            scaledSize: new google.maps.Size(40, 40),
+                        }}
                         onMouseOver={() => {
-                            setHoveredId(event.id);
+                            onMarkerHovered(true);
+                            onHover(event.id);
                         }}
                         onMouseOut={() => {
-                            setHoveredId(null);
+                            onMarkerHovered(false);
                         }}
                         animation={
-                            hoveredId === event.id
+                            itemHoveredId === event.id
                                 ? google.maps.Animation.BOUNCE
                                 : undefined
                         }

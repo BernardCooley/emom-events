@@ -51,6 +51,7 @@ const schema: ZodType<FormData> = z.object({
 interface Props {}
 
 const Page = ({}: Props) => {
+    const [isMarkerHovered, setIsMarkerHovered] = useState<boolean>(false);
     const [fetching, setFetching] = useState<boolean>(false);
     const [hasAllEvents, setHasAllEvents] = useState<boolean>(false);
     const scrollPosition = useScrollPosition();
@@ -61,7 +62,7 @@ const Page = ({}: Props) => {
     const [isMapShowing, setIsMapShowing] = useState<boolean>(false);
     const { events, currentEventId, updateEvents, skip, updateSkip } =
         useEventContext();
-    const [itemHovered, setItemHovered] = useState<string | null>(null);
+    const [itemHoveredId, setItemHovered] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
@@ -403,6 +404,8 @@ const Page = ({}: Props) => {
             ) : (
                 <HStack h="500px" alignItems="start" w="full">
                     <ItemList
+                        isMarkerHovered={isMarkerHovered}
+                        itemHoveredId={itemHoveredId || ""}
                         onHover={(id) => setItemHovered(id)}
                         overflowY="scroll"
                         columns={{ base: 1 }}
@@ -412,7 +415,11 @@ const Page = ({}: Props) => {
                     />
                     <Box minW="800px" h="500px">
                         <EventsMap
-                            itemHovered={itemHovered || ""}
+                            onMarkerHovered={(hov) => {
+                                setIsMarkerHovered(hov);
+                            }}
+                            onHover={(id) => setItemHovered(id)}
+                            itemHoveredId={itemHoveredId || ""}
                             events={events}
                         />
                     </Box>
