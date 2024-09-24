@@ -39,7 +39,7 @@ const ShareModal = ({ isOpen, onClose, event, eventImage }: Props) => {
     const toast = useToast();
     const shareOptions = {
         url: `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/events/${event.id}`,
-        quote: `Check out the EMOM event ${event.name} at ${event.venue.name}, ${event.venue.city} on EMOM Events!`,
+        quote: `Check out the EMOM event ${event.name} at ${event.venue.name}, ${event.venue.city} by ${event.promoter.name} on EMOM Events!`,
     };
 
     const copyText = () => {
