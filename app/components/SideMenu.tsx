@@ -62,7 +62,16 @@ const SideMenu = ({ placement = "right" }: Props) => {
     ];
 
     return (
-        <Box position="absolute" zIndex={200} right={4} top={4}>
+        <Box
+            display={{
+                base: "block",
+                md: "none",
+            }}
+            position="absolute"
+            zIndex={200}
+            right={4}
+            top={4}
+        >
             <IconButton
                 ref={btnRef}
                 bg="transparent"

@@ -3,6 +3,7 @@ import "./globals.css";
 import { Box } from "@chakra-ui/react";
 import SideMenu from "./components/SideMenu";
 import SessionProvider from "./../sessionProvider";
+import Header from "./components/Header";
 
 export default async function RootLayout({
     children,
@@ -14,9 +15,10 @@ export default async function RootLayout({
             <body>
                 <Providers>
                     <SessionProvider>
-                        <Box p={[4, 8, 12]}>
+                        <Box position="relative">
+                            <Header />
                             <SideMenu placement="right" />
-                            {children}
+                            <Box p={[4, 8, 12]}>{children}</Box>
                         </Box>
                     </SessionProvider>
                 </Providers>
