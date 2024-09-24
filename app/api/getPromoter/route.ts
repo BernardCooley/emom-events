@@ -36,6 +36,13 @@ export async function POST(req: Request) {
                             },
                         },
                         lineup: true,
+                        promoter: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
                     },
                 },
             },
