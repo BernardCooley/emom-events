@@ -10,7 +10,6 @@ export async function POST(req: Request) {
     try {
         await prisma?.promoter.create({
             data: {
-                id: d.email,
                 name: d.name,
                 city: d.city,
                 state: d.state,
