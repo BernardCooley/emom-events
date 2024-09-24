@@ -13,7 +13,6 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
-import { fetchPromoter } from "@/bff";
 import PromoterForm from "@/app/components/PromoterForm";
 import { getFirebaseImageBlob } from "@/firebase/functions";
 import { FirebaseImageBlob } from "@/types";
@@ -21,6 +20,7 @@ import PromoterProfile from "@/app/components/PromoterProfile";
 import AddEventModal from "@/app/components/AddEventModal";
 import ItemList from "@/app/components/ItemList";
 import { usePromoterContext } from "@/context/promoterContext";
+import { fetchPromoter } from "@/bff";
 
 interface Props {}
 
@@ -36,9 +36,8 @@ const PromoterDashboard = ({}: Props) => {
 
     useEffect(() => {
         if (promoter) {
-            updatePromoter(promoter);
-        } else {
-            updatePromoter(null);
+            setLoading(false);
+            getProfileImage();
         }
     }, [promoter]);
 
@@ -48,28 +47,22 @@ const PromoterDashboard = ({}: Props) => {
                 email: session?.user?.email,
             });
 
-            if (promoter && promoter?.imageIds.length > 0) {
-                const imageBlob = await getFirebaseImageBlob(
-                    `promoterImages/${promoter?.id}/${promoter.imageIds[0]}`,
-                    promoter.imageIds[0]
-                );
-
-                if (imageBlob) {
-                    setProfileImage(imageBlob);
-                } else {
-                    setProfileImage(null);
-                }
-            } else {
-                setProfileImage(null);
-            }
             updatePromoter(promoter);
-            setLoading(false);
         }
     }, [session?.user?.email]);
 
-    useEffect(() => {
-        getPromoter();
-    }, [getPromoter]);
+    const getProfileImage = async () => {
+        if (promoter && promoter.imageIds.length > 0) {
+            const imageBlob = await getFirebaseImageBlob(
+                `promoterImages/${promoter.id}/${promoter.imageIds[0]}`,
+                promoter.imageIds[0]
+            );
+
+            if (imageBlob) {
+                setProfileImage(imageBlob);
+            }
+        }
+    };
 
     if (loading) {
         return <Box>Loading...</Box>;

@@ -28,7 +28,6 @@ export const PromoterContextProvider = ({
     children: ReactNode;
 }) => {
     const [promoter, setPromoter] = useState<PromoterDetails | null>(null);
-    console.log("🚀 ~ promoter:", promoter);
 
     const updatePromoter = (promoter: PromoterDetails | null) => {
         setPromoter(promoter);
