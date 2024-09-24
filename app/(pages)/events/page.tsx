@@ -12,7 +12,7 @@ import { EventDetails, EventRequestProps } from "@/types";
 import {
     formatDateString,
     generateRandomEvent,
-    removeQueryParam,
+    removeQueryParams,
     setQueryParams,
 } from "@/utils";
 import { ArrowRightIcon, CloseIcon, Search2Icon } from "@chakra-ui/icons";
@@ -89,12 +89,7 @@ const Page = ({}: Props) => {
         },
     });
 
-    const {
-        formState: { errors },
-        control,
-        watch,
-        setValue,
-    } = formMethods;
+    const { control, watch, setValue } = formMethods;
 
     const dateFromWatch = watch("dateFrom");
     const dateToWatch = watch("dateTo");
@@ -141,7 +136,7 @@ const Page = ({}: Props) => {
                 router
             );
         } else {
-            removeQueryParam("dateTo", pathname, searchParams, router);
+            removeQueryParams(["dateTo"], pathname, searchParams, router);
             setValue("dateTo", "");
         }
         getEvents(dateFromWatch, dateToWatch, searchTermWatch);
@@ -243,7 +238,7 @@ const Page = ({}: Props) => {
     };
 
     const handleSearchClear = () => {
-        removeQueryParam("searchTerm", pathname, searchParams, router);
+        removeQueryParams(["searchTerm"], pathname, searchParams, router);
         getEvents(dateFromWatch, dateToWatch, "");
         setValue("searchTerm", "");
     };
@@ -257,8 +252,12 @@ const Page = ({}: Props) => {
             searchParams,
             router
         );
-        removeQueryParam("dateTo", pathname, searchParams, router);
-        removeQueryParam("searchTerm", pathname, searchParams, router);
+        removeQueryParams(
+            ["dateTo", "searchTerm"],
+            pathname,
+            searchParams,
+            router
+        );
         setValue("searchTerm", "");
         setValue("dateFrom", todayDateFormatted);
         setValue("dateTo", "");
@@ -357,7 +356,8 @@ const Page = ({}: Props) => {
                     <HStack>
                         <Text>Showing: </Text>
                         <Text fontWeight={700}>
-                            {searchParams.get("searchTerm") || "All events"}
+                            {searchParams.get("searchTerm") || "All Events"}{" "}
+                            {events.length > 0 ? `(${events.length})` : ""}
                         </Text>
                         {dateFromWatch !== todayDateFormatted ||
                             (dateToWatch.length > 0 && (
@@ -428,16 +428,18 @@ const Page = ({}: Props) => {
                         fields={fields}
                         data={events}
                     />
-                    <Box minW="800px" h="500px">
-                        <EventsMap
-                            onMarkerHovered={(hov) => {
-                                setIsMarkerHovered(hov);
-                            }}
-                            onHover={(id) => setItemHovered(id)}
-                            itemHoveredId={itemHoveredId || ""}
-                            events={events}
-                        />
-                    </Box>
+                    {events.length > 0 && (
+                        <Box minW="800px" h="500px">
+                            <EventsMap
+                                onMarkerHovered={(hov) => {
+                                    setIsMarkerHovered(hov);
+                                }}
+                                onHover={(id) => setItemHovered(id)}
+                                itemHoveredId={itemHoveredId || ""}
+                                events={events}
+                            />
+                        </Box>
+                    )}
                 </HStack>
             )}
         </Flex>
