@@ -1,6 +1,7 @@
 import React from "react";
 import {
     HStack,
+    IconButton,
     Image,
     Modal,
     ModalBody,
@@ -10,6 +11,7 @@ import {
     ModalHeader,
     ModalOverlay,
     Text,
+    useToast,
     VStack,
 } from "@chakra-ui/react";
 import {
@@ -24,6 +26,7 @@ import {
 } from "next-share";
 import { EventDetails, FirebaseImageBlob } from "@/types";
 import { formatDateTime, getUrlFromBlob } from "@/utils";
+import { FaRegCopy } from "react-icons/fa";
 
 interface Props {
     isOpen: boolean;
@@ -33,11 +36,78 @@ interface Props {
 }
 
 const ShareModal = ({ isOpen, onClose, event, eventImage }: Props) => {
+    const toast = useToast();
     const shareOptions = {
         url: `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/events/${event.id}`,
-        quote: `Check out the EMOM event ${event.name} at ${event.venue.name} event on EMOM Events!`,
-        hashtag: "#emomevents",
+        quote: `Check out the EMOM event ${event.name} at ${event.venue.name}, ${event.venue.city} on EMOM Events!`,
     };
+
+    const copyText = () => {
+        try {
+            if (navigator && navigator.clipboard) {
+                navigator.clipboard.writeText(shareOptions.url);
+            }
+
+            toast({
+                title: "Link copied to clipboard",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        } catch (err) {
+            toast({
+                title: "Failed to copy link to clipboard",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const buttons = [
+        {
+            container: FacebookShareButton,
+            icon: <FacebookIcon size={54} borderRadius={12} />,
+            onClick: () => {},
+            label: "Facebook",
+            props: {
+                url: shareOptions.url,
+                hashtag: shareOptions.quote,
+            },
+        },
+        {
+            container: TwitterShareButton,
+            icon: <TwitterIcon size={54} borderRadius={12} />,
+            onClick: () => {},
+            label: "Twitter",
+            props: {
+                url: shareOptions.url,
+                title: shareOptions.quote,
+            },
+        },
+        {
+            container: WhatsappShareButton,
+            icon: <WhatsappIcon size={54} borderRadius={12} />,
+            onClick: () => {},
+            label: "WhatsApp",
+            props: {
+                url: shareOptions.url,
+                title: shareOptions.quote,
+                separator: ":: ",
+            },
+        },
+        {
+            container: EmailShareButton,
+            icon: <EmailIcon size={54} borderRadius={12} />,
+            onClick: () => {},
+            label: "Email",
+            props: {
+                url: shareOptions.url,
+                subject: shareOptions.quote,
+                body: "",
+            },
+        },
+    ];
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -48,42 +118,50 @@ const ShareModal = ({ isOpen, onClose, event, eventImage }: Props) => {
                 <ModalBody>
                     <VStack>
                         {eventImage && (
-                            <Image src={getUrlFromBlob(eventImage)} />
+                            <Image w="300px" src={getUrlFromBlob(eventImage)} />
                         )}
-                        <Text>{event.name}</Text>
-                        <Text>{event.venue.name}</Text>
-                        <Text>{event.venue.city}</Text>
-                        <Text>{formatDateTime(event.timeFrom)}</Text>
+                        <Text fontWeight={700}>{event.name}</Text>
+                        <Text>
+                            {event.venue.name} - {event.venue.city}
+                        </Text>
+                        <Text as="i">{formatDateTime(event.timeFrom)}</Text>
                     </VStack>
                 </ModalBody>
                 <ModalFooter>
-                    <HStack w="full" justifyContent="space-around">
-                        <FacebookShareButton
-                            url={shareOptions.url}
-                            hashtag={shareOptions.quote}
-                        >
-                            <FacebookIcon size={54} borderRadius={12} />
-                        </FacebookShareButton>
-                        <TwitterShareButton
-                            url={shareOptions.url}
-                            title={shareOptions.quote}
-                        >
-                            <TwitterIcon size={54} borderRadius={12} />
-                        </TwitterShareButton>
-                        <WhatsappShareButton
-                            url={shareOptions.url}
-                            title={shareOptions.quote}
-                            separator=":: "
-                        >
-                            <WhatsappIcon size={54} borderRadius={12} />
-                        </WhatsappShareButton>
-                        <EmailShareButton
-                            url={shareOptions.url}
-                            subject={shareOptions.quote}
-                            body=""
-                        >
-                            <EmailIcon size={54} borderRadius={12} />
-                        </EmailShareButton>
+                    <HStack
+                        alignItems="flex-start"
+                        w="full"
+                        justifyContent="space-around"
+                    >
+                        {buttons.map((button) => (
+                            <VStack gap={1}>
+                                <button.container {...button.props}>
+                                    {button.icon}
+                                </button.container>
+                                <Text fontSize={12}>{button.label}</Text>
+                            </VStack>
+                        ))}
+
+                        <VStack gap={1}>
+                            <IconButton
+                                border="1px solid"
+                                borderColor="gray.500"
+                                rounded={12}
+                                w="54px"
+                                h="54px"
+                                minW="unset"
+                                aria-label="Copy link"
+                                bg="transparent"
+                                _hover={{
+                                    color: "gray.900",
+                                    bg: "gray.200",
+                                    borderColor: "gray.900",
+                                }}
+                                icon={<FaRegCopy fontSize="38px" />}
+                                onClick={copyText}
+                            />
+                            <Text fontSize={12}>Copy</Text>
+                        </VStack>
                     </HStack>
                 </ModalFooter>
             </ModalContent>
