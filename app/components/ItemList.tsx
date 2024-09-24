@@ -1,17 +1,19 @@
 import React, { useEffect } from "react";
 import {
     Box,
+    Button,
     Card,
     CardBody,
     CardHeader,
     Divider,
     Heading,
+    Link,
     SimpleGrid,
     Text,
     VStack,
 } from "@chakra-ui/react";
 import { EventDetails, VenueDetails, PromoterDetails } from "@/types";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { capitalizeFirstLetter } from "@/utils";
 
 interface Props {
@@ -27,6 +29,7 @@ interface Props {
     onHover?: (id: string) => void;
     itemHoveredId?: string;
     isMarkerHovered?: boolean;
+    onAddEventClick?: () => void;
 }
 
 const ItemList = ({
@@ -39,7 +42,9 @@ const ItemList = ({
     onHover,
     itemHoveredId = "",
     isMarkerHovered = false,
+    onAddEventClick,
 }: Props) => {
+    const pathname = usePathname();
     const router = useRouter();
 
     useEffect(() => {
@@ -113,7 +118,30 @@ const ItemList = ({
                     ))}
                 </SimpleGrid>
             ) : (
-                <Heading pt={20}>No Events found</Heading>
+                <Heading pt={20}>
+                    {pathname ? (
+                        <>
+                            No Events. Click{" "}
+                            <Button
+                                onClick={onAddEventClick && onAddEventClick}
+                                _hover={{
+                                    color: "gray.700",
+                                    textDecoration: "underline",
+                                }}
+                                position="relative"
+                                top={-1}
+                                fontSize="36px"
+                                variant="unstyled"
+                                color="#718096"
+                            >
+                                here
+                            </Button>{" "}
+                            to create your first event
+                        </>
+                    ) : (
+                        "No Events found"
+                    )}
+                </Heading>
             )}
         </VStack>
     );

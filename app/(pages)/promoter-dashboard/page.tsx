@@ -134,6 +134,7 @@ const PromoterDashboard = ({}: Props) => {
                         </Button>
                         <Heading size="md">Events</Heading>
                         <ItemList
+                            onAddEventClick={onOpen}
                             page="events"
                             fields={fields}
                             data={promoter.events}
