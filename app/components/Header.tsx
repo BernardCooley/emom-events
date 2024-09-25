@@ -35,7 +35,7 @@ const Header = ({}: Props) => {
             show: true,
         },
         {
-            name: "Promoter Dashboard",
+            name: "Host Dashboard",
             path: "promoter-dashboard",
             show: session?.user ? true : false,
         },
@@ -102,7 +102,7 @@ const Header = ({}: Props) => {
                                 })
                             }
                         >
-                            Promoter login
+                            Host login
                         </Button>
                     )}
                 </Flex>

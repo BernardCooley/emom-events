@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { EventOrderByWithRelationInput } from "@/types";
 import { formatDateString } from "@/utils";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -108,6 +109,29 @@ export async function POST(req: Request) {
         ],
     };
 
+    const getOrderBy = (orderBy: string): EventOrderByWithRelationInput => {
+        switch (orderBy) {
+            case "nameAsc":
+                return { name: "asc" };
+            case "nameDesc":
+                return { name: "desc" };
+            case "timeFromAsc":
+                return { timeFrom: "asc" };
+            case "timeFromDesc":
+                return { timeFrom: "desc" };
+            case "promoterAsc":
+                return { promoter: { name: "asc" } };
+            case "promoterDesc":
+                return { promoter: { name: "desc" } };
+            case "venueAsc":
+                return { venue: { name: "asc" } };
+            case "venueDesc":
+                return { venue: { name: "desc" } };
+            default:
+                return { timeFrom: "asc" };
+        }
+    };
+
     const combinedQuery = {
         AND: [...(data.searchTerm ? [searchTermQuery] : []), dataRangeQuery],
     };
@@ -117,9 +141,7 @@ export async function POST(req: Request) {
             skip: data.skip,
             take: data.limit,
             where: combinedQuery,
-            orderBy: {
-                timeFrom: "asc",
-            },
+            orderBy: getOrderBy(data.orderBy),
             select: {
                 id: true,
                 name: true,

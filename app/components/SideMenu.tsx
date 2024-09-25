@@ -55,7 +55,7 @@ const SideMenu = ({ placement = "right" }: Props) => {
             show: true,
         },
         {
-            name: "Promoter Dashboard",
+            name: "Host Dashboard",
             path: "promoter-dashboard",
             show: session?.user ? true : false,
         },
@@ -132,7 +132,7 @@ const SideMenu = ({ placement = "right" }: Props) => {
                                     })
                                 }
                             >
-                                Promoter login
+                                Host login
                             </Button>
                         )}
                     </DrawerFooter>

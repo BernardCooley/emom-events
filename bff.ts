@@ -248,7 +248,7 @@ export const fetchEvent = async ({
 };
 
 type FetchEventsProps = {
-    data?: EventRequestProps | {};
+    data?: EventRequestProps | null;
 };
 
 export const fetchEvents = async ({

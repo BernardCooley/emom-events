@@ -99,5 +99,17 @@ export type EventRequestProps = {
     limit: number | null;
     dateFrom: string | null;
     dateTo: string | null;
+    orderBy: string | null;
     searchTerm: string | null;
+};
+
+export type EventOrderByWithRelationInput = {
+    name?: "asc" | "desc";
+    timeFrom?: "asc" | "desc";
+    promoter?: {
+        name?: "asc" | "desc";
+    };
+    venue?: {
+        name?: "asc" | "desc";
+    };
 };

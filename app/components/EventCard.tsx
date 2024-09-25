@@ -112,7 +112,7 @@ const EventCard = ({
                             />
                             <EventCardDetail
                                 title="Date/Time From"
-                                value={formatDateTime(timeFrom!!)}
+                                value={formatDateTime(timeFrom!)}
                             />
                             {timeTo && (
                                 <EventCardDetail
@@ -121,7 +121,7 @@ const EventCard = ({
                                 />
                             )}
                             <EventCardDetail
-                                title="Organiser/Promoter"
+                                title="Host"
                                 value={promoter.name || ""}
                                 href={`/promoters/${promoter.id}`}
                             />
