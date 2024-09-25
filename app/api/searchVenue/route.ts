@@ -50,7 +50,6 @@ export async function POST(req: Request) {
 
         return response;
     } catch (error: any) {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         console.error(error);
 
         return NextResponse.json(
