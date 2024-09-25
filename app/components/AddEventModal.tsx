@@ -617,6 +617,11 @@ const AddEventModal = ({
                                                     alignItems="flex-start"
                                                 >
                                                     <VenueSearch
+                                                        isEditing={
+                                                            defaultValues
+                                                                ? true
+                                                                : false
+                                                        }
                                                         onRevert={() => {
                                                             setVenueAddressFields(
                                                                 {

@@ -20,6 +20,7 @@ interface Props {
     control: Control<FormData, any>;
     errors: FieldErrors<FormData>;
     onRevert: () => void;
+    isEditing?: boolean;
 }
 
 const VenueSearch = ({
@@ -35,6 +36,7 @@ const VenueSearch = ({
     control,
     errors,
     onRevert,
+    isEditing = false,
 }: Props) => {
     return (
         <>
@@ -67,9 +69,9 @@ const VenueSearch = ({
                             rightIcon={
                                 venueSearchTerm?.length > 0 && (
                                     <IconButton
-                                        mt={5}
-                                        h="58px"
-                                        w="58px"
+                                        mt={2}
+                                        h="44px"
+                                        w="36px"
                                         minW="unset"
                                         aria-label="Search"
                                         icon={<SearchIcon />}
@@ -133,9 +135,11 @@ const VenueSearch = ({
                             </VStack>
                         )}
                     </VStack>
-                    <Button onClick={onRevert} variant="link">
-                        Revert to current venue
-                    </Button>
+                    {isEditing && (
+                        <Button onClick={onRevert} variant="link">
+                            Revert to current venue
+                        </Button>
+                    )}
                 </VStack>
             )}
         </>
