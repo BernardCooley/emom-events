@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { CustomError } from "@/types";
+
 
 export async function POST(req: Request) {
     const { venueId } = await req.json();
