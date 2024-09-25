@@ -7,6 +7,7 @@ import {
     Divider,
     Heading,
     SimpleGrid,
+    Skeleton,
     Text,
     VStack,
 } from "@chakra-ui/react";
@@ -15,7 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { capitalizeFirstLetter, formatDateTime } from "@/utils";
 
 interface Props {
-    events: EventDetails[];
+    events: EventDetails[] | null;
     title?: string;
     page: string;
     columns?: { [key: string]: number };
@@ -57,6 +58,24 @@ const ItemList = ({
         outlineColor: "gray.700",
     };
 
+    if (!events) {
+        return (
+            <SimpleGrid w="full" spacing={4} columns={columns}>
+                {[1, 2, 3, 4, 5, 6].map((item) => {
+                    return (
+                        <Skeleton
+                            rounded="lg"
+                            key={item}
+                            isLoaded={events ? true : false}
+                            w="full"
+                            h="200px"
+                        />
+                    );
+                })}
+            </SimpleGrid>
+        );
+    }
+
     return (
         <VStack
             p={4}
@@ -83,11 +102,11 @@ const ItemList = ({
                                         ? selectedStyles
                                         : {}
                                 }
+                                key={item.id}
                                 id={item.id}
                                 onClick={() =>
                                     router.push(`/${page}/${item.id}`)
                                 }
-                                key={item.id}
                                 onMouseEnter={() => onHover && onHover(item.id)}
                                 _hover={selectedStyles}
                                 transition="transform 0.2s"
@@ -113,7 +132,7 @@ const ItemList = ({
                 </SimpleGrid>
             ) : (
                 <Heading pt={20}>
-                    {pathname ? (
+                    {pathname === "promoter-dashboard" ? (
                         <>
                             No Events. Click{" "}
                             <Button

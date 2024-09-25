@@ -23,6 +23,7 @@ import AddEventModal from "@/app/components/AddEventModal";
 import ItemList from "@/app/components/ItemList";
 import { usePromoterContext } from "@/context/promoterContext";
 import { fetchPromoter } from "@/bff";
+import PageLoading from "@/app/components/PageLoading";
 
 interface Props {}
 
@@ -67,7 +68,7 @@ const PromoterDashboard = ({}: Props) => {
     };
 
     if (loading) {
-        return <Box>Loading...</Box>;
+        return <PageLoading />;
     }
 
     if (!promoter) {

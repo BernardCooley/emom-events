@@ -4,8 +4,8 @@ import { EventDetails } from "@/types";
 import React, { createContext, ReactNode, useContext, useState } from "react";
 
 interface EventContextProps {
-    events: EventDetails[];
-    updateEvents: (events: EventDetails[]) => void;
+    events: EventDetails[] | null;
+    updateEvents: (events: EventDetails[] | null) => void;
     skip: number;
     updateSkip: (skip: number) => void;
     currentEventId: string | null;
@@ -27,11 +27,11 @@ export const useEventContext = () => {
 };
 
 export const EventContextProvider = ({ children }: { children: ReactNode }) => {
-    const [events, setEvents] = useState<EventDetails[]>([]);
+    const [events, setEvents] = useState<EventDetails[] | null>(null);
     const [skip, setSkip] = useState<number>(0);
     const [currentEventId, setCurrentEvent] = useState<string | null>(null);
 
-    const updateEvents = (events: EventDetails[]) => {
+    const updateEvents = (events: EventDetails[] | null) => {
         setEvents(events);
     };
 

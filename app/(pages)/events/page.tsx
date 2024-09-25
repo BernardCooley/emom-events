@@ -3,7 +3,6 @@
 import EventsMap from "@/app/components/EventsMap";
 import FloatingIconButton from "@/app/components/FloatingIconButton";
 import ItemList from "@/app/components/ItemList";
-import PageLoading from "@/app/components/PageLoading";
 import { TextInput } from "@/app/components/TextInput";
 import { fetchEvents } from "@/bff";
 import { useEventContext } from "@/context/eventContext";
@@ -143,7 +142,6 @@ const Page = ({}: Props) => {
     const searchTerm = searchParams.get("searchTerm");
     const orderBy = searchParams.get("orderBy");
     const showMap = searchParams.get("showMap");
-    const [loading, setLoading] = useState(true);
     const [isMapShowing, setIsMapShowing] = useState<boolean>(
         showMap === "true"
     );
@@ -267,9 +265,9 @@ const Page = ({}: Props) => {
 
         if (events) {
             updateEvents(events as EventDetails[]);
+        } else {
+            updateEvents(null);
         }
-
-        setLoading(false);
     };
 
     const getRequestOptions = (
@@ -318,7 +316,7 @@ const Page = ({}: Props) => {
                 });
 
                 if (newEvents && newEvents.length > 0) {
-                    updateEvents([...events, ...newEvents]);
+                    updateEvents([...(events || []), ...newEvents]);
                     updateSkip(skip + limit);
                     setFetching(false);
                 } else {
@@ -385,10 +383,6 @@ const Page = ({}: Props) => {
                 <Text fontWeight={700}>{value}</Text>
             </HStack>
         ) : null;
-
-    if (loading) {
-        return <PageLoading />;
-    }
 
     return (
         <Flex ref={containerRef} direction="column" gap={2}>
@@ -505,7 +499,9 @@ const Page = ({}: Props) => {
                         <Text>Showing: </Text>
                         <Text fontWeight={700}>
                             {searchParams.get("searchTerm") || "All Events"}{" "}
-                            {events.length > 0 ? `(${events.length})` : ""}
+                            {events && events.length > 0
+                                ? `(${events.length})`
+                                : ""}
                         </Text>
                         <ConditionalText
                             condition={
@@ -542,7 +538,7 @@ const Page = ({}: Props) => {
                             </Button>
                         )}
                     </HStack>
-                    {events.length > 0 && (
+                    {events && events.length > 0 && (
                         <Button
                             onClick={() => {
                                 if (isMapShowing) {
@@ -565,7 +561,9 @@ const Page = ({}: Props) => {
                             }}
                             variant="link"
                         >
-                            {isMapShowing ? "Show list" : "Show on map"}
+                            {isMapShowing && events && events.length > 0
+                                ? "Show list"
+                                : "Show on map"}
                         </Button>
                     )}
                 </HStack>
@@ -583,7 +581,7 @@ const Page = ({}: Props) => {
                         page="events"
                         events={events}
                     />
-                    {events.length > 0 && (
+                    {events && events.length > 0 && (
                         <Box minW="800px" h="500px">
                             <EventsMap
                                 onMarkerHovered={(hov) => {
