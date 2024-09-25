@@ -393,7 +393,10 @@ const AddEventModal = ({
     };
 
     const handleWebsiteAdd = () => {
-        const val = getValues("website");
+        let val = getValues("website");
+        if (!val.startsWith("https://")) {
+            val = `https://${val}`;
+        }
 
         if (val.length > 0) {
             setValue("websites", Array.from(new Set([...watchWebsites, val])));

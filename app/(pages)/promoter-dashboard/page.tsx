@@ -5,7 +5,9 @@ import {
     Box,
     Button,
     Card,
+    CardBody,
     CardHeader,
+    Divider,
     Heading,
     Text,
     useDisclosure,
@@ -109,13 +111,18 @@ const PromoterDashboard = ({}: Props) => {
     }
 
     return (
-        <VStack gap={10}>
+        <VStack gap={6}>
             <PromoterProfile
                 promoter={promoter}
                 profileImage={profileImage}
                 onGetPromoter={getPromoter}
             />
-            <Card w="full">
+            <Card
+                shadow="lg"
+                border="1px solid"
+                borderColor="gray.200"
+                w="full"
+            >
                 <CardHeader>
                     <Box position="relative">
                         <Button
@@ -128,14 +135,18 @@ const PromoterDashboard = ({}: Props) => {
                             Add Event
                         </Button>
                         <Heading size="md">Events</Heading>
-                        <ItemList
-                            onAddEventClick={onOpen}
-                            page="events"
-                            events={promoter.events}
-                        />
                     </Box>
                 </CardHeader>
+                <Divider />
+                <CardBody>
+                    <ItemList
+                        onAddEventClick={onOpen}
+                        page="events"
+                        events={promoter.events}
+                    />
+                </CardBody>
             </Card>
+
             <AddEventModal
                 existingEventImage={null}
                 onFail={() => {

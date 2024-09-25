@@ -75,6 +75,9 @@ const ItemList = ({
                     {events.map((item) => {
                         return (
                             <Card
+                                shadow="md"
+                                border="1px solid"
+                                borderColor="gray.100"
                                 sx={
                                     itemHoveredId === item.id
                                         ? selectedStyles

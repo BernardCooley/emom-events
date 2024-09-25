@@ -146,7 +146,7 @@ const EventCard = ({
                                         }`}
                                     </Heading>
                                     {websites.map((website) => (
-                                        <Link href={website}>
+                                        <Link href={website} isExternal>
                                             <Text pt="2" fontSize="sm">
                                                 {website}
                                             </Text>

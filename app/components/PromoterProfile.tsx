@@ -38,7 +38,12 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
 
     return (
         <>
-            <Card w="full">
+            <Card
+                shadow="lg"
+                border="1px solid"
+                borderColor="gray.200"
+                w="full"
+            >
                 <CardHeader>
                     <HStack
                         w="full"
