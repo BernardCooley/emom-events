@@ -134,7 +134,7 @@ const ShareModal = ({ isOpen, onClose, event, eventImage }: Props) => {
                         justifyContent="space-around"
                     >
                         {buttons.map((button) => (
-                            <VStack gap={1}>
+                            <VStack key={button.label} gap={1}>
                                 <button.container {...button.props}>
                                     {button.icon}
                                 </button.container>
