@@ -28,6 +28,7 @@ import PageLoading from "@/app/components/PageLoading";
 interface Props {}
 
 const PromoterDashboard = ({}: Props) => {
+    const [isEditing, setEditing] = useState(false);
     const { promoter, updatePromoter } = usePromoterContext();
     const toast = useToast();
     const { data: session } = useSession();
@@ -105,6 +106,7 @@ const PromoterDashboard = ({}: Props) => {
                         state: "",
                         country: "",
                         email: session?.user?.email || "",
+                        showEmail: false,
                     }}
                 />
             </VStack>
@@ -114,11 +116,23 @@ const PromoterDashboard = ({}: Props) => {
     return (
         <VStack gap={6}>
             <PromoterProfile
+                onEditing={(isEditing) => {
+                    setEditing(isEditing);
+                }}
                 promoter={promoter}
                 profileImage={profileImage}
                 onGetPromoter={getPromoter}
             />
             <Card
+                sx={
+                    isEditing
+                        ? {
+                              height: "0px",
+                              overflow: "hidden",
+                              visibility: "hidden",
+                          }
+                        : {}
+                }
                 shadow="lg"
                 border="1px solid"
                 borderColor="gray.200"

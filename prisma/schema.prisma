@@ -28,15 +28,16 @@ model Event {
 }
 
 model Promoter {
-    id       String   @id @default(uuid())
-    name     String
-    email    String   @unique
-    city     String?
-    state    String?
-    country  String
-    websites String[]
-    imageIds String[]
-    events   Event[]
+    id        String   @id @default(uuid())
+    name      String
+    email     String   @unique
+    city      String?
+    state     String?
+    country   String
+    showEmail Boolean  @default(false)
+    websites  String[]
+    imageIds  String[]
+    events    Event[]
 }
 
 model Venue {

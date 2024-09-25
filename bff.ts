@@ -114,6 +114,7 @@ type UpdatePromoterProps = {
         country?: Promoter["country"];
         websites?: Promoter["websites"];
         imageIds?: Promoter["imageIds"];
+        showEmail?: Promoter["showEmail"];
     };
 };
 
@@ -278,7 +279,7 @@ type UpdateEventProps = {
         lineup?: EventDetails["lineup"];
         venueId?: EventDetails["venueId"];
         websites?: EventDetails["websites"];
-        preBookEmail: EventDetails["preBookEmail"];
+        preBookEmail?: EventDetails["preBookEmail"];
     };
 };
 

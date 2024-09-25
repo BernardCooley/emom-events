@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -24,12 +24,22 @@ interface Props {
     promoter: PromoterDetails;
     profileImage: FirebaseImageBlob | null;
     onGetPromoter: () => void;
+    onEditing: (isEditing: boolean) => void;
 }
 
-const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
-    const { city, state, country, name, email } = promoter;
+const PromoterProfile = ({
+    promoter,
+    profileImage,
+    onGetPromoter,
+    onEditing,
+}: Props) => {
+    const { city, state, country, name, email, showEmail } = promoter;
     const toast = useToast();
     const [isEditing, setEditing] = useState(false);
+
+    useEffect(() => {
+        onEditing(isEditing);
+    }, [isEditing]);
 
     const getLocation = () => {
         const locationParts = [city, state, country].filter(Boolean);
@@ -67,7 +77,7 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                 <CardBody>
                     {!isEditing && (
                         <Flex width="full" direction="column" gap={10}>
-                            <SimpleGrid columns={[1, 1, 3]} gap={[6, 6, 0]}>
+                            <SimpleGrid columns={[1, 1, 4]} gap={[6, 6, 0]}>
                                 <VStack alignItems="flex-start">
                                     <Text fontWeight={700}>Name</Text>
                                     <Text>{name}</Text>
@@ -79,6 +89,10 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                                 <VStack alignItems="flex-start">
                                     <Text fontWeight={700}>Email</Text>
                                     <Text>{email}</Text>
+                                </VStack>
+                                <VStack alignItems="flex-start">
+                                    <Text fontWeight={700}>Show Email</Text>
+                                    <Text>{showEmail ? "Yes" : "No"}</Text>
                                 </VStack>
                             </SimpleGrid>
                             <Skeleton
@@ -131,6 +145,7 @@ const PromoterProfile = ({ promoter, profileImage, onGetPromoter }: Props) => {
                                     state,
                                     country,
                                     email,
+                                    showEmail,
                                 }}
                             />
                         )}

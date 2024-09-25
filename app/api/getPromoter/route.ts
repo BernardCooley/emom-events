@@ -17,6 +17,7 @@ export async function POST(req: Request) {
                 state: true,
                 country: true,
                 imageIds: true,
+                showEmail: true,
                 events: {
                     select: {
                         id: true,

@@ -24,6 +24,7 @@ import ImageCropper from "./ImageCropper";
 import { getUrlFromBlob, handleProfileImageChange } from "@/utils";
 import { CloseIcon } from "@chakra-ui/icons";
 import { usePromoterContext } from "@/context/promoterContext";
+import { SwitchInput } from "./FormInputs/SwitchInput";
 
 export interface FormData {
     name: Promoter["name"];
@@ -31,6 +32,7 @@ export interface FormData {
     state: Promoter["state"];
     country: Promoter["country"];
     email: Promoter["email"];
+    showEmail: Promoter["showEmail"];
 }
 
 const schema: ZodType<FormData> = z.object({
@@ -39,6 +41,7 @@ const schema: ZodType<FormData> = z.object({
     state: z.string(),
     country: z.string().min(1, "Country is required"),
     email: z.string().email(),
+    showEmail: z.boolean(),
 });
 
 type Props = {
@@ -83,6 +86,7 @@ const PromoterForm = ({
             state: defaultValues?.state || "",
             country: defaultValues?.country || "",
             email: defaultValues?.email || "",
+            showEmail: defaultValues?.showEmail || false,
         },
     });
 
@@ -105,6 +109,7 @@ const PromoterForm = ({
                 imageIds: [],
                 email: formData.email,
                 websites: [],
+                showEmail: formData.showEmail,
             },
         });
 
@@ -159,6 +164,7 @@ const PromoterForm = ({
                 country: formData.country,
                 imageIds: imageIds,
                 websites: [],
+                showEmail: formData.showEmail,
             },
         });
 
@@ -234,7 +240,15 @@ const PromoterForm = ({
                             name="city"
                             control={control}
                         />
-
+                        <SwitchInput
+                            orientation="row"
+                            width="full"
+                            title="Show your email address on your public profile"
+                            size="lg"
+                            control={control}
+                            name="showEmail"
+                            error={errors.showEmail?.message}
+                        />
                         <FileUpload
                             onImageSelected={setImageToCrop}
                             fieldLabel="Images"

@@ -16,6 +16,7 @@ export async function POST(req: Request) {
                 country: d.country,
                 email: d.email,
                 imageIds: d.imageIds,
+                showEmail: d.showEmail,
             },
         });
 

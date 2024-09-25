@@ -10,6 +10,7 @@ export type PromoterDetails = {
     websites: Promoter["websites"];
     imageIds: Promoter["imageIds"];
     events: EventDetails[];
+    showEmail: Promoter["showEmail"];
 };
 
 export type VenueDetails = {
