@@ -35,6 +35,7 @@ export async function POST(req: Request) {
                                 country: true,
                             },
                         },
+                        websites: true,
                         lineup: true,
                         promoter: {
                             select: {

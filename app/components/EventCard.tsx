@@ -1,6 +1,5 @@
 import React from "react";
 import {
-    Box,
     Button,
     Card,
     CardBody,
@@ -10,8 +9,10 @@ import {
     HStack,
     IconButton,
     Image,
+    Link,
     Stack,
     StackDivider,
+    Text,
     VStack,
 } from "@chakra-ui/react";
 import { EventDetails, FirebaseImageBlob } from "@/types";
@@ -35,8 +36,16 @@ const EventCard = ({
     image,
     onShareClick,
 }: EventCardProps) => {
-    const { name, venue, timeFrom, timeTo, promoter, description, lineup } =
-        eventDetails || {};
+    const {
+        name,
+        venue,
+        timeFrom,
+        timeTo,
+        promoter,
+        description,
+        lineup,
+        websites,
+    } = eventDetails || {};
 
     return (
         <>
@@ -125,6 +134,25 @@ const EventCard = ({
                                     title="Lineup"
                                     value={lineup.join(", ") || ""}
                                 />
+                            )}
+                            {websites && websites.length > 0 && (
+                                <VStack gap={0} w="full" alignItems="start">
+                                    <Heading
+                                        size="xs"
+                                        textTransform="uppercase"
+                                    >
+                                        {`Website${
+                                            websites.length > 1 ? "s" : ""
+                                        }`}
+                                    </Heading>
+                                    {websites.map((website) => (
+                                        <Link href={website}>
+                                            <Text pt="2" fontSize="sm">
+                                                {website}
+                                            </Text>
+                                        </Link>
+                                    ))}
+                                </VStack>
                             )}
                         </Stack>
                     </Flex>

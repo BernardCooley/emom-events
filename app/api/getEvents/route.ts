@@ -145,6 +145,7 @@ export async function POST(req: Request) {
                     },
                 },
                 lineup: true,
+                websites: true,
             },
         });
 

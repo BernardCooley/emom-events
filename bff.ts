@@ -277,6 +277,7 @@ type UpdateEventProps = {
         imageIds: EventDetails["imageIds"];
         lineup?: EventDetails["lineup"];
         venueId?: EventDetails["venueId"];
+        websites?: EventDetails["websites"];
     };
 };
 

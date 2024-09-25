@@ -35,8 +35,16 @@ const Event = ({}: Props) => {
         null
     );
 
-    const { name, timeFrom, timeTo, description, promoter, venue, lineup } =
-        eventDetails || {};
+    const {
+        name,
+        timeFrom,
+        timeTo,
+        description,
+        promoter,
+        venue,
+        lineup,
+        websites,
+    } = eventDetails || {};
 
     useEffect(() => {
         if (eventId) {
@@ -129,6 +137,8 @@ const Event = ({}: Props) => {
                             venueSearchTerm: "",
                             artist: "",
                             googlePlaceSearch: "",
+                            websites: websites || [],
+                            website: "",
                         }}
                         onFail={() => {
                             toast({

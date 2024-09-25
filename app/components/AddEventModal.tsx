@@ -66,9 +66,11 @@ export interface FormData {
         longitude: Venue["longitude"];
     };
     venueSearchTerm: string;
-    artist: Event["lineup"][0];
+    artist: Event["lineup"][number];
     imageId: Event["imageIds"][number];
     googlePlaceSearch: string;
+    website: Event["websites"][number];
+    websites: Event["websites"];
 }
 
 const schema: ZodType<FormData> = z
@@ -95,6 +97,8 @@ const schema: ZodType<FormData> = z
             message: "An Event image is required",
         }),
         googlePlaceSearch: z.string(),
+        website: z.string(),
+        websites: z.array(z.string()),
     })
     .refine(
         (data) => {
@@ -174,6 +178,7 @@ const AddEventModal = ({
             },
             imageId: defaultValues?.imageId || "",
             googlePlaceSearch: "",
+            websites: defaultValues?.websites || [],
         },
     });
 
@@ -189,6 +194,8 @@ const AddEventModal = ({
     } = formMethods;
 
     const watchLineup = watch("lineup");
+    const watchWebsites = watch("websites");
+    const watchWebsite = watch("website");
     const watchVenueSearchTerm = watch("venueSearchTerm");
     const watchArtist = watch("artist");
 
@@ -270,7 +277,7 @@ const AddEventModal = ({
                     timeFrom: formData.timeFrom,
                     timeTo: formData.timeTo,
                     description: formData.description,
-                    websites: [],
+                    websites: formData.websites,
                     imageIds: eventImage ? [eventImage.name] : [],
                     tickets: [],
                     lineup: formData.lineup,
@@ -345,6 +352,7 @@ const AddEventModal = ({
                 imageIds: imageIds,
                 lineup: formData.lineup,
                 venueId: newVenue ? newVenue.id : defaultValues?.venue.id,
+                websites: formData.websites,
             },
         });
 
@@ -381,6 +389,15 @@ const AddEventModal = ({
         if (val.length > 0) {
             setValue("lineup", Array.from(new Set([...watchLineup, val])));
             setValue("artist", "");
+        }
+    };
+
+    const handleWebsiteAdd = () => {
+        const val = getValues("website");
+
+        if (val.length > 0) {
+            setValue("websites", Array.from(new Set([...watchWebsites, val])));
+            setValue("website", "");
         }
     };
 
@@ -805,7 +822,7 @@ const AddEventModal = ({
                                                         h="44px"
                                                         w="36px"
                                                         minW="unset"
-                                                        aria-label="Search"
+                                                        aria-label="Artist"
                                                         icon={
                                                             <SmallAddIcon fontSize="28px" />
                                                         }
@@ -828,10 +845,59 @@ const AddEventModal = ({
                                                         )
                                                     )
                                                 }
-                                                chips={watchLineup.map(
-                                                    (artist) => ({
-                                                        label: artist,
-                                                        value: artist.toLowerCase(),
+                                                chips={
+                                                    watchLineup &&
+                                                    watchLineup.map(
+                                                        (artist) => ({
+                                                            label: artist,
+                                                            value: artist.toLowerCase(),
+                                                        })
+                                                    )
+                                                }
+                                            />
+                                        </Box>
+                                        <TextInput
+                                            type="text"
+                                            title="Add Website"
+                                            size="lg"
+                                            name="website"
+                                            control={control}
+                                            onEnter={handleWebsiteAdd}
+                                            rightIcon={
+                                                watchWebsite?.length > 0 && (
+                                                    <IconButton
+                                                        mt={2}
+                                                        h="44px"
+                                                        w="36px"
+                                                        minW="unset"
+                                                        aria-label="Website"
+                                                        icon={
+                                                            <SmallAddIcon fontSize="28px" />
+                                                        }
+                                                        onClick={
+                                                            handleWebsiteAdd
+                                                        }
+                                                    />
+                                                )
+                                            }
+                                        />
+
+                                        <Box w="full" mt={6}>
+                                            <ChipGroup
+                                                title="Websites: "
+                                                onRemoveChip={(index) =>
+                                                    setValue(
+                                                        "websites",
+                                                        watchWebsites.filter(
+                                                            (_, i) =>
+                                                                i !== index
+                                                        )
+                                                    )
+                                                }
+                                                chips={watchWebsites.map(
+                                                    (website) => ({
+                                                        label: website,
+                                                        value: website.toLowerCase(),
                                                     })
                                                 )}
                                             />
