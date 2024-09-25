@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-
+import { AddEventInput } from "@/types";
 
 export async function POST(req: Request) {
-    const { data } = await req.json();
+    const data: AddEventInput = await req.json();
 
     try {
         const event = await prisma?.event.create({
