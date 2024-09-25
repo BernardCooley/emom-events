@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { EventDetails } from "@/types";
 import { usePathname, useRouter } from "next/navigation";
-import { capitalizeFirstLetter } from "@/utils";
+import { capitalizeFirstLetter, formatDateTime } from "@/utils";
 
 interface Props {
     events: EventDetails[];
@@ -97,12 +97,14 @@ const ItemList = ({
                                 </CardHeader>
                                 <CardBody>
                                     <Divider my={2} />
-                                    <Text pt="2" fontSize="sm">
-                                        {item.name}
+                                    <Text fontSize="sm">{item.venue.name}</Text>
+                                    <Divider my={2} />
+                                    <Text fontSize="sm">
+                                        {item.promoter?.name}
                                     </Text>
                                     <Divider my={2} />
-                                    <Text pt="2" fontSize="sm">
-                                        {item.promoter?.name}
+                                    <Text fontSize="sm">
+                                        {formatDateTime(item.timeFrom)}
                                     </Text>
                                 </CardBody>
                             </Card>

@@ -117,6 +117,9 @@ export async function POST(req: Request) {
             skip: data.skip,
             take: data.limit,
             where: combinedQuery,
+            orderBy: {
+                timeFrom: "asc",
+            },
             select: {
                 id: true,
                 name: true,

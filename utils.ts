@@ -78,6 +78,7 @@ export const formatDateTime = (dateTimeString: string) => {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        hour12: true, // Add this line to show AM/PM
     };
     return date.toLocaleDateString(undefined, options);
 };
