@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { CustomError } from "@/types";
 
 export async function POST(req: Request) {
     const { data } = await req.json();
@@ -24,12 +25,17 @@ export async function POST(req: Request) {
 
         return response;
     } catch (error: unknown) {
-        console.error(error);
-        return NextResponse.json(
-            { error: error },
-            {
-                status: 500,
-            }
-        );
+        console.error("Error creating event:", error);
+        if (error instanceof CustomError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.status || 500 }
+            );
+        } else {
+            return NextResponse.json(
+                { error: "An unknown error occurred" },
+                { status: 500 }
+            );
+        }
     }
 }
