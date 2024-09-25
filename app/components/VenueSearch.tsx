@@ -2,12 +2,12 @@ import React from "react";
 import { Button, IconButton, Text, VStack } from "@chakra-ui/react";
 import { TextInput } from "./FormInputs/TextInput";
 import { SearchIcon } from "@chakra-ui/icons";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form";
 import { FormData } from "./AddEventModal";
 import { VenueItem } from "@/types";
 import MenuSelect from "./FormInputs/MenuSelect";
 
-interface Props {
+interface Props<T extends FieldValues> {
     onAddManuallyClick: () => void;
     handleSearchVenue: () => void;
     venueSearchTerm: string;
@@ -17,13 +17,13 @@ interface Props {
     venues: VenueItem[] | null;
     handleVenueClick: (venue: VenueItem) => void;
     venueSearched: boolean;
-    control: Control<FormData, any>;
+    control: Control<FormData, T>;
     errors: FieldErrors<FormData>;
     onRevert: () => void;
     isEditing?: boolean;
 }
 
-const VenueSearch = ({
+const VenueSearch = <T extends FieldValues>({
     onAddManuallyClick,
     handleSearchVenue,
     venueSearchTerm,
@@ -37,7 +37,7 @@ const VenueSearch = ({
     errors,
     onRevert,
     isEditing = false,
-}: Props) => {
+}: Props<T>) => {
     return (
         <>
             {isManual ? (

@@ -23,12 +23,12 @@ export async function POST(req: Request) {
         });
 
         return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(error);
         return NextResponse.json(
             { error: error },
             {
-                status: error.status || 500,
+                status: 500,
             }
         );
     }

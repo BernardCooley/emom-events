@@ -7,6 +7,7 @@ import {
 } from "firebase/storage";
 import { storage } from "./clientApp";
 import { FirebaseImageBlob } from "@/types";
+import { FirebaseError } from "firebase/app";
 
 export const uploadFirebaseImage = async (
     folder: string,
@@ -19,8 +20,11 @@ export const uploadFirebaseImage = async (
 
         const response = await uploadBytes(storageRef, file);
         return getDownloadURL(response.ref);
-    } catch (err: any) {
-        return err;
+    } catch (err: unknown) {
+        if (err instanceof FirebaseError) {
+            throw new Error(err.message);
+        }
+        return "";
     }
 };
 

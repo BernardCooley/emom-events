@@ -885,7 +885,7 @@ const AddEventModal = ({
                                             control={control}
                                         />
                                         <TextFieldChipGroup
-                                            name={"artist"}
+                                            name="artist"
                                             title="Add Artist"
                                             onEnter={handleArtistAdd}
                                             fieldValue={watchArtist}
@@ -901,7 +901,7 @@ const AddEventModal = ({
                                             control={control}
                                         />
                                         <TextFieldChipGroup
-                                            name={"website"}
+                                            name="website"
                                             title="Add Website"
                                             onEnter={handleWebsiteAdd}
                                             fieldValue={watchWebsite}

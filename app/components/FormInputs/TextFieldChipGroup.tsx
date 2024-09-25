@@ -3,19 +3,19 @@ import { Box, IconButton } from "@chakra-ui/react";
 import { TextInput } from "./TextInput";
 import { SmallAddIcon } from "@chakra-ui/icons";
 import ChipGroup from "../ChipGroup";
-import { Control } from "react-hook-form";
+import { Control, FieldValues, Path } from "react-hook-form";
 
-interface Props {
+interface Props<T extends FieldValues> {
     onEnter: () => void;
     fieldValue: string;
     onRemoveChip: (index: number) => void;
     chips: string[];
-    control: Control<any>;
+    control: Control<T>;
     title: string;
-    name: string;
+    name: Path<T>;
 }
 
-const TextFieldChipGroup = ({
+const TextFieldChipGroup = <T extends FieldValues>({
     onEnter,
     fieldValue,
     onRemoveChip,
@@ -23,7 +23,7 @@ const TextFieldChipGroup = ({
     control,
     title,
     name,
-}: Props) => {
+}: Props<T>) => {
     return (
         <>
             <TextInput

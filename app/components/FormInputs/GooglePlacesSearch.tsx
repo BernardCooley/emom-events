@@ -16,14 +16,24 @@ interface Props {
         latitude: number;
         longitude: number;
     }) => void;
-    control: Control<FormData, any>;
+    control: Control<FormData, unknown>;
 }
 
 const GooglePlacesSearch = ({ onPlaceChange, control }: Props) => {
-    const placesRef = useRef<any>(null);
+    const placesRef = useRef<google.maps.places.SearchBox | null>(null);
 
     const handlePlaceChange = () => {
-        const [place] = placesRef.current.getPlaces();
+        if (!placesRef.current) {
+            return;
+        }
+        const places = placesRef.current.getPlaces();
+        if (!places || places.length === 0) {
+            return;
+        }
+        const [place] = places;
+        if (!place.geometry || !place.geometry.location) {
+            return;
+        }
         const addressComponents = getAddress(place);
         onPlaceChange({
             address: addressComponents.address,
