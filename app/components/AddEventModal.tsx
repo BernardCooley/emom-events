@@ -42,7 +42,11 @@ import {
 } from "@/firebase/functions";
 import { Event, Venue } from "@prisma/client";
 import ImageCropper from "./ImageCropper";
-import { getUrlFromBlob, handleProfileImageChange } from "@/utils";
+import {
+    formatForDateTimeField,
+    getUrlFromBlob,
+    handleProfileImageChange,
+} from "@/utils";
 import GooglePlacesSearch from "./GooglePlacesSearch";
 import FileUpload from "./FileUpload";
 import { CloseIcon } from "@chakra-ui/icons";
@@ -150,6 +154,8 @@ const AddEventModal = ({
     const [isVenueManual, setIsVenueManual] = useState(false);
     const [venues, setVenues] = useState<VenueItem[] | null>([]);
     const [libraries] = useState<Library[]>(["places"]);
+    const todayDateFormatted = formatForDateTimeField(new Date());
+
     useJsApiLoader({
         id: "google-map-script",
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
@@ -196,8 +202,6 @@ const AddEventModal = ({
     const watchLineup = watch("lineup");
     const watchWebsites = watch("websites");
     const watchWebsite = watch("website");
-    const watchVenueSearchTerm = watch("venueSearchTerm");
-    const watchArtist = watch("artist");
 
     useEffect(() => {
         if (showAddressPanel) trigger("venue");
@@ -672,9 +676,9 @@ const AddEventModal = ({
                                                         handleSearchVenue={
                                                             handleSearchVenue
                                                         }
-                                                        venueSearchTerm={
-                                                            watchVenueSearchTerm
-                                                        }
+                                                        venueSearchTerm={watch(
+                                                            "venueSearchTerm"
+                                                        )}
                                                         onExistingVenueSearchClick={() => {
                                                             setVenues(null);
                                                             setIsVenueManual(
@@ -802,8 +806,10 @@ const AddEventModal = ({
                                             error={errors.timeFrom?.message}
                                             control={control}
                                             required
+                                            min={todayDateFormatted}
                                         />
                                         <TextInput
+                                            min={watch("timeFrom")}
                                             type="datetime-local"
                                             title="To"
                                             size="lg"
@@ -812,7 +818,7 @@ const AddEventModal = ({
                                         />
                                         <TextFieldChipGroup
                                             onEnter={handleArtistAdd}
-                                            fieldValue={watchArtist}
+                                            fieldValue={watch("artist")}
                                             onRemoveChip={(index) =>
                                                 setValue(
                                                     "lineup",

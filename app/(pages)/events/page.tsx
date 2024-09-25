@@ -42,6 +42,10 @@ const testMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
 const limit = 50;
 const options = [
     {
+        value: "",
+        label: "Defult",
+    },
+    {
         value: "nameAsc",
         label: (
             <>
