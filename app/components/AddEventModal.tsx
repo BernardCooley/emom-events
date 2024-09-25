@@ -45,8 +45,8 @@ import ImageCropper from "./ImageCropper";
 import { getUrlFromBlob, handleProfileImageChange } from "@/utils";
 import GooglePlacesSearch from "./GooglePlacesSearch";
 import FileUpload from "./FileUpload";
-import { CloseIcon, SmallAddIcon } from "@chakra-ui/icons";
-import ChipGroup from "./ChipGroup";
+import { CloseIcon } from "@chakra-ui/icons";
+import TextFieldChipGroup from "./TextFieldChipGroup";
 
 export interface FormData {
     name: Event["name"];
@@ -807,101 +807,34 @@ const AddEventModal = ({
                                             name="timeTo"
                                             control={control}
                                         />
-
-                                        <TextInput
-                                            type="text"
-                                            title="Add Artist"
-                                            size="lg"
-                                            name="artist"
-                                            control={control}
+                                        <TextFieldChipGroup
                                             onEnter={handleArtistAdd}
-                                            rightIcon={
-                                                watchArtist?.length > 0 && (
-                                                    <IconButton
-                                                        mt={2}
-                                                        h="44px"
-                                                        w="36px"
-                                                        minW="unset"
-                                                        aria-label="Artist"
-                                                        icon={
-                                                            <SmallAddIcon fontSize="28px" />
-                                                        }
-                                                        onClick={
-                                                            handleArtistAdd
-                                                        }
-                                                    />
+                                            fieldValue={watchArtist}
+                                            onRemoveChip={(index) =>
+                                                setValue(
+                                                    "lineup",
+                                                    watchLineup.filter(
+                                                        (_, i) => i !== index
+                                                    )
                                                 )
                                             }
-                                        />
-                                        <Box w="full" mt={6}>
-                                            <ChipGroup
-                                                title="Lineup: "
-                                                onRemoveChip={(index) =>
-                                                    setValue(
-                                                        "lineup",
-                                                        watchLineup.filter(
-                                                            (_, i) =>
-                                                                i !== index
-                                                        )
-                                                    )
-                                                }
-                                                chips={
-                                                    watchLineup &&
-                                                    watchLineup.map(
-                                                        (artist) => ({
-                                                            label: artist,
-                                                            value: artist.toLowerCase(),
-                                                        })
-                                                    )
-                                                }
-                                            />
-                                        </Box>
-                                        <TextInput
-                                            type="text"
-                                            title="Add Website"
-                                            size="lg"
-                                            name="website"
+                                            chips={watchLineup}
                                             control={control}
+                                        />
+                                        <TextFieldChipGroup
                                             onEnter={handleWebsiteAdd}
-                                            rightIcon={
-                                                watchWebsite?.length > 0 && (
-                                                    <IconButton
-                                                        mt={2}
-                                                        h="44px"
-                                                        w="36px"
-                                                        minW="unset"
-                                                        aria-label="Website"
-                                                        icon={
-                                                            <SmallAddIcon fontSize="28px" />
-                                                        }
-                                                        onClick={
-                                                            handleWebsiteAdd
-                                                        }
-                                                    />
+                                            fieldValue={watchWebsite}
+                                            onRemoveChip={(index) =>
+                                                setValue(
+                                                    "websites",
+                                                    watchWebsites.filter(
+                                                        (_, i) => i !== index
+                                                    )
                                                 )
                                             }
+                                            chips={watchWebsites}
+                                            control={control}
                                         />
-
-                                        <Box w="full" mt={6}>
-                                            <ChipGroup
-                                                title="Websites: "
-                                                onRemoveChip={(index) =>
-                                                    setValue(
-                                                        "websites",
-                                                        watchWebsites.filter(
-                                                            (_, i) =>
-                                                                i !== index
-                                                        )
-                                                    )
-                                                }
-                                                chips={watchWebsites.map(
-                                                    (website) => ({
-                                                        label: website,
-                                                        value: website.toLowerCase(),
-                                                    })
-                                                )}
-                                            />
-                                        </Box>
                                     </VStack>
                                 </VStack>
                                 <HStack w="full" justifyContent="flex-end">
