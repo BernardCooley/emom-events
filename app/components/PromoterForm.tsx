@@ -97,7 +97,7 @@ const PromoterForm = ({
     } = formMethods;
 
     const onCreatePromoter = async (formData: FormData) => {
-        let imageIds: string[] = [];
+        const imageIds: string[] = [];
 
         const newPromoter = await addPromoter({
             data: {
