@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { CustomError, EventOrderByWithRelationInput } from "@/types";
+import { EventOrderByWithRelationInput } from "@/types";
 import { formatDateString } from "@/utils";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
