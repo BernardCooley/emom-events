@@ -14,10 +14,10 @@ import {
 import { z, ZodType } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TextInput } from "./TextInput";
+import { TextInput } from "./FormInputs/TextInput";
 import { addPromoter, updatePromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
-import FileUpload from "./FileUpload";
+import FileUpload from "./FormInputs/FileUpload";
 import { uploadFirebaseImage } from "@/firebase/functions";
 import { FirebaseImageBlob } from "@/types";
 import ImageCropper from "./ImageCropper";

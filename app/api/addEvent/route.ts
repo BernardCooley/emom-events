@@ -17,6 +17,7 @@ export async function POST(req: Request) {
                 imageIds: data.imageIds,
                 tickets: data.tickets,
                 lineup: data.lineup,
+                preBookEmail: data.preBookEmail,
             },
         });
 

@@ -44,6 +44,7 @@ export async function POST(req: Request) {
                                 email: true,
                             },
                         },
+                        preBookEmail: true,
                     },
                 },
             },

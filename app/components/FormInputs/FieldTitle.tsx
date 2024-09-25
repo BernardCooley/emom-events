@@ -14,6 +14,7 @@ type Props = {
     helperText?: ReactNode;
     titleSize?: TypographyProps["fontSize"];
     helperTextSize?: TypographyProps["fontSize"];
+    wrapText?: boolean;
 };
 
 const FieldTitle = ({
@@ -22,12 +23,15 @@ const FieldTitle = ({
     helperText,
     titleSize = "md",
     helperTextSize = "sm",
+    wrapText = false,
 }: Props) => {
     return (
         <>
             <FormLabel mb={0} fontSize={titleSize}>
                 <Flex>
-                    <Text>{title}</Text>
+                    <Text whiteSpace={wrapText ? "normal" : "nowrap"}>
+                        {title}
+                    </Text>
                     {required && (
                         <Box color="gpRed.500" pl={1}>
                             *

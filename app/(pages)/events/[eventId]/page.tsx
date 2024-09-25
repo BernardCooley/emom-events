@@ -44,6 +44,7 @@ const Event = ({}: Props) => {
         venue,
         lineup,
         websites,
+        preBookEmail,
     } = eventDetails || {};
 
     useEffect(() => {
@@ -139,6 +140,11 @@ const Event = ({}: Props) => {
                             googlePlaceSearch: "",
                             websites: websites || [],
                             website: "",
+                            preBookAvailable:
+                                preBookEmail && preBookEmail.length > 0
+                                    ? true
+                                    : false,
+                            contactEmail: preBookEmail || "",
                         }}
                         onFail={() => {
                             toast({

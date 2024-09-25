@@ -266,3 +266,19 @@ export const formatForDateTimeField = (date: Date): string => {
         `${todayDate.day}T${todayDate.hours}:${todayDate.minutes}`,
     ].join("-")}`;
 };
+
+export const validateField = <T>(
+    field: keyof T,
+    message: string,
+    onInvalid: (field: keyof T, error: { message: string }) => void,
+    condition: boolean
+) => {
+    let valid = true;
+    if (condition) {
+        onInvalid(field, {
+            message: message,
+        });
+        valid = false;
+    }
+    return valid;
+};

@@ -278,6 +278,7 @@ type UpdateEventProps = {
         lineup?: EventDetails["lineup"];
         venueId?: EventDetails["venueId"];
         websites?: EventDetails["websites"];
+        preBookEmail: EventDetails["preBookEmail"];
     };
 };
 

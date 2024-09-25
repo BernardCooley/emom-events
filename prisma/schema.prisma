@@ -10,20 +10,21 @@ generator client {
 }
 
 model Event {
-    id          String   @id @default(uuid())
-    name        String
-    status      String?
-    timeFrom    String
-    timeTo      String?
-    description String
-    websites    String[]
-    imageIds    String[]
-    tickets     String[]
-    lineup      String[]
-    promoter    Promoter @relation(fields: [promoterId], references: [id])
-    promoterId  String
-    venue       Venue    @relation(fields: [venueId], references: [id])
-    venueId     String
+    id           String   @id @default(uuid())
+    name         String
+    status       String?
+    timeFrom     String
+    timeTo       String?
+    description  String
+    preBookEmail String   @default("")
+    websites     String[]
+    imageIds     String[]
+    tickets      String[]
+    lineup       String[]
+    promoter     Promoter @relation(fields: [promoterId], references: [id])
+    promoterId   String
+    venue        Venue    @relation(fields: [venueId], references: [id])
+    venueId      String
 }
 
 model Promoter {

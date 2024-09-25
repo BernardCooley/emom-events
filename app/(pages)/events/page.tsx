@@ -3,7 +3,6 @@
 import EventsMap from "@/app/components/EventsMap";
 import FloatingIconButton from "@/app/components/FloatingIconButton";
 import ItemList from "@/app/components/ItemList";
-import { TextInput } from "@/app/components/TextInput";
 import { fetchEvents } from "@/bff";
 import { useEventContext } from "@/context/eventContext";
 import useScrollPosition from "@/hooks/useScrollPosition";
@@ -36,6 +35,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 import Select from "react-select";
+import { TextInput } from "@/app/components/FormInputs/TextInput";
 
 const testMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
 const limit = 50;

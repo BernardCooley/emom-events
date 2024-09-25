@@ -23,7 +23,7 @@ import {
 import { z, ZodType } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { TextInput } from "./TextInput";
+import { TextInput } from "./FormInputs/TextInput";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { Library } from "@googlemaps/js-api-loader";
 import {
@@ -46,11 +46,14 @@ import {
     formatForDateTimeField,
     getUrlFromBlob,
     handleProfileImageChange,
+    validateField,
 } from "@/utils";
-import GooglePlacesSearch from "./GooglePlacesSearch";
-import FileUpload from "./FileUpload";
+import FileUpload from "./FormInputs/FileUpload";
 import { CloseIcon } from "@chakra-ui/icons";
-import TextFieldChipGroup from "./TextFieldChipGroup";
+import TextFieldChipGroup from "./FormInputs/TextFieldChipGroup";
+import GooglePlacesSearch from "./FormInputs/GooglePlacesSearch";
+import { SwitchInput } from "./FormInputs/SwitchInput";
+import { usePromoterContext } from "@/context/promoterContext";
 
 export interface FormData {
     name: Event["name"];
@@ -75,48 +78,38 @@ export interface FormData {
     googlePlaceSearch: string;
     website: Event["websites"][number];
     websites: Event["websites"];
+    preBookAvailable: boolean;
+    contactEmail: string;
 }
 
-const schema: ZodType<FormData> = z
-    .object({
-        name: z.string().min(1, "Name is required"),
-        timeFrom: z.string().min(1, "Date/Time from is required"),
-        timeTo: z.string(),
-        description: z.string().min(1, "Description is required"),
-        lineup: z.array(z.string()),
-        venue: z.object({
-            id: z.string(),
-            name: z.string().min(1, "Venue name is required"),
-            address: z.string(),
-            city: z.string().min(1, "Venue city is required"),
-            state: z.string().min(1, "Venue state is required"),
-            country: z.string().min(1, "Venue country is required"),
-            postcodeZip: z.string(),
-            latitude: z.number(),
-            longitude: z.number(),
-        }),
-        venueSearchTerm: z.string(),
-        artist: z.string(),
-        imageId: z.string().min(1, {
-            message: "An Event image is required",
-        }),
-        googlePlaceSearch: z.string(),
-        website: z.string(),
-        websites: z.array(z.string()),
-    })
-    .refine(
-        (data) => {
-            if (data.timeTo.length > 0) {
-                return data.timeFrom < data.timeTo;
-            } else {
-                return true;
-            }
-        },
-        {
-            message: "End time must be after start time",
-            path: ["timeTo"],
-        }
-    );
+const schema: ZodType<FormData> = z.object({
+    name: z.string().min(1, "Name is required"),
+    timeFrom: z.string().min(1, "Date/Time from is required"),
+    timeTo: z.string(),
+    description: z.string().min(1, "Description is required"),
+    lineup: z.array(z.string()),
+    venue: z.object({
+        id: z.string(),
+        name: z.string().min(1, "Venue name is required"),
+        address: z.string(),
+        city: z.string().min(1, "Venue city is required"),
+        state: z.string().min(1, "Venue state is required"),
+        country: z.string().min(1, "Venue country is required"),
+        postcodeZip: z.string(),
+        latitude: z.number(),
+        longitude: z.number(),
+    }),
+    venueSearchTerm: z.string(),
+    artist: z.string(),
+    imageId: z.string().min(1, {
+        message: "An Event image is required",
+    }),
+    googlePlaceSearch: z.string(),
+    website: z.string(),
+    websites: z.array(z.string()),
+    preBookAvailable: z.boolean(),
+    contactEmail: z.string(),
+});
 
 type Props = {
     promoterId: string;
@@ -139,6 +132,7 @@ const AddEventModal = ({
     onFail,
     eventId,
 }: Props) => {
+    const { promoter } = usePromoterContext();
     const imageGridRef = useRef<HTMLDivElement>(null);
     const [imageToUpload, setImageToUpload] = useState<File | null>(null);
     const [croppedImage, setCroppedImage] = useState<FirebaseImageBlob | null>(
@@ -185,6 +179,10 @@ const AddEventModal = ({
             imageId: defaultValues?.imageId || "",
             googlePlaceSearch: "",
             websites: defaultValues?.websites || [],
+            preBookAvailable: defaultValues?.preBookAvailable || false,
+            contactEmail: defaultValues?.contactEmail || promoter?.email,
+            artist: "",
+            website: "",
         },
     });
 
@@ -197,11 +195,20 @@ const AddEventModal = ({
         trigger,
         control,
         formState: { errors },
+        setError,
     } = formMethods;
 
+    const watchArtist = watch("artist");
     const watchLineup = watch("lineup");
     const watchWebsites = watch("websites");
     const watchWebsite = watch("website");
+    const watchPreBookAvailable = watch("preBookAvailable");
+
+    useEffect(() => {
+        if (watchPreBookAvailable && !getValues("contactEmail")) {
+            setValue("contactEmail", promoter?.email || "");
+        }
+    }, [watchPreBookAvailable]);
 
     useEffect(() => {
         if (showAddressPanel) trigger("venue");
@@ -285,6 +292,9 @@ const AddEventModal = ({
                     imageIds: eventImage ? [eventImage.name] : [],
                     tickets: [],
                     lineup: formData.lineup,
+                    preBookEmail: formData.preBookAvailable
+                        ? formData.contactEmail
+                        : "",
                 },
             });
 
@@ -357,6 +367,9 @@ const AddEventModal = ({
                 lineup: formData.lineup,
                 venueId: newVenue ? newVenue.id : defaultValues?.venue.id,
                 websites: formData.websites,
+                preBookEmail: formData.preBookAvailable
+                    ? formData.contactEmail
+                    : "",
             },
         });
 
@@ -370,11 +383,23 @@ const AddEventModal = ({
     };
 
     const onSave = async (formData: FormData) => {
-        setIsSaving(true);
-        if (eventId) {
-            await onUpdateEvent(formData);
-        } else {
-            await onCreateEvent(formData);
+        const valid = validateField<FormData>(
+            "contactEmail",
+            "Contact email is required for pre-booking",
+            () =>
+                setError("contactEmail", {
+                    message: "Contact email is required for pre-booking",
+                }),
+            formData.preBookAvailable && !formData.contactEmail
+        );
+
+        if (valid) {
+            setIsSaving(true);
+            if (eventId) {
+                await onUpdateEvent(formData);
+            } else {
+                await onCreateEvent(formData);
+            }
         }
     };
 
@@ -444,6 +469,8 @@ const AddEventModal = ({
 
     return (
         <Modal
+            scrollBehavior="inside"
+            blockScrollOnMount={false}
             closeOnOverlayClick={false}
             closeOnEsc={false}
             isOpen={isOpen}
@@ -452,8 +479,8 @@ const AddEventModal = ({
             isCentered
         >
             <ModalOverlay />
-            <ModalContent pb={10} pt={4} h="90vh" overflowY="scroll">
-                <ModalHeader>
+            <ModalContent pt={4} h="90vh" overflowY="scroll">
+                <ModalHeader pt={0}>
                     {eventId ? "Edit Event" : "Create Event"}
                 </ModalHeader>
                 <Divider />
@@ -473,10 +500,10 @@ const AddEventModal = ({
                     </Center>
                 )}
                 <ModalBody
+                    py={4}
                     position="relative"
                     opacity={isSaving ? 0.3 : 1}
                     pointerEvents={isSaving ? "none" : "auto"}
-                    mt={6}
                 >
                     <ImageCropper
                         onCancel={() => {
@@ -495,7 +522,7 @@ const AddEventModal = ({
                                 console.log(errors)
                             )}
                         >
-                            <VStack gap={6}>
+                            <VStack gap={6} px={1}>
                                 <VStack gap={6} w="full">
                                     <VStack gap={6} w="full">
                                         <TextInput
@@ -507,6 +534,42 @@ const AddEventModal = ({
                                             control={control}
                                             required
                                         />
+                                        <SwitchInput
+                                            orientation="row"
+                                            width="full"
+                                            title="Artist pre-booking available"
+                                            size="lg"
+                                            control={control}
+                                            name="preBookAvailable"
+                                            error={
+                                                errors.preBookAvailable?.message
+                                            }
+                                        />
+                                        <Box
+                                            w="full"
+                                            sx={
+                                                watchPreBookAvailable
+                                                    ? {}
+                                                    : {
+                                                          h: 0,
+                                                          visibility: "hidden",
+                                                          overflow: "hidden",
+                                                      }
+                                            }
+                                        >
+                                            <TextInput
+                                                type="text"
+                                                title="Contact Email for pre-booking"
+                                                size="lg"
+                                                name="contactEmail"
+                                                error={
+                                                    errors.contactEmail?.message
+                                                }
+                                                control={control}
+                                                required
+                                            />
+                                        </Box>
+
                                         <TextInput
                                             type="text"
                                             title="Description"
@@ -519,7 +582,7 @@ const AddEventModal = ({
                                         />
                                         <VStack w="full" alignItems="start">
                                             <Flex w="full">
-                                                <Text fontSize="lg">Venue</Text>
+                                                <Text fontSize="md">Venue</Text>
                                                 <Box color="gpRed.500" pl={1}>
                                                     *
                                                 </Box>
@@ -822,8 +885,10 @@ const AddEventModal = ({
                                             control={control}
                                         />
                                         <TextFieldChipGroup
+                                            name={"artist"}
+                                            title="Add Artist"
                                             onEnter={handleArtistAdd}
-                                            fieldValue={watch("artist")}
+                                            fieldValue={watchArtist}
                                             onRemoveChip={(index) =>
                                                 setValue(
                                                     "lineup",
@@ -836,6 +901,8 @@ const AddEventModal = ({
                                             control={control}
                                         />
                                         <TextFieldChipGroup
+                                            name={"website"}
+                                            title="Add Website"
                                             onEnter={handleWebsiteAdd}
                                             fieldValue={watchWebsite}
                                             onRemoveChip={(index) =>

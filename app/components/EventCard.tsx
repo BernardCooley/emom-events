@@ -45,6 +45,7 @@ const EventCard = ({
         description,
         lineup,
         websites,
+        preBookEmail,
     } = eventDetails || {};
 
     return (
@@ -157,6 +158,13 @@ const EventCard = ({
                                         </Link>
                                     ))}
                                 </VStack>
+                            )}
+                            {preBookEmail.length > 0 && (
+                                <EventCardDetail
+                                    title="Pre-Book Email"
+                                    value={preBookEmail}
+                                    href={`mailto:${preBookEmail}`}
+                                />
                             )}
                         </Stack>
                     </Flex>

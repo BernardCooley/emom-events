@@ -2,7 +2,7 @@ import React from "react";
 import { Box, IconButton } from "@chakra-ui/react";
 import { TextInput } from "./TextInput";
 import { SmallAddIcon } from "@chakra-ui/icons";
-import ChipGroup from "./ChipGroup";
+import ChipGroup from "../ChipGroup";
 import { Control } from "react-hook-form";
 
 interface Props {
@@ -11,6 +11,8 @@ interface Props {
     onRemoveChip: (index: number) => void;
     chips: string[];
     control: Control<any>;
+    title: string;
+    name: string;
 }
 
 const TextFieldChipGroup = ({
@@ -19,14 +21,16 @@ const TextFieldChipGroup = ({
     onRemoveChip,
     chips,
     control,
+    title,
+    name,
 }: Props) => {
     return (
         <>
             <TextInput
                 type="text"
-                title="Add Website"
+                title={title}
                 size="lg"
-                name="website"
+                name={name}
                 control={control}
                 onEnter={onEnter}
                 rightIcon={

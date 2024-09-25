@@ -1,11 +1,11 @@
 import React from "react";
 import { Button, IconButton, Text, VStack } from "@chakra-ui/react";
-import { TextInput } from "./TextInput";
+import { TextInput } from "./FormInputs/TextInput";
 import { SearchIcon } from "@chakra-ui/icons";
 import { Control, FieldErrors } from "react-hook-form";
 import { FormData } from "./AddEventModal";
 import { VenueItem } from "@/types";
-import MenuSelect from "./MenuSelect";
+import MenuSelect from "./FormInputs/MenuSelect";
 
 interface Props {
     onAddManuallyClick: () => void;
