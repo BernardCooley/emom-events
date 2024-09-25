@@ -17,14 +17,15 @@ export async function POST(req: Request) {
         });
 
         return response;
-    } catch (error: any) {
-        console.error(error);
-
-        return NextResponse.json(
-            { error: error },
-            {
-                status: error.status || 500,
-            }
-        );
+    } catch (error: unknown) {
+        console.error("Error creating event:", error);
+        if (error instanceof Error) {
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        } else {
+            return NextResponse.json(
+                { error: "An unknown error occurred" },
+                { status: 500 }
+            );
+        }
     }
 }
