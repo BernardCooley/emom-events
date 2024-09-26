@@ -12,15 +12,17 @@ interface Props {
 
 const ComponentName = ({ children }: Props) => {
     const { data: session } = useSession();
-    const { updatePromoter } = usePromoterContext();
+    const { updatePromoter, updatePromoterLoading } = usePromoterContext();
 
     const getPromoter = useCallback(async () => {
+        updatePromoterLoading(true);
         if (session?.user?.email) {
             const promoter = await fetchPromoter({
                 email: session?.user?.email,
             });
 
             updatePromoter(promoter);
+            updatePromoterLoading(false);
         }
     }, [session?.user?.email]);
 

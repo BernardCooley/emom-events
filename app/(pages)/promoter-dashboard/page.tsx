@@ -29,10 +29,10 @@ interface Props {}
 
 const PromoterDashboard = ({}: Props) => {
     const [isEditing, setEditing] = useState(false);
-    const { promoter, updatePromoter } = usePromoterContext();
+    const { promoter, updatePromoter, updatePromoterLoading, promoterLoading } =
+        usePromoterContext();
     const toast = useToast();
     const { data: session } = useSession();
-    const [loading, setLoading] = useState(true);
     const [profileImage, setProfileImage] = useState<FirebaseImageBlob | null>(
         null
     );
@@ -42,16 +42,17 @@ const PromoterDashboard = ({}: Props) => {
         if (promoter) {
             getProfileImage();
         }
-        setLoading(false);
     }, [promoter]);
 
     const getPromoter = useCallback(async () => {
+        updatePromoterLoading(true);
         if (session?.user?.email) {
             const promoter = await fetchPromoter({
                 email: session?.user?.email,
             });
 
             updatePromoter(promoter);
+            updatePromoterLoading(false);
         }
     }, [session?.user?.email]);
 
@@ -68,7 +69,7 @@ const PromoterDashboard = ({}: Props) => {
         }
     };
 
-    if (loading) {
+    if (promoterLoading) {
         return <PageLoading />;
     }
 
