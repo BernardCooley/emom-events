@@ -1,10 +1,13 @@
 import { Event, Promoter, Venue } from "@prisma/client";
 import {
     AddEventInput,
+    AddPromoterInput,
     AddVenueInput,
     EventDetails,
     EventRequestProps,
     PromoterDetails,
+    UpdateEventInput,
+    UpdatePromoterInput,
     VenueItem,
 } from "./types";
 
@@ -84,7 +87,7 @@ export const fetchPromoter = async ({
 };
 
 type AddPromoterProps = {
-    data: Promoter;
+    data: AddPromoterInput;
 };
 
 export const addPromoter = async ({
@@ -107,15 +110,7 @@ export const addPromoter = async ({
 
 type UpdatePromoterProps = {
     id: string;
-    data: {
-        name?: Promoter["name"];
-        city?: Promoter["city"];
-        state?: Promoter["state"];
-        country?: Promoter["country"];
-        websites?: Promoter["websites"];
-        imageIds?: Promoter["imageIds"];
-        showEmail?: Promoter["showEmail"];
-    };
+    data: UpdatePromoterInput;
 };
 
 export const updatePromoter = async ({
@@ -270,17 +265,7 @@ export const fetchEvents = async ({
 
 type UpdateEventProps = {
     id: string;
-    event: {
-        name: EventDetails["name"];
-        timeFrom: EventDetails["timeFrom"];
-        timeTo?: EventDetails["timeTo"];
-        description: EventDetails["description"];
-        imageIds: EventDetails["imageIds"];
-        lineup?: EventDetails["lineup"];
-        venueId?: EventDetails["venueId"];
-        websites?: EventDetails["websites"];
-        preBookEmail?: EventDetails["preBookEmail"];
-    };
+    event: UpdateEventInput;
 };
 
 export const updateEvent = async ({

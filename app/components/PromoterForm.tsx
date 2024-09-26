@@ -94,14 +94,18 @@ const PromoterForm = ({
         handleSubmit,
         formState: { errors },
         control,
+        reset,
     } = formMethods;
+
+    useEffect(() => {
+        reset(defaultValues);
+    }, [defaultValues]);
 
     const onCreatePromoter = async (formData: FormData) => {
         const imageIds: string[] = [];
 
         const newPromoter = await addPromoter({
             data: {
-                id: "",
                 name: formData.name,
                 city: formData.city,
                 state: formData.state,
@@ -206,7 +210,11 @@ const PromoterForm = ({
                 opacity={isSaving ? 0.4 : 1}
                 pointerEvents={isSaving ? "none" : "auto"}
             >
-                <form onSubmit={handleSubmit(onSave)}>
+                <form
+                    onSubmit={handleSubmit(onSave, (error) => {
+                        console.error(error);
+                    })}
+                >
                     <VStack gap={6}>
                         <TextInput
                             type="text"
@@ -288,7 +296,7 @@ const PromoterForm = ({
                             </Button>
                             <Button
                                 isLoading={isSaving}
-                                onClick={handleSubmit(onSave)}
+                                type="submit"
                                 colorScheme="blue"
                                 mt={10}
                             >

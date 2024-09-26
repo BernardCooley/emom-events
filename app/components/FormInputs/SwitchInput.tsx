@@ -48,7 +48,6 @@ export const SwitchInput = <T extends FieldValues>({
         name: name,
     });
 
-    console.log("🚀 ~ field:", field);
     return (
         <FormControl w={width} isInvalid={!!error} style={styles}>
             <Flex

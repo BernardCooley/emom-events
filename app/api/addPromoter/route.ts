@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const d: Promoter = data;
 
     try {
-        await prisma?.promoter.create({
+        const promoter = await prisma?.promoter.create({
             data: {
                 name: d.name,
                 city: d.city,
@@ -21,12 +21,9 @@ export async function POST(req: Request) {
             },
         });
 
-        const response = NextResponse.json(
-            {},
-            {
-                status: 200,
-            }
-        );
+        const response = NextResponse.json(promoter, {
+            status: 200,
+        });
 
         return response;
     } catch (error: unknown) {

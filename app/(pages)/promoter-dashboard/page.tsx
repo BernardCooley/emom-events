@@ -40,9 +40,9 @@ const PromoterDashboard = ({}: Props) => {
 
     useEffect(() => {
         if (promoter) {
-            setLoading(false);
             getProfileImage();
         }
+        setLoading(false);
     }, [promoter]);
 
     const getPromoter = useCallback(async () => {

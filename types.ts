@@ -66,6 +66,39 @@ export type VenueItem = {
     longitude: Venue["longitude"];
 };
 
+export type UpdatePromoterInput = {
+    name?: Promoter["name"];
+    city?: Promoter["city"];
+    state?: Promoter["state"];
+    country?: Promoter["country"];
+    websites?: Promoter["websites"];
+    imageIds?: Promoter["imageIds"];
+    showEmail?: Promoter["showEmail"];
+};
+
+export type AddPromoterInput = {
+    name: Promoter["name"];
+    email: Promoter["email"];
+    city: Promoter["city"];
+    state: Promoter["state"];
+    country: Promoter["country"];
+    websites: Promoter["websites"];
+    imageIds: Promoter["imageIds"];
+    showEmail: Promoter["showEmail"];
+};
+
+export type UpdateEventInput = {
+    name: EventDetails["name"];
+    timeFrom: EventDetails["timeFrom"];
+    timeTo?: EventDetails["timeTo"];
+    description: EventDetails["description"];
+    imageIds: EventDetails["imageIds"];
+    lineup?: EventDetails["lineup"];
+    venueId?: EventDetails["venueId"];
+    websites?: EventDetails["websites"];
+    preBookEmail?: EventDetails["preBookEmail"];
+};
+
 export type AddEventInput = {
     promoterId: string;
     venueId: string;
