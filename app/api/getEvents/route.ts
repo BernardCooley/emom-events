@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { EventOrderByWithRelationInput } from "@/types";
+import { EventOrderByWithRelationInput, EventRequestProps } from "@/types";
 import { formatDateString } from "@/utils";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -7,31 +7,33 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const { data } = await req.json();
 
-    const dateFrom = data.dateFrom
-        ? `${data.dateFrom}T00:00`
+    const d: EventRequestProps = data;
+
+    const dateFrom = d.dateFrom
+        ? `${d.dateFrom}T00:00`
         : `${formatDateString(new Date().toISOString()).date}T00:00`;
 
     // TODO returning some events past the dateTo date
-    const dateTo = data.dateTo ? `${data.dateTo}T23:59` : null;
+    const dateTo = d.dateTo ? `${d.dateTo}T23:59` : null;
 
-    const searchTermQuery = data.searchTerm
+    const searchTermQuery = d.searchTerm
         ? {
               OR: [
                   {
                       name: {
-                          contains: data.searchTerm,
+                          contains: d.searchTerm,
                           mode: Prisma.QueryMode.insensitive,
                       },
                   },
                   {
                       lineup: {
-                          has: data.searchTerm,
+                          has: d.searchTerm,
                       },
                   },
                   {
                       promoter: {
                           name: {
-                              contains: data.searchTerm,
+                              contains: d.searchTerm,
                               mode: Prisma.QueryMode.insensitive,
                           },
                       },
@@ -41,7 +43,7 @@ export async function POST(req: Request) {
                           {
                               venue: {
                                   name: {
-                                      contains: data.searchTerm,
+                                      contains: d.searchTerm,
                                       mode: Prisma.QueryMode.insensitive,
                                   },
                               },
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
                           {
                               venue: {
                                   address: {
-                                      contains: data.searchTerm,
+                                      contains: d.searchTerm,
                                       mode: Prisma.QueryMode.insensitive,
                                   },
                               },
@@ -57,7 +59,7 @@ export async function POST(req: Request) {
                           {
                               venue: {
                                   city: {
-                                      contains: data.searchTerm,
+                                      contains: d.searchTerm,
                                       mode: Prisma.QueryMode.insensitive,
                                   },
                               },
@@ -65,7 +67,7 @@ export async function POST(req: Request) {
                           {
                               venue: {
                                   state: {
-                                      contains: data.searchTerm,
+                                      contains: d.searchTerm,
                                       mode: Prisma.QueryMode.insensitive,
                                   },
                               },
@@ -73,7 +75,7 @@ export async function POST(req: Request) {
                           {
                               venue: {
                                   country: {
-                                      contains: data.searchTerm,
+                                      contains: d.searchTerm,
                                       mode: Prisma.QueryMode.insensitive,
                                   },
                               },
@@ -81,7 +83,7 @@ export async function POST(req: Request) {
                           {
                               venue: {
                                   postcodeZip: {
-                                      contains: data.searchTerm,
+                                      contains: d.searchTerm,
                                       mode: Prisma.QueryMode.insensitive,
                                   },
                               },
@@ -133,15 +135,15 @@ export async function POST(req: Request) {
     };
 
     const combinedQuery = {
-        AND: [...(data.searchTerm ? [searchTermQuery] : []), dataRangeQuery],
+        AND: [...(d.searchTerm ? [searchTermQuery] : []), dataRangeQuery],
     };
 
     try {
         const event = await prisma?.event.findMany({
-            skip: data.skip,
-            take: data.limit,
+            skip: d.skip,
+            take: d.limit ? d.limit : undefined,
             where: combinedQuery,
-            orderBy: getOrderBy(data.orderBy),
+            orderBy: d.orderBy ? getOrderBy(d.orderBy) : { timeFrom: "asc" },
             select: {
                 id: true,
                 name: true,

@@ -5,10 +5,12 @@ import prisma from "@/lib/prisma";
 export async function POST(req: Request) {
     const { venueId } = await req.json();
 
+    const v: string = venueId;
+
     try {
         const deleteVenue = await prisma?.venue.delete({
             where: {
-                id: venueId,
+                id: v,
             },
         });
 

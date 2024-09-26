@@ -1,16 +1,20 @@
 import prisma from "@/lib/prisma";
+import { UpdateEventInput } from "@/types";
 
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     const { id, event } = await req.json();
 
+    const i: string = id;
+    const e: UpdateEventInput = event;
+
     try {
         const newEvent = await prisma?.event.update({
             where: {
-                id,
+                id: i,
             },
-            data: event,
+            data: e,
         });
 
         const response = NextResponse.json(newEvent, {

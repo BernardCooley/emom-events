@@ -5,10 +5,12 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const { eventId } = await req.json();
 
+    const e: string = eventId;
+
     try {
         const event = await prisma?.event.findUnique({
             where: {
-                id: eventId,
+                id: e,
             },
             select: {
                 id: true,

@@ -5,28 +5,30 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const { searchTerm } = await req.json();
 
+    const s: string = searchTerm;
+
     try {
         const venue = await prisma?.venue.findMany({
             where: {
                 OR: [
                     {
                         name: {
-                            search: searchTerm,
+                            search: s,
                         },
                         address: {
-                            search: searchTerm,
+                            search: s,
                         },
                         city: {
-                            search: searchTerm,
+                            search: s,
                         },
                         state: {
-                            search: searchTerm,
+                            search: s,
                         },
                         country: {
-                            search: searchTerm,
+                            search: s,
                         },
                         postcodeZip: {
-                            search: searchTerm,
+                            search: s,
                         },
                     },
                 ],

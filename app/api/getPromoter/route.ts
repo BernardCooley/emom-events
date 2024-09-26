@@ -5,10 +5,12 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const { email } = await req.json();
 
+    const e: string = email;
+
     try {
         const promoter = await prisma?.promoter.findUnique({
             where: {
-                email,
+                email: e,
             },
             select: {
                 id: true,
