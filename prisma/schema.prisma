@@ -25,6 +25,7 @@ model Event {
     promoterId   String
     venue        Venue    @relation(fields: [venueId], references: [id])
     venueId      String
+    createAt     DateTime @default(now())
 }
 
 model Promoter {
@@ -38,6 +39,7 @@ model Promoter {
     websites  String[]
     imageIds  String[]
     events    Event[]
+    createAt  DateTime @default(now())
 }
 
 model Venue {
@@ -52,4 +54,5 @@ model Venue {
     longitude   Float    @default(0)
     links       String[]
     events      Event[]
+    createAt    DateTime @default(now())
 }
