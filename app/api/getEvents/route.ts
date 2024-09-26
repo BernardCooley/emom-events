@@ -127,6 +127,10 @@ export async function POST(req: Request) {
                 return { venue: { name: "asc" } };
             case "venueDesc":
                 return { venue: { name: "desc" } };
+            case "createAtAsc":
+                return { createAt: "asc" };
+            case "createAtDesc":
+                return { createAt: "desc" };
             default:
                 return { timeFrom: "asc" };
         }

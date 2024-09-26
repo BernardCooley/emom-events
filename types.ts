@@ -149,4 +149,5 @@ export type EventOrderByWithRelationInput = {
     venue?: {
         name?: "asc" | "desc";
     };
+    createAt?: "asc" | "desc";
 };
