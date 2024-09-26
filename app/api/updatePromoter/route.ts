@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     try {
         const newPromoter = await prisma?.promoter.update({
             where: {
-                id,
+                id: i,
             },
             data: p,
         });
