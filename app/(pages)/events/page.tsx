@@ -133,6 +133,9 @@ const schema: ZodType<FormData> = z.object({
 interface Props {}
 
 const EventsPage = ({}: Props) => {
+    const [itemListEvents, setItemListEvents] = useState<EventDetails[] | null>(
+        null
+    );
     const [isMarkerHovered, setIsMarkerHovered] = useState<boolean>(false);
     const [fetching, setFetching] = useState<boolean>(false);
     const [hasAllEvents, setHasAllEvents] = useState<boolean>(false);
@@ -506,10 +509,21 @@ const EventsPage = ({}: Props) => {
                     <HStack>
                         <Text>Showing: </Text>
                         <Text fontWeight={700}>
-                            {searchParams.get("searchTerm") || "All Events"}{" "}
-                            {events && events.length > 0
-                                ? `(${events.length})`
-                                : ""}
+                            {isMapShowing ? (
+                                <>
+                                    {itemListEvents && itemListEvents.length > 0
+                                        ? `${itemListEvents.length}`
+                                        : ""}{" "}
+                                    {"events"}
+                                </>
+                            ) : (
+                                <>
+                                    {events && events.length > 0
+                                        ? `${events.length}`
+                                        : ""}{" "}
+                                    {"events"}
+                                </>
+                            )}
                         </Text>
                         <ConditionalText
                             condition={
@@ -587,11 +601,14 @@ const EventsPage = ({}: Props) => {
                         overflowY="scroll"
                         columns={{ base: 1 }}
                         page="events"
-                        events={events}
+                        events={itemListEvents}
                     />
                     {events && events.length > 0 && (
                         <Box minW="800px" h="500px">
                             <EventsMap
+                                onNewBounds={(events) =>
+                                    setItemListEvents(events)
+                                }
                                 onMarkerHovered={(hov) => {
                                     setIsMarkerHovered(hov);
                                 }}

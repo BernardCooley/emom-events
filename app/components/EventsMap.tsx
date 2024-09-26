@@ -14,6 +14,7 @@ interface Props {
     itemHoveredId: string;
     onHover: (id: string) => void;
     onMarkerHovered: (isMarkerHovered: boolean) => void;
+    onNewBounds: (events: EventDetails[]) => void;
 }
 
 const EventsMap = ({
@@ -21,6 +22,7 @@ const EventsMap = ({
     itemHoveredId,
     onHover,
     onMarkerHovered,
+    onNewBounds,
 }: Props) => {
     const router = useRouter();
     const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -32,7 +34,9 @@ const EventsMap = ({
     });
 
     useEffect(() => {
-        if (map) getNewBounds(events, map);
+        if (map) {
+            getNewBounds(events, map);
+        }
     }, [events, map]);
 
     const getNewBounds = (events: EventDetails[], map: google.maps.Map) => {
@@ -79,9 +83,29 @@ const EventsMap = ({
         setMap(null);
     }, []);
 
+    const updateMarkersInBounds = (map: google.maps.Map) => {
+        const bounds = map.getBounds();
+        if (bounds) {
+            const markersInBounds = events.filter((event) => {
+                const position = new google.maps.LatLng(
+                    event.venue.latitude,
+                    event.venue.longitude
+                );
+                return bounds.contains(position);
+            });
+            onNewBounds(markersInBounds);
+        }
+    };
+
     return (
         isLoaded && (
             <GoogleMap
+                onIdle={() => {
+                    console.log("Map is idle");
+                    if (map) {
+                        updateMarkersInBounds(map);
+                    }
+                }}
                 mapContainerStyle={containerStyle}
                 onLoad={onLoad}
                 onUnmount={onUnmount}
