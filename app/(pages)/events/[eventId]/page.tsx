@@ -54,6 +54,10 @@ const Event = ({}: Props) => {
         }
     }, [eventId]);
 
+    const timeout = (ms: number) => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    };
+
     const getEventDetails = async () => {
         if (eventId) {
             const event = await fetchEvent({
@@ -61,13 +65,16 @@ const Event = ({}: Props) => {
             });
 
             if (event && event?.imageIds.length > 0) {
-                const imageBlob = await getFirebaseImageBlob(
-                    `eventImages/${eventId}/${event.imageIds[0]}`,
-                    event.imageIds[0]
-                );
+                const imageBlob = await Promise.race([
+                    getFirebaseImageBlob(
+                        `eventImages/${eventId}/${event.imageIds[0]}`,
+                        event.imageIds[0]
+                    ),
+                    timeout(15000),
+                ]);
 
                 if (imageBlob) {
-                    setEventImage(imageBlob);
+                    setEventImage(imageBlob as FirebaseImageBlob);
                 } else {
                     setEventImage(null);
                 }
