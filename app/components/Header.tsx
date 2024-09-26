@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Box, Button, Flex, HStack } from "@chakra-ui/react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 
 interface Props {}
