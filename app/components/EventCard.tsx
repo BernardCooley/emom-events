@@ -74,31 +74,31 @@ const EventCard = ({
                         wrap="wrap"
                         alignItems="flex-start"
                     >
-                        {image && (
-                            <VStack
-                                h="full"
-                                justifyContent="space-between"
-                                alignItems="start"
-                                position="relative"
-                                w="300px"
-                            >
+                        <VStack
+                            h="full"
+                            justifyContent="space-between"
+                            alignItems="start"
+                            position="relative"
+                            w="300px"
+                        >
+                            {image && (
                                 <Image
                                     src={getUrlFromBlob(image)}
                                     alt="main image"
                                     borderRadius="lg"
                                 />
-                                <IconButton
-                                    mt={2}
-                                    h="44px"
-                                    w="36px"
-                                    minW="unset"
-                                    aria-label="Search"
-                                    bg="transparent"
-                                    icon={<MdIosShare fontSize="38px" />}
-                                    onClick={onShareClick}
-                                />
-                            </VStack>
-                        )}
+                            )}
+                            <IconButton
+                                mt={2}
+                                h="44px"
+                                w="36px"
+                                minW="unset"
+                                aria-label="Search"
+                                bg="transparent"
+                                icon={<MdIosShare fontSize="38px" />}
+                                onClick={onShareClick}
+                            />
+                        </VStack>
                         <Stack w="60%" divider={<StackDivider />} spacing="4">
                             <EventCardDetail
                                 href={`/venues/${venue.id}`}
