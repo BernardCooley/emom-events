@@ -1,5 +1,9 @@
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { User } from "next-auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase/clientApp";
 
 const authOptions = {
     providers: [
@@ -12,6 +16,41 @@ const authOptions = {
                     access_type: "offline",
                     response_type: "code",
                 },
+            },
+        }),
+        CredentialsProvider({
+            name: "Credentials",
+            credentials: {
+                username: {
+                    label: "Username",
+                    type: "text",
+                    placeholder: "jsmith",
+                },
+                password: { label: "Password", type: "password" },
+            },
+            async authorize(credentials) {
+                let user: User | null = null;
+
+                if (credentials?.username && credentials?.password) {
+                    const firebaseUser = await signInWithEmailAndPassword(
+                        auth,
+                        credentials.username,
+                        credentials.password
+                    );
+
+                    if (firebaseUser) {
+                        user = {
+                            id: firebaseUser.user.uid,
+                            name: firebaseUser.user.displayName || "",
+                            email: firebaseUser.user.email || "",
+                        };
+                    }
+                }
+                if (user) {
+                    return user;
+                } else {
+                    return null;
+                }
             },
         }),
     ],

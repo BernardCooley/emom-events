@@ -78,10 +78,11 @@ export type UpdatePromoterInput = {
 };
 
 export type AddPromoterInput = {
+    id?: Promoter["id"];
     name: Promoter["name"];
     email: Promoter["email"];
-    city: Promoter["city"];
-    state: Promoter["state"];
+    city?: Promoter["city"];
+    state?: Promoter["state"];
     country: Promoter["country"];
     websites: Promoter["websites"];
     imageIds: Promoter["imageIds"];

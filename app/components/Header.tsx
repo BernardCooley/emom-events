@@ -93,17 +93,15 @@ const Header = ({}: Props) => {
                             Sign out
                         </Button>
                     ) : (
-                        <Button
-                            color="white"
-                            variant="link"
-                            onClick={() =>
-                                signIn("promoter", {
-                                    callbackUrl: "/promoter-dashboard",
-                                })
-                            }
-                        >
-                            Host login
-                        </Button>
+                        <HStack>
+                            <Button
+                                color="white"
+                                variant="link"
+                                onClick={() => router.push("/auth")}
+                            >
+                                Host login
+                            </Button>
+                        </HStack>
                     )}
                 </Flex>
             </HStack>

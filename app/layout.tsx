@@ -18,7 +18,7 @@ export default async function RootLayout({
                         <Box position="relative">
                             <Header />
                             <SideMenu placement="right" />
-                            <Box p={[4, 8, 12]} pt={[4, 4, 4]}>
+                            <Box p={[4, 8, 12]} pt={[4]}>
                                 {children}
                             </Box>
                         </Box>
