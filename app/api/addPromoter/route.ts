@@ -1,23 +1,20 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { Promoter } from "@prisma/client";
-
 
 export async function POST(req: Request) {
     const { data } = await req.json();
 
-    const d: Promoter = data;
-
     try {
         const promoter = await prisma?.promoter.create({
             data: {
-                name: d.name,
-                city: d.city,
-                state: d.state,
-                country: d.country,
-                email: d.email,
-                imageIds: d.imageIds,
-                showEmail: d.showEmail,
+                name: data.name,
+                city: data.city,
+                state: data.state,
+                country: data.country,
+                imageIds: data.imageIds,
+                email: data.email,
+                websites: data.websites,
+                showEmail: data.showEmail,
             },
         });
 

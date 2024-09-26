@@ -74,6 +74,7 @@ export type UpdatePromoterInput = {
     websites?: Promoter["websites"];
     imageIds?: Promoter["imageIds"];
     showEmail?: Promoter["showEmail"];
+    email?: Promoter["email"];
 };
 
 export type AddPromoterInput = {
