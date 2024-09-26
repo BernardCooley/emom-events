@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "next-auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
+import FacebookProvider from "next-auth/providers/facebook";
 
 const authOptions = {
     providers: [
@@ -17,6 +18,10 @@ const authOptions = {
                     response_type: "code",
                 },
             },
+        }),
+        FacebookProvider({
+            clientId: process.env.FACEBOOK_CLIENT_ID || "",
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
         }),
         CredentialsProvider({
             name: "Credentials",
