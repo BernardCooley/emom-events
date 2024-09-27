@@ -312,7 +312,7 @@ const SignUp = () => {
                         position="absolute"
                         bottom={0}
                         right={0}
-                        href="/auth/signin"
+                        href="/auth"
                         as={Link}
                         mb={4}
                         variant="link"
