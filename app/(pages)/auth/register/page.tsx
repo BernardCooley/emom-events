@@ -12,7 +12,6 @@ import {
     useToast,
     Text,
     VStack,
-    Link,
     useDisclosure,
 } from "@chakra-ui/react";
 import { AiFillEyeInvisible } from "react-icons/ai";
