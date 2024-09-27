@@ -28,6 +28,7 @@ import { addPromoter, fetchPromoter } from "@/bff";
 import { useRouter } from "next/navigation";
 import EmailAlreadyExistsDialog from "@/app/components/EmailAlreadyExistsDialog";
 import { FirebaseError } from "firebase/app";
+import { signIn } from "next-auth/react";
 
 interface FormData {
     email: string;
@@ -312,8 +313,11 @@ const SignUp = () => {
                         position="absolute"
                         bottom={0}
                         right={0}
-                        href="/auth"
-                        as={Link}
+                        onClick={() =>
+                            signIn("promoter", {
+                                callbackUrl: "/promoter-dashboard",
+                            })
+                        }
                         mb={4}
                         variant="link"
                     >
