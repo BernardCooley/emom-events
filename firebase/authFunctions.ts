@@ -39,20 +39,13 @@ export const ResetPassword = async (email: string) => {
 };
 
 export const DeleteUser = async () => {
-    console.log("DeleteUser");
-    // try {
-    //     const user = auth.currentUser;
-    //     await user?.delete();
-
-    //     if (user) {
-    //         await deletePromoter({
-    //             userId: user?.uid,
-    //         });
-    //     }
-    // } catch (error) {
-    //     console.error(error);
-    //     throw error;
-    // }
+    try {
+        const user = auth.currentUser;
+        await user?.delete();
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 };
 
 export const SendVerificationEmail = async (user: User) => {

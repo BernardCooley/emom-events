@@ -44,7 +44,7 @@ const AuthPage = ({}: Props) => {
                 shadow="lg"
             >
                 <Text fontSize="xl">
-                    Sign in with email and password or with google
+                    Sign in with Google, Facebook or email and password
                 </Text>
                 <HStack gap={6}>
                     <Button

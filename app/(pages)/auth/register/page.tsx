@@ -1,21 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodType, z } from "zod";
 import {
-    Box,
     Button,
     Flex,
-    FormErrorMessage,
     IconButton,
     ToastProps,
     useToast,
     Text,
     VStack,
     Link,
-    FormControl,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { AiFillEyeInvisible } from "react-icons/ai";
 import { AiOutlineEyeInvisible } from "react-icons/ai";
@@ -26,23 +24,21 @@ import {
     RegisterUser,
     SendVerificationEmail,
 } from "@/firebase/authFunctions";
-import { addPromoter } from "@/bff";
+import { addPromoter, fetchPromoter } from "@/bff";
 import { Promoter } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import EmailAlreadyExistsDialog from "@/app/components/EmailAlreadyExistsDialog";
+import { FirebaseError } from "firebase/app";
 
 interface FormData {
     email: string;
     password: string;
     confirmPassword: string;
-    username: string;
 }
 
 const schema: ZodType<FormData> = z
     .object({
         email: z.string().email(),
-        username: z
-            .string()
-            .min(3, { message: "Username must be 3 characters or more." }),
         password: z
             .string()
             .min(6, { message: "Password must be 6 characters or more." }),
@@ -56,13 +52,15 @@ const schema: ZodType<FormData> = z
     });
 
 const SignUp = () => {
+    const [promoterExists, setPromoterExists] = useState<boolean>(false);
+    const [newUser, setNewUser] = useState<UserCredential | null>(null);
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const router = useRouter();
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showConfirmPassword, setShowConfirmPassword] =
         useState<boolean>(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [authError, setAuthError] = useState<string>("");
     const toast = useToast();
     const id = "registerToast";
     const [email, setEmail] = useState("");
@@ -72,7 +70,6 @@ const SignUp = () => {
         resolver: zodResolver(schema),
         defaultValues: {
             email: "",
-            username: "",
             password: "",
             confirmPassword: "",
         },
@@ -82,6 +79,7 @@ const SignUp = () => {
         handleSubmit,
         formState: { errors },
         control,
+        getValues,
     } = formMethods;
 
     const showToast = useCallback(
@@ -100,43 +98,38 @@ const SignUp = () => {
         [toast]
     );
 
-    const onRegister = async (formData: FormData) => {
-        setEmail(formData.email);
-        setSubmitting(true);
-
-        let newUser: UserCredential | null = null;
-
+    const onSubmit = async (formData: FormData) => {
         try {
-            newUser = await RegisterUser(formData.email, formData.password);
-        } catch (error) {
-            showToast({
-                title: "Error registering.",
-                description:
-                    "Please check your email and password and try again.",
-                status: "error",
-            });
-            setAuthError(
-                "Error registering. Please check your email and password and try again."
+            const newUser = await RegisterUser(
+                formData.email,
+                formData.password
             );
-        }
 
-        let newPromoter: Promoter | null = null;
+            setNewUser(newUser);
 
-        if (newUser) {
-            try {
-                newPromoter = await addPromoter({
-                    data: {
-                        id: newUser.user?.uid,
-                        name: formData.username,
-                        country: "",
-                        imageIds: [],
-                        email: formData.email,
-                        websites: [],
-                        showEmail: false,
-                    },
+            const promoter = await fetchPromoter({
+                email: formData.email,
+            });
+
+            setPromoterExists(promoter !== null);
+
+            if (promoter) {
+                onOpen();
+            } else {
+                onRegister(formData, newUser);
+            }
+        } catch (error: unknown) {
+            if (
+                error instanceof FirebaseError &&
+                error.code === "auth/email-already-in-use"
+            ) {
+                showToast({
+                    title: "Email address already registered.",
+                    description:
+                        "Please use a different email address or log in.",
+                    status: "error",
                 });
-            } catch (error) {
-                await DeleteUser();
+            } else {
                 showToast({
                     title: "Error registering.",
                     description:
@@ -144,24 +137,56 @@ const SignUp = () => {
                     status: "error",
                 });
             }
-            try {
-                await SendVerificationEmail(newUser.user);
-                setAuthError("");
-                setSubmitted(true);
-            } catch (error) {
-                showToast({
-                    title: "Error sending verification email.",
-                    description:
-                        "Please check your email and password and try again.",
-                    status: "error",
-                });
-            }
         }
+    };
 
-        if (newPromoter) {
-            router.push("/promoter-dashboard");
-        } else {
-            await DeleteUser();
+    const onRegister = async (
+        formData: FormData,
+        newUser?: UserCredential | null
+    ) => {
+        setEmail(formData.email);
+        setSubmitting(true);
+
+        let newPromoter: Promoter | null = null;
+
+        if (newUser) {
+            if (!promoterExists) {
+                try {
+                    newPromoter = await addPromoter({
+                        data: {
+                            id: newUser.user?.uid,
+                            name: "",
+                            country: "",
+                            imageIds: [],
+                            email: formData.email,
+                            websites: [],
+                            showEmail: false,
+                        },
+                    });
+                } catch (error) {
+                    await DeleteUser();
+                    showToast({
+                        title: "Error registering.",
+                        description:
+                            "Please check your email and password and try again.",
+                        status: "error",
+                    });
+                }
+                try {
+                    await SendVerificationEmail(newUser.user);
+                    setSubmitted(true);
+                } catch (error) {
+                    showToast({
+                        title: "Error sending verification email.",
+                        description:
+                            "Please check your email and password and try again.",
+                        status: "error",
+                    });
+                }
+            }
+
+            await SendVerificationEmail(newUser.user);
+            setSubmitted(true);
         }
 
         setSubmitting(false);
@@ -169,8 +194,18 @@ const SignUp = () => {
 
     return (
         <Flex m="auto" direction="column" w={["100%", "80%", "70%", "60%"]}>
+            <EmailAlreadyExistsDialog
+                isOpen={isOpen}
+                onNo={() => {
+                    if (newUser) DeleteUser();
+                    onClose();
+                    router.push("/auth");
+                }}
+                onClose={onClose}
+                onYes={() => onRegister(getValues(), newUser)}
+            />
             {!submitted ? (
-                <form onSubmit={handleSubmit(onRegister)}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <VStack
                         w="full"
                         gap="18px"
@@ -186,15 +221,6 @@ const SignUp = () => {
                                 size="lg"
                                 name="email"
                                 error={errors.email?.message}
-                                control={control}
-                                required
-                            />
-                            <TextInput
-                                type="text"
-                                title="Username"
-                                size="lg"
-                                name="username"
-                                error={errors.username?.message}
                                 control={control}
                                 required
                             />
@@ -296,13 +322,6 @@ const SignUp = () => {
                     >
                         Already have a Host account? Log in here
                     </Button>
-                    {authError.length > 0 && (
-                        <FormControl>
-                            <Box h="16px" mt="8px">
-                                <FormErrorMessage>{authError}</FormErrorMessage>
-                            </Box>
-                        </FormControl>
-                    )}
                 </form>
             ) : (
                 <Flex direction="column" alignItems="center" gap={10} pt={20}>

@@ -27,9 +27,9 @@ const authOptions = {
             name: "Credentials",
             credentials: {
                 username: {
-                    label: "Username",
+                    label: "Email",
                     type: "text",
-                    placeholder: "jsmith",
+                    placeholder: "",
                 },
                 password: { label: "Password", type: "password" },
             },
