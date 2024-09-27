@@ -126,11 +126,7 @@ const SideMenu = ({ placement = "right" }: Props) => {
                         ) : (
                             <Button
                                 variant="link"
-                                onClick={() =>
-                                    signIn("promoter", {
-                                        callbackUrl: "/promoter-dashboard",
-                                    })
-                                }
+                                onClick={() => router.push("/auth")}
                             >
                                 Host login
                             </Button>
