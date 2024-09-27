@@ -25,7 +25,6 @@ import {
     SendVerificationEmail,
 } from "@/firebase/authFunctions";
 import { addPromoter, fetchPromoter } from "@/bff";
-import { Promoter } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import EmailAlreadyExistsDialog from "@/app/components/EmailAlreadyExistsDialog";
 import { FirebaseError } from "firebase/app";
