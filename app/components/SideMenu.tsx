@@ -118,7 +118,10 @@ const SideMenu = ({ placement = "right" }: Props) => {
                                 <Text>{session.user?.name}</Text>
                                 <Button
                                     variant="link"
-                                    onClick={() => signOut()}
+                                    onClick={() => {
+                                        onClose();
+                                        signOut();
+                                    }}
                                 >
                                     Sign out
                                 </Button>
@@ -126,7 +129,10 @@ const SideMenu = ({ placement = "right" }: Props) => {
                         ) : (
                             <Button
                                 variant="link"
-                                onClick={() => router.push("/auth")}
+                                onClick={() => {
+                                    onClose();
+                                    router.push("/auth");
+                                }}
                             >
                                 Host login
                             </Button>
