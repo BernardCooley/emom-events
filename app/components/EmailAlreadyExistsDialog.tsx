@@ -69,4 +69,6 @@ const EmailAlreadyExistsDialog = forwardRef(
     }
 );
 
+EmailAlreadyExistsDialog.displayName = "EmailAlreadyExistsDialog";
+
 export default EmailAlreadyExistsDialog;
