@@ -147,12 +147,10 @@ const SignUp = () => {
         setEmail(formData.email);
         setSubmitting(true);
 
-        let newPromoter: Promoter | null = null;
-
         if (newUser) {
             if (!promoterExists) {
                 try {
-                    newPromoter = await addPromoter({
+                    await addPromoter({
                         data: {
                             id: newUser.user?.uid,
                             name: "",

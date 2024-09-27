@@ -11,7 +11,6 @@ import {
     HStack,
     Image,
     SimpleGrid,
-    Skeleton,
     Text,
     useToast,
     VStack,
@@ -95,22 +94,16 @@ const PromoterProfile = ({
                                     <Text>{showEmail ? "Yes" : "No"}</Text>
                                 </VStack>
                             </SimpleGrid>
-                            <Skeleton
-                                isLoaded={!!profileImage}
-                                h="200px"
-                                w="200px"
-                            >
-                                <Box position="relative" w="200px">
-                                    <Image
-                                        src={
-                                            profileImage
-                                                ? getUrlFromBlob(profileImage)
-                                                : ""
-                                        }
-                                        alt=""
-                                    />
-                                </Box>
-                            </Skeleton>
+                            <Box position="relative" w="200px">
+                                <Image
+                                    src={
+                                        profileImage
+                                            ? getUrlFromBlob(profileImage)
+                                            : ""
+                                    }
+                                    alt=""
+                                />
+                            </Box>
                         </Flex>
                     )}
                     <Flex w="full" alignItems="center" direction="column">
