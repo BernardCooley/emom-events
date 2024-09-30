@@ -247,6 +247,7 @@ const EventsPage = ({}: Props) => {
     }, [watchDateTo]);
 
     useEffect(() => {
+        handleClearAll();
         if (!currentEventId) {
             getEvents(dateFrom, dateTo, orderBy, searchTerm);
         }
@@ -361,18 +362,19 @@ const EventsPage = ({}: Props) => {
         setQueryParams(
             {
                 dateFrom: [todayDateFormatted],
+                orderBy: ["timeFromAsc"],
             },
             pathname,
             searchParams,
             router
         );
         removeQueryParams(
-            ["dateTo", "searchTerm", "orderBy"],
+            ["dateTo", "searchTerm"],
             pathname,
             searchParams,
             router
         );
-        setValue("orderBy", "");
+        setValue("orderBy", "timeFromAsc");
         setValue("searchTerm", "");
         setValue("dateFrom", todayDateFormatted);
         setValue("dateTo", "");
