@@ -358,7 +358,7 @@ const AddEventModal = ({
 
         const updatedEvent = await updateEvent({
             id: eventId as string,
-            event: {
+            data: {
                 name: formData.name,
                 timeFrom: formData.timeFrom,
                 timeTo: formData.timeTo,

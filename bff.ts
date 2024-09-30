@@ -265,12 +265,12 @@ export const fetchEvents = async ({
 
 type UpdateEventProps = {
     id: string;
-    event: UpdateEventInput;
+    data: UpdateEventInput;
 };
 
 export const updateEvent = async ({
     id,
-    event,
+    data,
 }: UpdateEventProps): Promise<EventDetails | null> => {
     try {
         const updatedEvent: EventDetails | null = await fetchWithErrorHandling(
@@ -278,7 +278,7 @@ export const updateEvent = async ({
             "POST",
             {
                 id,
-                event,
+                data,
             }
         );
 

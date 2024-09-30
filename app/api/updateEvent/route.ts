@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     try {
         const newEvent = await prisma?.event.update({
             where: {
-                id: id,
+                id,
             },
             data,
         });
