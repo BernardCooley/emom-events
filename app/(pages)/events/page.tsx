@@ -593,7 +593,7 @@ const EventsPage = ({}: Props) => {
             ) : (
                 <Flex
                     direction={["column-reverse", "column-reverse", "row"]}
-                    h="500px"
+                    h="440px"
                     alignItems="start"
                     w="full"
                 >
@@ -607,7 +607,7 @@ const EventsPage = ({}: Props) => {
                         events={itemListEvents}
                     />
                     {events && events.length > 0 && (
-                        <Box minW={["100%", "100%", "60%"]} h="500px">
+                        <Box minW={["100%", "100%", "60%"]} h="440px">
                             <EventsMap
                                 onNewBounds={(events) =>
                                     setItemListEvents(events)
