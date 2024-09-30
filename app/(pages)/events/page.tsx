@@ -32,9 +32,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
-import Select from "react-select";
 import { TextInput } from "@/app/components/FormInputs/TextInput";
 
 const testMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
@@ -177,40 +176,139 @@ const EventsPage = ({}: Props) => {
 
     const { control, watch, setValue } = formMethods;
 
+    const onDateButtonClick = (name: string) => {
+        if (document.querySelector(`input[name="${name}"]`)) {
+            const input = document.querySelector(
+                `input[name="${name}"]`
+            ) as HTMLInputElement;
+            input?.showPicker();
+        }
+    };
+
     const watchOrderBy = watch("orderBy");
     const watchDateFrom = watch("dateFrom");
     const watchDateTo = watch("dateTo");
     const watchSearchTerm = watch("searchTerm");
+
+    const filterButtonOptions = [
+        {
+            value: "dateFrom",
+            selected: watchDateFrom !== todayDateFormatted,
+            onClick: () => onDateButtonClick("dateFrom"),
+            label: "Date from",
+            field: (
+                <TextInput
+                    styles={{
+                        visibility: "hidden",
+                        position: "absolute",
+                        zIndex: -1,
+                        pointerEvents: "none",
+                    }}
+                    width="180px"
+                    type="date"
+                    title="Date from"
+                    height="40px"
+                    size="md"
+                    name="dateFrom"
+                    control={control}
+                    min={todayDateFormatted}
+                />
+            ),
+        },
+        {
+            value: "dateTo",
+            selected: watchDateTo.length > 0,
+            onClick: () => onDateButtonClick("dateTo"),
+            label: "Date to",
+            field: (
+                <TextInput
+                    styles={{
+                        visibility: "hidden",
+                        position: "absolute",
+                        zIndex: -1,
+                        pointerEvents: "none",
+                    }}
+                    width="180px"
+                    type="date"
+                    title="Date to"
+                    height="40px"
+                    size="md"
+                    name="dateTo"
+                    control={control}
+                    min={todayDateFormatted}
+                />
+            ),
+        },
+        {
+            value: "timeFromAsc",
+            selected: watchOrderBy === "timeFromAsc",
+            onClick: () => setValue("orderBy", "timeFromAsc"),
+            label: "Soonest",
+            field: null,
+        },
+        {
+            value: "nameAsc",
+            selected: watchOrderBy === "nameAsc",
+            onClick: () => setValue("orderBy", "nameAsc"),
+            label: "Event name",
+            field: null,
+        },
+        {
+            value: "promoterAsc",
+            selected: watchOrderBy === "promoterAsc",
+            onClick: () => setValue("orderBy", "promoterAsc"),
+            label: "Host name",
+            field: null,
+        },
+        {
+            value: "venueAsc",
+            selected: watchOrderBy === "venueAsc",
+            onClick: () => setValue("orderBy", "venueAsc"),
+            label: "Venue",
+            field: null,
+        },
+        {
+            value: "createAtDesc",
+            selected: watchOrderBy === "createAtDesc",
+            onClick: () => setValue("orderBy", "createAtDesc"),
+            label: "Newest",
+            field: null,
+        },
+        {
+            value: "createAtAsc",
+            selected: watchOrderBy === "createAtAsc",
+            onClick: () => setValue("orderBy", "createAtAsc"),
+            label: "Oldest",
+            field: null,
+        },
+    ];
 
     useEffect(() => {
         handleScroll();
     }, [scrollPosition]);
 
     useEffect(() => {
-        if (watchDateFrom.length > 0) {
-            setTimeout(() => {
-                setQueryParams(
-                    {
-                        dateFrom: [watchDateFrom],
-                    },
-                    pathname,
-                    searchParams,
-                    router
-                );
-            }, 0);
-        } else {
-            setQueryParams(
-                {
-                    dateFrom: [todayDateFormatted],
-                },
-                pathname,
-                searchParams,
-                router
-            );
-            setValue("dateFrom", todayDateFormatted);
-        }
+        const updateQueryParams = () => {
+            const params: { dateFrom?: string[]; orderBy?: string[] } = {};
+
+            if (watchDateFrom.length > 0) {
+                params.dateFrom = [watchDateFrom];
+            }
+
+            if (watchOrderBy.length > 0) {
+                params.orderBy = [watchOrderBy];
+            }
+
+            if (Object.keys(params).length > 0) {
+                setTimeout(() => {
+                    setQueryParams(params, pathname, searchParams, router);
+                }, 0);
+            }
+        };
+
+        updateQueryParams();
         getEvents(watchDateFrom, watchDateTo, watchOrderBy, watchSearchTerm);
-    }, [watchDateFrom]);
+    }, [watchDateFrom, watchOrderBy]);
 
     useEffect(() => {
         if (watchDateTo.length > 0) {
@@ -228,23 +326,6 @@ const EventsPage = ({}: Props) => {
         }
         getEvents(watchDateFrom, watchDateTo, watchOrderBy, watchSearchTerm);
     }, [watchDateTo]);
-
-    useEffect(() => {
-        if (watchOrderBy.length > 0) {
-            setQueryParams(
-                {
-                    orderBy: [watchOrderBy],
-                },
-                pathname,
-                searchParams,
-                router
-            );
-        } else {
-            removeQueryParams(["orderBy"], pathname, searchParams, router);
-            setValue("orderBy", "");
-        }
-        getEvents(watchDateFrom, watchDateTo, watchOrderBy, watchSearchTerm);
-    }, [watchOrderBy]);
 
     useEffect(() => {
         if (!currentEventId) {
@@ -419,58 +500,55 @@ const EventsPage = ({}: Props) => {
             />
             <Heading>Events</Heading>
             <form>
-                <HStack
+                <Flex
+                    gap={0}
+                    flexWrap="wrap"
                     rounded="lg"
                     pt={2}
                     alignItems="flex-end"
                     justifyContent="flex-end"
                 >
-                    <TextInput
-                        width="180px"
-                        type="date"
-                        title="Date from"
-                        height="40px"
-                        size="md"
-                        name="dateFrom"
-                        control={control}
-                        min={todayDateFormatted}
-                    />
-                    <TextInput
-                        width="180px"
-                        type="date"
-                        title="Date to"
-                        height="40px"
-                        size="md"
-                        name="dateTo"
-                        control={control}
-                        min={watchDateFrom}
-                    />
-                    <Controller
-                        control={control}
-                        name="orderBy"
-                        render={({ field: { ref } }) => (
-                            <Select
-                                placeholder="Sort by"
-                                styles={{
-                                    control: (styles) => ({
-                                        ...styles,
-                                        width: "200px",
-                                    }),
-                                }}
-                                ref={ref}
-                                value={
-                                    options.find(
-                                        (option) =>
-                                            option.value === watchOrderBy
-                                    ) || null
-                                }
-                                onChange={(val) =>
-                                    setValue("orderBy", val?.value || "")
-                                }
-                                options={options}
-                            />
-                        )}
-                    />
+                    <HStack
+                        overflowX="scroll"
+                        w="full"
+                        css={{
+                            "&::-webkit-scrollbar": {
+                                width: "4px",
+                            },
+                            "&::-webkit-scrollbar-track": {
+                                width: "6px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                                background: "transparent",
+                                borderRadius: "24px",
+                            },
+                        }}
+                    >
+                        {filterButtonOptions.map((option) => (
+                            <Box key={option.value}>
+                                <Button
+                                    sx={
+                                        option.selected
+                                            ? {
+                                                  backgroundColor: "gray.900",
+                                                  color: "white",
+                                              }
+                                            : {}
+                                    }
+                                    rounded="full"
+                                    onClick={option.onClick}
+                                    px={3}
+                                    h={8}
+                                    whiteSpace="nowrap"
+                                    width="auto"
+                                    minWidth="fit-content"
+                                >
+                                    {option.label}
+                                </Button>
+                                {option.field}
+                            </Box>
+                        ))}
+                    </HStack>
                     <TextInput
                         width="full"
                         onEnter={handleSearch}
@@ -501,7 +579,7 @@ const EventsPage = ({}: Props) => {
                             ) : null
                         }
                     />
-                </HStack>
+                </Flex>
             </form>
             <Divider />
             <Box h="24px">
@@ -545,7 +623,7 @@ const EventsPage = ({}: Props) => {
                             condition={watchOrderBy.length > 0}
                             label="sorted By:"
                             value={
-                                (options.find(
+                                (filterButtonOptions.find(
                                     (option) => option.value === watchOrderBy
                                 )?.label as string) || ""
                             }
