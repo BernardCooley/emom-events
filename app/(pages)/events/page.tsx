@@ -248,14 +248,13 @@ const EventsPage = ({}: Props) => {
             removeQueryParams(["dateTo"], pathname, searchParams, router);
             setValue("dateTo", "");
         }
-        getEvents(watchDateFrom, watchDateTo, watchOrderBy, watchSearchTerm);
     }, [watchDateTo]);
 
     useEffect(() => {
         if (!currentEventId) {
             getEvents(dateFrom, dateTo, orderBy, searchTerm);
         }
-    }, []);
+    }, [watchDateTo, watchDateFrom, watchOrderBy, watchSearchTerm]);
 
     const getEvents = async (
         dateFrom: string | null,
@@ -502,10 +501,9 @@ const EventsPage = ({}: Props) => {
                 </Flex>
             </form>
             <Divider />
-            <Box h="24px">
-                <HStack justifyContent="space-between">
-                    <HStack>
-                        <Text>Showing: </Text>
+            <Box>
+                <Flex flexWrap="wrap" gap={4} justifyContent="space-between">
+                    <Flex flexWrap="wrap" gap={2}>
                         <Text fontWeight={700}>
                             {isMapShowing ? (
                                 <>
@@ -541,23 +539,25 @@ const EventsPage = ({}: Props) => {
                             label="from"
                             value={watchDateFrom}
                         />
-                        <ConditionalText
-                            condition={watchDateTo.length > 0}
-                            label="to"
-                            value={watchDateTo}
-                        />
-                        {(searchParams.get("searchTerm") ||
-                            watchDateFrom !== todayDateFormatted ||
-                            watchDateTo.length > 0) && (
-                            <Button
-                                ml={6}
-                                variant="link"
-                                onClick={handleClearAll}
-                            >
-                                Clear
-                            </Button>
-                        )}
-                    </HStack>
+                        <HStack>
+                            <ConditionalText
+                                condition={watchDateTo.length > 0}
+                                label="to"
+                                value={watchDateTo}
+                            />
+                            {(searchParams.get("searchTerm") ||
+                                watchDateFrom !== todayDateFormatted ||
+                                watchDateTo.length > 0) && (
+                                <Button
+                                    ml={6}
+                                    variant="link"
+                                    onClick={handleClearAll}
+                                >
+                                    Clear
+                                </Button>
+                            )}
+                        </HStack>
+                    </Flex>
                     {events && events.length > 0 && (
                         <Button
                             onClick={() => {
@@ -586,12 +586,17 @@ const EventsPage = ({}: Props) => {
                                 : "Show on map"}
                         </Button>
                     )}
-                </HStack>
+                </Flex>
             </Box>
             {!isMapShowing ? (
                 <ItemList page="events" events={events} />
             ) : (
-                <HStack h="500px" alignItems="start" w="full">
+                <Flex
+                    direction={["column-reverse", "column-reverse", "row"]}
+                    h="500px"
+                    alignItems="start"
+                    w="full"
+                >
                     <ItemList
                         isMarkerHovered={isMarkerHovered}
                         itemHoveredId={itemHoveredId || ""}
@@ -602,7 +607,7 @@ const EventsPage = ({}: Props) => {
                         events={itemListEvents}
                     />
                     {events && events.length > 0 && (
-                        <Box minW="800px" h="500px">
+                        <Box minW={["100%", "100%", "60%"]} h="500px">
                             <EventsMap
                                 onNewBounds={(events) =>
                                     setItemListEvents(events)
@@ -616,7 +621,7 @@ const EventsPage = ({}: Props) => {
                             />
                         </Box>
                     )}
-                </HStack>
+                </Flex>
             )}
         </Flex>
     );

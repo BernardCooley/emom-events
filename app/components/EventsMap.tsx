@@ -101,7 +101,6 @@ const EventsMap = ({
         isLoaded && (
             <GoogleMap
                 onIdle={() => {
-                    console.log("Map is idle");
                     if (map) {
                         updateMarkersInBounds(map);
                     }

@@ -77,13 +77,7 @@ const ItemList = ({
     }
 
     return (
-        <VStack
-            p={4}
-            overflowY={overflowY}
-            overflowX="hidden"
-            h="full"
-            w="full"
-        >
+        <VStack p={4} overflowY={overflowY} overflowX="hidden" w="full">
             {title && (
                 <Heading size="lg" mb={4}>
                     {capitalizeFirstLetter(title)}
