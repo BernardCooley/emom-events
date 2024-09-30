@@ -521,7 +521,10 @@ const EventsPage = ({}: Props) => {
                                     {events && events.length > 0
                                         ? `${events.length}`
                                         : ""}{" "}
-                                    {"events"}
+                                    {"event"}
+                                    {events && events.length > 1
+                                        ? "s"
+                                        : ""}{" "}
                                 </>
                             )}
                         </Text>
