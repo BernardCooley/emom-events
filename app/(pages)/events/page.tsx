@@ -589,18 +589,25 @@ const EventsPage = ({}: Props) => {
                         <Text fontWeight={700}>
                             {isMapShowing ? (
                                 <>
-                                    {itemListEvents && itemListEvents.length > 0
+                                    {itemListEvents &&
+                                    itemListEvents.length >= 0
                                         ? `${itemListEvents.length}`
                                         : ""}{" "}
-                                    {"events"}
+                                    {"event"}
+                                    {(itemListEvents &&
+                                        itemListEvents.length > 1) ||
+                                    itemListEvents?.length === 0
+                                        ? "s"
+                                        : ""}{" "}
                                 </>
                             ) : (
                                 <>
-                                    {events && events.length > 0
+                                    {events && events.length >= 0
                                         ? `${events.length}`
                                         : ""}{" "}
                                     {"event"}
-                                    {events && events.length > 1
+                                    {(events && events.length > 1) ||
+                                    events?.length === 0
                                         ? "s"
                                         : ""}{" "}
                                 </>
