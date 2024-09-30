@@ -207,28 +207,32 @@ const EventsPage = ({}: Props) => {
     }, [scrollPosition]);
 
     useEffect(() => {
-        const params: { dateFrom?: string[]; orderBy?: string[] } = {};
+        const updateQueryParams = () => {
+            const params: { dateFrom?: string[]; orderBy?: string[] } = {};
 
-        if (watchDateFrom.length > 0) {
-            params.dateFrom = [watchDateFrom];
-        } else {
-            params.dateFrom = [todayDateFormatted];
-            setValue("dateFrom", todayDateFormatted);
-        }
+            if (watchDateFrom.length > 0) {
+                params.dateFrom = [watchDateFrom];
+            } else {
+                params.dateFrom = [todayDateFormatted];
+                setValue("dateFrom", todayDateFormatted);
+            }
 
-        if (watchOrderBy.length > 0) {
-            params.orderBy = [watchOrderBy];
-        } else {
-            params.orderBy = ["timeFromAsc"];
-            setValue("orderBy", "timeFromAsc");
-        }
+            if (watchOrderBy.length > 0) {
+                params.orderBy = [watchOrderBy];
+            } else {
+                params.orderBy = ["timeFromAsc"];
+                setValue("orderBy", "timeFromAsc");
+            }
 
-        if (Object.keys(params).length > 0) {
-            setTimeout(() => {
-                setQueryParams(params, pathname, searchParams, router);
-            }, 0);
-        }
-    }, []);
+            if (Object.keys(params).length > 0) {
+                setTimeout(() => {
+                    setQueryParams(params, pathname, searchParams, router);
+                }, 0);
+            }
+        };
+
+        updateQueryParams();
+    }, [watchOrderBy, watchDateFrom]);
 
     useEffect(() => {
         if (watchDateTo.length > 0) {
@@ -362,7 +366,6 @@ const EventsPage = ({}: Props) => {
         setQueryParams(
             {
                 dateFrom: [todayDateFormatted],
-                orderBy: ["timeFromAsc"],
             },
             pathname,
             searchParams,
@@ -374,7 +377,6 @@ const EventsPage = ({}: Props) => {
             searchParams,
             router
         );
-        setValue("orderBy", "timeFromAsc");
         setValue("searchTerm", "");
         setValue("dateFrom", todayDateFormatted);
         setValue("dateTo", "");
