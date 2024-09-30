@@ -448,14 +448,11 @@ const EventsPage = ({}: Props) => {
                         {filterButtonOptions.map((option) => (
                             <Box key={option.value}>
                                 <Button
-                                    sx={
-                                        option.selected
-                                            ? {
-                                                  backgroundColor: "gray.900",
-                                                  color: "white",
-                                              }
-                                            : {}
-                                    }
+                                    isActive={option.selected}
+                                    _active={{
+                                        backgroundColor: "gray.900",
+                                        color: "white",
+                                    }}
                                     rounded="full"
                                     onClick={option.onClick}
                                     px={3}
@@ -547,18 +544,8 @@ const EventsPage = ({}: Props) => {
                             label="to"
                             value={watchDateTo}
                         />
-                        <ConditionalText
-                            condition={watchOrderBy.length > 0}
-                            label="sorted By:"
-                            value={
-                                (filterButtonOptions.find(
-                                    (option) => option.value === watchOrderBy
-                                )?.label as string) || ""
-                            }
-                        />
                         {(searchParams.get("searchTerm") ||
                             watchDateFrom !== todayDateFormatted ||
-                            watchOrderBy.length > 0 ||
                             watchDateTo.length > 0) && (
                             <Button
                                 ml={6}
