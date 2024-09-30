@@ -112,17 +112,21 @@ const ItemList = ({
                                 transition="transform 0.2s"
                             >
                                 <CardHeader>
-                                    <Heading size="md">{item.name}</Heading>
+                                    <Heading userSelect="none" size="md">
+                                        {item.name}
+                                    </Heading>
                                 </CardHeader>
                                 <CardBody>
                                     <Divider my={2} />
-                                    <Text fontSize="sm">{item.venue.name}</Text>
+                                    <Text userSelect="none" fontSize="sm">
+                                        {item.venue.name}
+                                    </Text>
                                     <Divider my={2} />
-                                    <Text fontSize="sm">
+                                    <Text userSelect="none" fontSize="sm">
                                         {item.promoter?.name}
                                     </Text>
                                     <Divider my={2} />
-                                    <Text fontSize="sm">
+                                    <Text userSelect="none" fontSize="sm">
                                         {formatDateTime(item.timeFrom)}
                                     </Text>
                                 </CardBody>

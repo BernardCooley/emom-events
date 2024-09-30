@@ -13,12 +13,7 @@ import {
     removeQueryParams,
     setQueryParams,
 } from "@/utils";
-import {
-    ArrowRightIcon,
-    ChevronRightIcon,
-    CloseIcon,
-    Search2Icon,
-} from "@chakra-ui/icons";
+import { ArrowRightIcon, CloseIcon, Search2Icon } from "@chakra-ui/icons";
 import {
     Box,
     Button,
@@ -38,82 +33,6 @@ import { TextInput } from "@/app/components/FormInputs/TextInput";
 
 const testMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
 const limit = 50;
-const options = [
-    {
-        value: "",
-        label: "Defult",
-    },
-    {
-        value: "nameAsc",
-        label: (
-            <>
-                Title (a
-                <ChevronRightIcon />
-                z)
-            </>
-        ),
-    },
-    {
-        value: "nameDesc",
-        label: (
-            <>
-                Title (z
-                <ChevronRightIcon />
-                a)
-            </>
-        ),
-    },
-    { value: "timeFromAsc", label: "Date (earliest)" },
-    { value: "timeFromDesc", label: "Date (latest)" },
-    {
-        value: "promoterAsc",
-        label: (
-            <>
-                Host name (a
-                <ChevronRightIcon />
-                z)
-            </>
-        ),
-    },
-    {
-        value: "promoterDesc",
-        label: (
-            <>
-                Host name (z
-                <ChevronRightIcon />
-                a)
-            </>
-        ),
-    },
-    {
-        value: "venueAsc",
-        label: (
-            <>
-                Venue (a
-                <ChevronRightIcon />
-                z)
-            </>
-        ),
-    },
-    {
-        value: "venueDesc",
-        label: (
-            <>
-                Venue (z
-                <ChevronRightIcon />
-                a)
-            </>
-        ),
-    },
-    {
-        value: "createAtDesc",
-        label: "Added (newest)",
-    },
-    {
-        value: "createAtAsc",
-        label: "Added (oldest)",
-    },
-];
 
 export interface FormData {
     dateFrom: string;
