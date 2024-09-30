@@ -207,27 +207,28 @@ const EventsPage = ({}: Props) => {
     }, [scrollPosition]);
 
     useEffect(() => {
-        const updateQueryParams = () => {
-            const params: { dateFrom?: string[]; orderBy?: string[] } = {};
+        const params: { dateFrom?: string[]; orderBy?: string[] } = {};
 
-            if (watchDateFrom.length > 0) {
-                params.dateFrom = [watchDateFrom];
-            }
+        if (watchDateFrom.length > 0) {
+            params.dateFrom = [watchDateFrom];
+        } else {
+            params.dateFrom = [todayDateFormatted];
+            setValue("dateFrom", todayDateFormatted);
+        }
 
-            if (watchOrderBy.length > 0) {
-                params.orderBy = [watchOrderBy];
-            }
+        if (watchOrderBy.length > 0) {
+            params.orderBy = [watchOrderBy];
+        } else {
+            params.orderBy = ["timeFromAsc"];
+            setValue("orderBy", "timeFromAsc");
+        }
 
-            if (Object.keys(params).length > 0) {
-                setTimeout(() => {
-                    setQueryParams(params, pathname, searchParams, router);
-                }, 0);
-            }
-        };
-
-        updateQueryParams();
-        getEvents(watchDateFrom, watchDateTo, watchOrderBy, watchSearchTerm);
-    }, [watchDateFrom, watchOrderBy]);
+        if (Object.keys(params).length > 0) {
+            setTimeout(() => {
+                setQueryParams(params, pathname, searchParams, router);
+            }, 0);
+        }
+    }, []);
 
     useEffect(() => {
         if (watchDateTo.length > 0) {
@@ -247,7 +248,6 @@ const EventsPage = ({}: Props) => {
     }, [watchDateTo]);
 
     useEffect(() => {
-        handleClearAll();
         if (!currentEventId) {
             getEvents(dateFrom, dateTo, orderBy, searchTerm);
         }
