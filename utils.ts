@@ -269,3 +269,12 @@ export const validateField = <T>(
     }
     return valid;
 };
+
+export const formatForDateTimeField = (date: Date): string => {
+    const todayDate = formatDateString(date.toISOString());
+    return `${[
+        todayDate.year,
+        todayDate.month,
+        `${todayDate.day}T${todayDate.hours}:${todayDate.minutes}`,
+    ].join("-")}`;
+};
