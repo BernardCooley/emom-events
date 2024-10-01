@@ -198,7 +198,7 @@ const SignIn = () => {
                     mb={4}
                     variant="link"
                 >
-                    Don't have a Host account? Register here
+                    Don&apos;'t have a Host account? Register here
                 </Button>
             </form>
         </Flex>
