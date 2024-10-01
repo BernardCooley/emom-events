@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect } from "react";
 import { Box } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
-import { fetchPromoter } from "@/bff";
+import { fetchPromoterByEmail } from "@/bff";
 import { usePromoterContext } from "@/context/promoterContext";
 
 interface Props {
@@ -17,7 +17,7 @@ const ComponentName = ({ children }: Props) => {
     const getPromoter = useCallback(async () => {
         updatePromoterLoading(true);
         if (session?.user?.email) {
-            const promoter = await fetchPromoter({
+            const promoter = await fetchPromoterByEmail({
                 email: session?.user?.email,
             });
 

@@ -24,7 +24,7 @@ import {
     RegisterUser,
     SendVerificationEmail,
 } from "@/firebase/authFunctions";
-import { addPromoter, fetchPromoter } from "@/bff";
+import { addPromoter, fetchPromoterByEmail } from "@/bff";
 import { useRouter } from "next/navigation";
 import EmailAlreadyExistsDialog from "@/app/components/EmailAlreadyExistsDialog";
 import { FirebaseError } from "firebase/app";
@@ -107,7 +107,7 @@ const SignUp = () => {
 
             setNewUser(newUser);
 
-            const promoter = await fetchPromoter({
+            const promoter = await fetchPromoterByEmail({
                 email: formData.email,
             });
 

@@ -22,7 +22,7 @@ import PromoterProfile from "@/app/components/PromoterProfile";
 import AddEventModal from "@/app/components/AddEventModal";
 import ItemList from "@/app/components/ItemList";
 import { usePromoterContext } from "@/context/promoterContext";
-import { fetchPromoter } from "@/bff";
+import { fetchPromoterByEmail } from "@/bff";
 import PageLoading from "@/app/components/PageLoading";
 
 interface Props {}
@@ -47,7 +47,7 @@ const PromoterDashboard = ({}: Props) => {
     const getPromoter = useCallback(async () => {
         updatePromoterLoading(true);
         if (session?.user?.email) {
-            const promoter = await fetchPromoter({
+            const promoter = await fetchPromoterByEmail({
                 email: session?.user?.email,
             });
 

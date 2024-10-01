@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     try {
         const promoter = await prisma?.promoter.findUnique({
             where: {
-                email: email,
+                email,
             },
             select: {
                 id: true,

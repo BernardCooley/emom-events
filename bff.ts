@@ -65,19 +65,40 @@ export const fetchWithErrorHandling = async <T>(
     return null;
 };
 
-type FetchPromoterProps = {
+type FetchPromoterPropsByEmail = {
     email: string;
 };
 
-export const fetchPromoter = async ({
+export const fetchPromoterByEmail = async ({
     email,
-}: FetchPromoterProps): Promise<PromoterDetails | null> => {
+}: FetchPromoterPropsByEmail): Promise<PromoterDetails | null> => {
     try {
         const promoter: PromoterDetails | null = await fetchWithErrorHandling(
-            "/api/getPromoter",
+            "/api/getPromoterByEmail",
             "POST",
             {
                 email,
+            }
+        );
+        return promoter;
+    } catch (error) {
+        throw error;
+    }
+};
+
+type FetchPromoterPropsById = {
+    id: string;
+};
+
+export const fetchPromoterById = async ({
+    id,
+}: FetchPromoterPropsById): Promise<PromoterDetails | null> => {
+    try {
+        const promoter: PromoterDetails | null = await fetchWithErrorHandling(
+            "/api/getPromoterById",
+            "POST",
+            {
+                id,
             }
         );
         return promoter;
