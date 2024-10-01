@@ -73,12 +73,13 @@ const PromoterDashboard = ({}: Props) => {
         return <PageLoading />;
     }
 
-    if (!promoter) {
+    if (!promoter || !promoter.name || !promoter.country) {
         return (
             <VStack gap={10} w="full" alignItems="center">
                 <Heading>Your Host profile is incomplete</Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
                 <PromoterForm
+                    isEditing={session?.user?.email ? true : false}
                     existingProfileImage={profileImage}
                     onFail={() => {
                         toast({
