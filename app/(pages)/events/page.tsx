@@ -290,7 +290,7 @@ const EventsPage = ({}: Props) => {
     };
 
     useEffect(() => {
-        if (!currentEventId) {
+        if (!currentEventId || !events) {
             onFormUpdate();
         }
     }, [watchDateTo, watchDateFrom, watchOrderBy, watchSearchTerm]);
