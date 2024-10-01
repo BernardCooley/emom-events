@@ -21,6 +21,8 @@ import { FirebaseImageBlob, PromoterDetails } from "@/types";
 import { getUrlFromBlob } from "@/utils";
 import ChangePasswordModal from "./ChangePasswordModal";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import DeleteAccountDialog from "./DeleteAccountDialog";
 
 interface Props {
     promoter: PromoterDetails;
@@ -35,11 +37,24 @@ const PromoterProfile = ({
     onGetPromoter,
     onEditing,
 }: Props) => {
+    const searchParams = useSearchParams();
+    const deleteAccount = searchParams.get("deleteAccount");
     const { data: session } = useSession();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: isDeleteAccountDialogOpen,
+        onOpen: onDeleteAccountDialogOpen,
+        onClose: onDeleteAccountDialogClose,
+    } = useDisclosure();
     const { city, state, country, name, email, showEmail } = promoter;
     const toast = useToast();
     const [isEditing, setEditing] = useState(false);
+
+    useEffect(() => {
+        if (deleteAccount) {
+            onDeleteAccountDialogOpen();
+        }
+    }, [deleteAccount]);
 
     useEffect(() => {
         onEditing(isEditing);
@@ -54,6 +69,11 @@ const PromoterProfile = ({
     return (
         <>
             <ChangePasswordModal isOpen={isOpen} onClose={onClose} />
+            <DeleteAccountDialog
+                isOpen={isDeleteAccountDialogOpen}
+                onClose={onDeleteAccountDialogClose}
+                promoter={promoter}
+            />
             <Card
                 shadow="lg"
                 border="1px solid"
@@ -70,7 +90,7 @@ const PromoterProfile = ({
                             Profile
                         </Heading>
                         <HStack gap={6}>
-                            {!session?.user?.image && (
+                            {!session?.user?.image && !isEditing && (
                                 <Button onClick={onOpen} variant="link">
                                     Change password
                                 </Button>
@@ -117,6 +137,15 @@ const PromoterProfile = ({
                                     alt=""
                                 />
                             </Box>
+                            <Flex w="full" justifyContent="flex-end">
+                                <Button
+                                    colorScheme="red"
+                                    onClick={onDeleteAccountDialogOpen}
+                                    variant="link"
+                                >
+                                    Delete account
+                                </Button>
+                            </Flex>
                         </Flex>
                     )}
                     <Flex w="full" alignItems="center" direction="column">

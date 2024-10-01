@@ -21,7 +21,7 @@ model Event {
     imageIds     String[]
     tickets      String[]
     lineup       String[]
-    promoter     Promoter @relation(fields: [promoterId], references: [id])
+    promoter     Promoter @relation(fields: [promoterId], references: [id], onDelete: Cascade)
     promoterId   String
     venue        Venue    @relation(fields: [venueId], references: [id])
     venueId      String

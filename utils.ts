@@ -227,44 +227,31 @@ export const formatDateString = (
     };
 };
 
-export const setQueryParams = (
-    paramsObj: { [key: string]: string[] },
+export const updateQueryParams = (
+    router: AppRouterInstance,
     pathname: string,
-    searchParams: ReadonlyURLSearchParams,
-    router: AppRouterInstance
-) => {
-    const params = new URLSearchParams(searchParams.toString());
+    existingParams: ReadonlyURLSearchParams,
+    newParams?: { [key: string]: string[] } | null,
+    paramsToDelete?: string[]
+): Promise<boolean> => {
+    return new Promise((resolve) => {
+        const params = new URLSearchParams(existingParams.toString());
 
-    Object.keys(paramsObj).forEach((key) => {
-        params.delete(key);
-        paramsObj[key].forEach((value) => params.append(key, value));
+        paramsToDelete?.forEach((key) => {
+            params.delete(key);
+        });
+
+        if (newParams) {
+            Object.keys(newParams).forEach((key) => {
+                params.delete(key);
+                newParams[key].forEach((value) => params.append(key, value));
+            });
+        }
+
+        router.push(`${pathname}?${params.toString()}`);
+
+        resolve(true);
     });
-
-    router.push(`${pathname}?${params.toString()}`);
-};
-
-export const removeQueryParams = (
-    paramsObj: string[],
-    pathname: string,
-    searchParams: ReadonlyURLSearchParams,
-    router: AppRouterInstance
-) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    paramsObj.forEach((key) => {
-        params.delete(key);
-    });
-
-    router.push(`${pathname}?${params.toString()}`);
-};
-
-export const formatForDateTimeField = (date: Date): string => {
-    const todayDate = formatDateString(date.toISOString());
-    return `${[
-        todayDate.year,
-        todayDate.month,
-        `${todayDate.day}T${todayDate.hours}:${todayDate.minutes}`,
-    ].join("-")}`;
 };
 
 export const validateField = <T>(

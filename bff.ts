@@ -221,6 +221,28 @@ export const deleteVenue = async ({
     }
 };
 
+type DeletePromoterProps = {
+    promoterId: string;
+};
+
+export const deletePromoter = async ({
+    promoterId,
+}: DeletePromoterProps): Promise<Promoter | null> => {
+    try {
+        const deletePromoter: Promoter | null = await fetchWithErrorHandling(
+            "/api/deletePromoter",
+            "POST",
+            {
+                promoterId,
+            }
+        );
+
+        return deletePromoter;
+    } catch (error) {
+        throw error;
+    }
+};
+
 type FetchEventProps = {
     eventId: string;
 };

@@ -76,9 +76,7 @@ const PromoterDashboard = ({}: Props) => {
     if (!promoter) {
         return (
             <VStack gap={10} w="full" alignItems="center">
-                <Heading>
-                    Host profile for {session?.user?.name} is incomplete
-                </Heading>
+                <Heading>Your Host profile is incomplete</Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
                 <PromoterForm
                     existingProfileImage={profileImage}

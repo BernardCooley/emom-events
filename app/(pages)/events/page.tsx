@@ -10,8 +10,7 @@ import { EventDetails, EventRequestProps } from "@/types";
 import {
     formatDateString,
     generateRandomEvent,
-    removeQueryParams,
-    setQueryParams,
+    updateQueryParams,
 } from "@/utils";
 import { ArrowRightIcon, CloseIcon, Search2Icon } from "@chakra-ui/icons";
 import {
@@ -23,6 +22,7 @@ import {
     HStack,
     IconButton,
     Text,
+    useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -51,6 +51,7 @@ const schema: ZodType<FormData> = z.object({
 interface Props {}
 
 const EventsPage = ({}: Props) => {
+    const toast = useToast();
     const [itemListEvents, setItemListEvents] = useState<EventDetails[] | null>(
         null
     );
@@ -68,12 +69,24 @@ const EventsPage = ({}: Props) => {
     const searchParams = useSearchParams();
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
+    const accountDeleted = searchParams.get("accountDeleted");
     const searchTerm = searchParams.get("searchTerm");
     const orderBy = searchParams.get("orderBy");
     const showMap = searchParams.get("showMap");
     const [isMapShowing, setIsMapShowing] = useState<boolean>(
         showMap === "true"
     );
+
+    useEffect(() => {
+        if (accountDeleted === "true") {
+            toast({
+                title: "Account deleted",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    }, []);
 
     const todayDate = formatDateString(new Date().toISOString());
     const todayDateFormatted = `${[
@@ -206,53 +219,56 @@ const EventsPage = ({}: Props) => {
         handleScroll();
     }, [scrollPosition]);
 
-    useEffect(() => {
-        const updateQueryParams = () => {
-            const params: { dateFrom?: string[]; orderBy?: string[] } = {};
+    const onFormUpdate = async () => {
+        const params: {
+            dateFrom?: string[];
+            orderBy?: string[];
+            accountDeleted?: string[];
+            dateTo?: string[];
+        } = {};
 
-            if (watchDateFrom.length > 0) {
-                params.dateFrom = [watchDateFrom];
-            } else {
-                params.dateFrom = [todayDateFormatted];
-                setValue("dateFrom", todayDateFormatted);
-            }
+        const toDelete = [];
 
-            if (watchOrderBy.length > 0) {
-                params.orderBy = [watchOrderBy];
-            } else {
-                params.orderBy = ["timeFromAsc"];
-                setValue("orderBy", "timeFromAsc");
-            }
+        if (accountDeleted === "true") {
+            toDelete.push("accountDeleted");
+        }
 
-            if (Object.keys(params).length > 0) {
-                setTimeout(() => {
-                    setQueryParams(params, pathname, searchParams, router);
-                }, 0);
-            }
-        };
-
-        updateQueryParams();
-    }, [watchOrderBy, watchDateFrom]);
-
-    useEffect(() => {
-        if (watchDateTo.length > 0) {
-            setQueryParams(
-                {
-                    dateTo: [watchDateTo],
-                },
-                pathname,
-                searchParams,
-                router
-            );
+        if (watchDateFrom.length > 0) {
+            params.dateFrom = [watchDateFrom];
         } else {
-            removeQueryParams(["dateTo"], pathname, searchParams, router);
+            params.dateFrom = [todayDateFormatted];
+            setValue("dateFrom", todayDateFormatted);
+        }
+
+        if (watchOrderBy.length > 0) {
+            params.orderBy = [watchOrderBy];
+        } else {
+            params.orderBy = ["timeFromAsc"];
+            setValue("orderBy", "timeFromAsc");
+        }
+
+        if (watchDateTo.length > 0) {
+            params.dateTo = [watchDateTo];
+        } else {
+            toDelete.push("dateTo");
             setValue("dateTo", "");
         }
-    }, [watchDateTo]);
+
+        if (Object.keys(params).length > 0) {
+            await updateQueryParams(
+                router,
+                pathname,
+                searchParams,
+                params,
+                toDelete
+            );
+        }
+        getEvents(watchDateFrom, watchDateTo, watchOrderBy, watchSearchTerm);
+    };
 
     useEffect(() => {
         if (!currentEventId) {
-            getEvents(dateFrom, dateTo, orderBy, searchTerm);
+            onFormUpdate();
         }
     }, [watchDateTo, watchDateFrom, watchOrderBy, watchSearchTerm]);
 
@@ -341,45 +357,34 @@ const EventsPage = ({}: Props) => {
         }
     };
 
-    const handleSearch = () => {
-        setQueryParams(
-            {
-                searchTerm: [watchSearchTerm],
-                dateFrom: [todayDateFormatted],
-            },
-            pathname,
-            searchParams,
-            router
-        );
+    const handleSearch = async () => {
+        await updateQueryParams(router, pathname, searchParams, {
+            searchTerm: [watchSearchTerm],
+            dateFrom: [todayDateFormatted],
+        });
         setValue("dateFrom", todayDateFormatted);
-        getEvents(todayDateFormatted, "", "", watchSearchTerm);
     };
 
-    const handleSearchClear = () => {
-        removeQueryParams(["searchTerm"], pathname, searchParams, router);
-        getEvents(watchDateFrom, watchDateTo, watchOrderBy, "");
+    const handleSearchClear = async () => {
+        await updateQueryParams(router, pathname, searchParams, null, [
+            "searchTerm",
+        ]);
         setValue("searchTerm", "");
     };
 
-    const handleClearAll = () => {
-        setQueryParams(
+    const handleClearAll = async () => {
+        await updateQueryParams(
+            router,
+            pathname,
+            searchParams,
             {
                 dateFrom: [todayDateFormatted],
             },
-            pathname,
-            searchParams,
-            router
-        );
-        removeQueryParams(
-            ["dateTo", "searchTerm"],
-            pathname,
-            searchParams,
-            router
+            ["dateTo", "searchTerm"]
         );
         setValue("searchTerm", "");
         setValue("dateFrom", todayDateFormatted);
         setValue("dateTo", "");
-        getEvents(todayDateFormatted, "", "", "");
     };
 
     const ConditionalText = ({
@@ -560,21 +565,23 @@ const EventsPage = ({}: Props) => {
                     </Flex>
                     {events && events.length > 0 && (
                         <Button
-                            onClick={() => {
+                            onClick={async () => {
                                 if (isMapShowing) {
                                     setIsMapShowing(false);
-                                    removeQueryParams(
-                                        ["showMap"],
+                                    await updateQueryParams(
+                                        router,
                                         pathname,
                                         searchParams,
-                                        router
+                                        null,
+                                        ["showMap"]
                                     );
                                 } else {
-                                    setQueryParams(
-                                        { showMap: ["true"] },
+                                    await updateQueryParams(
+                                        router,
                                         pathname,
                                         searchParams,
-                                        router
+                                        { showMap: ["true"] },
+                                        ["dateTo", "searchTerm"]
                                     );
                                     setIsMapShowing(true);
                                 }
