@@ -64,12 +64,3 @@ export const UpdateUserEmail = async (email: string, user: User) => {
         throw error;
     }
 };
-
-export const UpdateUserPassword = async (password: string, user: User) => {
-    try {
-        await updatePassword(user, password);
-    } catch (error: unknown) {
-        console.error(error);
-        throw error;
-    }
-};

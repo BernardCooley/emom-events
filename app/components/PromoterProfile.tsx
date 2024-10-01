@@ -12,12 +12,15 @@ import {
     Image,
     SimpleGrid,
     Text,
+    useDisclosure,
     useToast,
     VStack,
 } from "@chakra-ui/react";
 import PromoterForm from "./PromoterForm";
 import { FirebaseImageBlob, PromoterDetails } from "@/types";
 import { getUrlFromBlob } from "@/utils";
+import ChangePasswordModal from "./ChangePasswordModal";
+import { useSession } from "next-auth/react";
 
 interface Props {
     promoter: PromoterDetails;
@@ -32,6 +35,8 @@ const PromoterProfile = ({
     onGetPromoter,
     onEditing,
 }: Props) => {
+    const { data: session } = useSession();
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const { city, state, country, name, email, showEmail } = promoter;
     const toast = useToast();
     const [isEditing, setEditing] = useState(false);
@@ -48,6 +53,7 @@ const PromoterProfile = ({
 
     return (
         <>
+            <ChangePasswordModal isOpen={isOpen} onClose={onClose} />
             <Card
                 shadow="lg"
                 border="1px solid"
@@ -63,13 +69,20 @@ const PromoterProfile = ({
                         <Heading w="fit-content" size="md">
                             Profile
                         </Heading>
+                        <HStack gap={6}>
+                            {!session?.user?.image && (
+                                <Button onClick={onOpen} variant="link">
+                                    Change password
+                                </Button>
+                            )}
 
-                        <Button
-                            onClick={() => setEditing(!isEditing)}
-                            variant="link"
-                        >
-                            {isEditing ? "Cancel" : "Edit"}
-                        </Button>
+                            <Button
+                                onClick={() => setEditing(!isEditing)}
+                                variant="link"
+                            >
+                                {isEditing ? "Cancel" : "Edit profile"}
+                            </Button>
+                        </HStack>
                     </HStack>
                 </CardHeader>
                 <Divider />
