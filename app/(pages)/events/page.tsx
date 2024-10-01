@@ -634,7 +634,7 @@ const EventsPage = ({}: Props) => {
                         overflowY="scroll"
                         columns={{ base: 1 }}
                         page="events"
-                        events={itemListEvents}
+                        events={itemListEvents || events}
                     />
                     {events && events.length > 0 && (
                         <Box minW={["100%", "100%", "60%"]} h="440px">
