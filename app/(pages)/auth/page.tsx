@@ -1,8 +1,18 @@
 "use client";
 
 import React from "react";
-import { Button, Heading, HStack, Link, Text, VStack } from "@chakra-ui/react";
+import {
+    Button,
+    Center,
+    Divider,
+    Heading,
+    Link,
+    Text,
+    VStack,
+} from "@chakra-ui/react";
 import { signIn } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
 
 interface Props {}
 
@@ -19,8 +29,41 @@ const AuthPage = ({}: Props) => {
                 gap={8}
                 shadow="lg"
             >
-                <Text fontSize="xl">Register with email and password</Text>
-                <HStack gap={6}>
+                <Text fontSize="xl">
+                    Sign in or register with Google, Facebook or email and
+                    password
+                </Text>
+                <VStack gap={6}>
+                    <Button
+                        w={"full"}
+                        variant={"outline"}
+                        leftIcon={<FcGoogle />}
+                    >
+                        <Center>
+                            <Text>Sign in with Google</Text>
+                        </Center>
+                    </Button>
+                    <Button
+                        w={"full"}
+                        colorScheme={"facebook"}
+                        leftIcon={<FaFacebook />}
+                    >
+                        <Center>
+                            <Text>Sign in with Facebook</Text>
+                        </Center>
+                    </Button>
+                    <Button
+                        onClick={() =>
+                            signIn("credentails", {
+                                callbackUrl: "/promoter-dashboard",
+                            })
+                        }
+                        colorScheme="blue"
+                    >
+                        Sign in with Email and Password
+                    </Button>
+                    <Divider colorScheme="red" />
+                    <Text>OR</Text>
                     <Button
                         href="/auth/register"
                         _hover={{
@@ -30,34 +73,9 @@ const AuthPage = ({}: Props) => {
                         as={Link}
                         colorScheme="blue"
                     >
-                        Register
+                        Register with email and password
                     </Button>
-                </HStack>
-            </VStack>
-            <VStack
-                w={["full", "50%"]}
-                border="1px solid"
-                borderColor="gray.300"
-                rounded="lg"
-                p={10}
-                gap={8}
-                shadow="lg"
-            >
-                <Text fontSize="xl">
-                    Sign in with Google, Facebook or email and password
-                </Text>
-                <HStack gap={6}>
-                    <Button
-                        onClick={() =>
-                            signIn("promoter", {
-                                callbackUrl: "/promoter-dashboard",
-                            })
-                        }
-                        colorScheme="blue"
-                    >
-                        Sign in
-                    </Button>
-                </HStack>
+                </VStack>
             </VStack>
             <Button
                 href="/events"
