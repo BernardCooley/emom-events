@@ -8,6 +8,7 @@ import {
     PromoterDetails,
     UpdateEventInput,
     UpdatePromoterInput,
+    VenueDetails,
     VenueItem,
 } from "./types";
 
@@ -109,6 +110,28 @@ export const fetchPromoterById = async ({
 
 type AddPromoterProps = {
     data: AddPromoterInput;
+};
+
+type GetVenueProps = {
+    id: string;
+};
+
+export const fetchVenue = async ({
+    id,
+}: GetVenueProps): Promise<VenueDetails | null> => {
+    try {
+        const venue: VenueDetails | null = await fetchWithErrorHandling(
+            "/api/getVenue",
+            "POST",
+            {
+                id,
+            }
+        );
+
+        return venue;
+    } catch (error) {
+        throw error;
+    }
 };
 
 export const addPromoter = async ({
