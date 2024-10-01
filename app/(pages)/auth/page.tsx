@@ -35,6 +35,11 @@ const AuthPage = ({}: Props) => {
                 </Text>
                 <VStack gap={6}>
                     <Button
+                        onClick={() => {
+                            signIn("google", {
+                                callbackUrl: "/promoter-dashboard",
+                            });
+                        }}
                         w={"full"}
                         variant={"outline"}
                         leftIcon={<FcGoogle />}
@@ -44,6 +49,11 @@ const AuthPage = ({}: Props) => {
                         </Center>
                     </Button>
                     <Button
+                        onClick={() => {
+                            signIn("facebook", {
+                                callbackUrl: "/promoter-dashboard",
+                            });
+                        }}
                         w={"full"}
                         colorScheme={"facebook"}
                         leftIcon={<FaFacebook />}
