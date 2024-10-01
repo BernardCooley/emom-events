@@ -61,7 +61,7 @@ const SignIn = () => {
             if (!toast.isActive(id)) {
                 toast({
                     id,
-                    title: title || "An error has occured.",
+                    title: title || "An error has occurred.",
                     status: status,
                     duration: 5000,
                     isClosable: true,
@@ -198,7 +198,7 @@ const SignIn = () => {
                     mb={4}
                     variant="link"
                 >
-                    Don&apos;'t have a Host account? Register here
+                    Don&apos;t have a Host account? Register here
                 </Button>
             </form>
         </Flex>
