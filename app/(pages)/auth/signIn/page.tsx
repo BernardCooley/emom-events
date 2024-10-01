@@ -10,6 +10,7 @@ import {
     Heading,
     IconButton,
     ToastProps,
+    useDisclosure,
     useToast,
     VStack,
 } from "@chakra-ui/react";
@@ -20,6 +21,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { auth } from "@/firebase/clientApp";
+import ResetPasswordDialog from "@/app/components/PasswordResetDialog";
 
 interface FormData {
     email: string;
@@ -32,6 +34,7 @@ const schema: ZodType<FormData> = z.object({
 });
 
 const SignIn = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const router = useRouter();
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [submitting, setSubmitting] = useState(false);
@@ -108,6 +111,7 @@ const SignIn = () => {
 
     return (
         <Flex m="auto" direction="column" w={["100%", "80%", "70%", "60%"]}>
+            <ResetPasswordDialog isOpen={isOpen} onClose={onClose} />
             <Heading textAlign="center" size="lg" mb={8}>
                 Log into your Host account
             </Heading>
@@ -169,11 +173,18 @@ const SignIn = () => {
                             }
                         />
                         <Button
+                            colorScheme="blue"
                             isLoading={submitting}
                             type="submit"
-                            variant="primary"
                         >
                             Sign in
+                        </Button>
+                        <Button
+                            isLoading={submitting}
+                            onClick={onOpen}
+                            variant="outline"
+                        >
+                            Forgot password? Reset here
                         </Button>
                     </VStack>
                 </VStack>

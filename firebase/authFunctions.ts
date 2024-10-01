@@ -29,15 +29,6 @@ export const RegisterUser = async (
     }
 };
 
-export const ResetPassword = async (email: string) => {
-    try {
-        await sendPasswordResetEmail(auth, email);
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-
 export const DeleteUser = async () => {
     try {
         const user = auth.currentUser;

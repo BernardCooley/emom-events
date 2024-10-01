@@ -304,9 +304,9 @@ const SignUp = () => {
                                 }
                             />
                             <Button
+                                colorScheme="blue"
                                 isLoading={submitting}
                                 type="submit"
-                                variant="primary"
                             >
                                 Register
                             </Button>
