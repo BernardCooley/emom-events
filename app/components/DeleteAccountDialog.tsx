@@ -32,17 +32,18 @@ export interface FormData {
     password: string;
 }
 
-const schema: ZodType<FormData> = z.object({
-    password: z.string().min(1, "Password is required."),
-});
-
 const DeleteAccountDialog = forwardRef(
     (
         { isOpen, onClose, promoter }: Props,
         ref: LegacyRef<HTMLButtonElement>
     ) => {
-        const toast = useToast();
         const { data: session } = useSession();
+        const schema: ZodType<FormData> = z.object({
+            password: session?.user?.image
+                ? z.string()
+                : z.string().min(1, "Password is required."),
+        });
+        const toast = useToast();
         const formMethods = useForm<FormData>({
             mode: "onChange",
             resolver: zodResolver(schema),
@@ -57,7 +58,7 @@ const DeleteAccountDialog = forwardRef(
             control,
         } = formMethods;
 
-        const onDelete = async (password: string) => {
+        const onDeleteAccountAndProfile = async (password: string) => {
             const user = auth.currentUser;
 
             if (user) {
@@ -115,24 +116,54 @@ const DeleteAccountDialog = forwardRef(
             }
         };
 
-        const onSubmit = async (formData: FormData) => {
-            signInWithEmailAndPassword(
-                auth,
-                session?.user?.email || "",
-                formData.password
-            )
+        const onDeleteProfile = async () => {
+            deletePromoter({
+                promoterId: promoter.id,
+            })
                 .then(() => {
-                    onDelete(formData.password);
+                    toast({
+                        title: "Account deleted. We're sorry to see you go!",
+                        status: "success",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    onClose();
+                    signOut({
+                        callbackUrl: "/events?accountDeleted=true",
+                    });
                 })
                 .catch(() => {
                     toast({
-                        title: "Incorrect password",
-                        description:
-                            "The password you entered is incorrect. Please try again.",
+                        title: "Failed to delete account. Please try again later.",
                         status: "error",
+                        duration: 5000,
                         isClosable: true,
                     });
                 });
+        };
+
+        const onSubmit = async (formData: FormData) => {
+            if (session?.user?.image) {
+                onDeleteProfile();
+            } else {
+                signInWithEmailAndPassword(
+                    auth,
+                    session?.user?.email || "",
+                    formData.password
+                )
+                    .then(() => {
+                        onDeleteAccountAndProfile(formData.password);
+                    })
+                    .catch(() => {
+                        toast({
+                            title: "Incorrect password",
+                            description:
+                                "The password you entered is incorrect. Please try again.",
+                            status: "error",
+                            isClosable: true,
+                        });
+                    });
+            }
         };
 
         return (
@@ -158,16 +189,18 @@ const DeleteAccountDialog = forwardRef(
                                         your account and all associated data and
                                         events, and cannot be reversed.
                                     </Box>
-                                    <TextInput
-                                        type="password"
-                                        title="Old Password"
-                                        size="lg"
-                                        name="password"
-                                        error={errors.password?.message}
-                                        control={control}
-                                        required
-                                        helperText="Enter your password to confirm."
-                                    />
+                                    {!session?.user?.image && (
+                                        <TextInput
+                                            type="password"
+                                            title="Old Password"
+                                            size="lg"
+                                            name="password"
+                                            error={errors.password?.message}
+                                            control={control}
+                                            required
+                                            helperText="Enter your password to confirm."
+                                        />
+                                    )}
                                     <HStack
                                         w="full"
                                         gap={6}

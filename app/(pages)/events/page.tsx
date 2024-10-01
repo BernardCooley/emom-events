@@ -22,11 +22,18 @@ import {
     HStack,
     IconButton,
     Text,
+    ToastProps,
     useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, {
+    Suspense,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 import { TextInput } from "@/app/components/FormInputs/TextInput";
@@ -76,10 +83,11 @@ const EventsPage = ({}: Props) => {
     const [isMapShowing, setIsMapShowing] = useState<boolean>(
         showMap === "true"
     );
+    const id = "accountDeletedToastId";
 
     useEffect(() => {
         if (accountDeleted === "true") {
-            toast({
+            showToast({
                 title: "Account deleted",
                 status: "success",
                 duration: 5000,
@@ -87,6 +95,21 @@ const EventsPage = ({}: Props) => {
             });
         }
     }, []);
+
+    const showToast = useCallback(
+        ({ status, title }: ToastProps) => {
+            if (!toast.isActive(id)) {
+                toast({
+                    id,
+                    title: title || "An error has occurred.",
+                    status: status,
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        },
+        [toast]
+    );
 
     const todayDate = formatDateString(new Date().toISOString());
     const todayDateFormatted = `${[

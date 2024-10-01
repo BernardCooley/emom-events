@@ -79,7 +79,7 @@ const PromoterDashboard = ({}: Props) => {
                 <Heading>Your Host profile is incomplete</Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
                 <PromoterForm
-                    isEditing={session?.user?.email ? true : false}
+                    isEditing={promoter ? true : false}
                     existingProfileImage={profileImage}
                     onFail={() => {
                         toast({
