@@ -15,11 +15,6 @@ const Header = ({}: Props) => {
 
     const menuItems = [
         {
-            name: "Home",
-            path: "",
-            show: true,
-        },
-        {
             name: "Events",
             path: "events",
             show: true,
