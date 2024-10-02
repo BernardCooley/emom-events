@@ -25,16 +25,6 @@ const Header = ({}: Props) => {
             show: true,
         },
         {
-            name: "Promoters",
-            path: "promoters",
-            show: true,
-        },
-        {
-            name: "Venues",
-            path: "venues",
-            show: true,
-        },
-        {
             name: "Host Dashboard",
             path: "promoter-dashboard",
             show: session?.user ? true : false,
