@@ -10,6 +10,16 @@ const nextConfig = {
                 destination: "/events",
                 permanent: true,
             },
+            {
+                source: "/promoters",
+                destination: "/events",
+                permanent: true,
+            },
+            {
+                source: "/venues",
+                destination: "/events",
+                permanent: true,
+            },
         ];
     },
 };
