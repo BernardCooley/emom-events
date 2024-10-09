@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Heading, Link, Text } from "@chakra-ui/react";
+import { Box, Link, Text } from "@chakra-ui/react";
 
 interface Props {
     title: string;
@@ -10,9 +10,7 @@ interface Props {
 const EventCardDetail = ({ title, value, href }: Props) => {
     return (
         <Box>
-            <Heading size="xs" textTransform="uppercase">
-                {title}
-            </Heading>
+            <Text textTransform="uppercase">{title}</Text>
             {href ? (
                 <Link href={href}>
                     <Text pt="2" fontSize="sm">

@@ -76,7 +76,9 @@ const PromoterDashboard = ({}: Props) => {
     if (!promoter || !promoter.name || !promoter.country) {
         return (
             <VStack gap={10} w="full" alignItems="center">
-                <Heading>Your Host profile is incomplete</Heading>
+                <Heading variant="page-title">
+                    Your Host profile is incomplete
+                </Heading>
                 <Text fontSize="2xl">Please complete it below</Text>
                 <PromoterForm
                     isEditing={promoter ? true : false}
@@ -149,7 +151,7 @@ const PromoterDashboard = ({}: Props) => {
                         >
                             Add Event
                         </Button>
-                        <Heading size="md">Events</Heading>
+                        <Heading variant="section-title">Events</Heading>
                     </Box>
                 </CardHeader>
                 <Divider />

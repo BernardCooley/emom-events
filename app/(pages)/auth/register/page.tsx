@@ -192,9 +192,7 @@ const SignUp = () => {
 
     return (
         <Flex m="auto" direction="column" w={["100%", "80%", "70%", "60%"]}>
-            <Heading textAlign="center" size="lg" mb={8}>
-                Register for a Host account
-            </Heading>
+            <Heading variant="page-title">Register for a Host account</Heading>
             <EmailAlreadyExistsDialog
                 isOpen={isOpen}
                 onNo={() => {

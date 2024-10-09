@@ -76,7 +76,7 @@ const Venue = ({}: Props) => {
                                 alignItems="center"
                                 justifyContent="space-between"
                             >
-                                <Heading w="fit-content" size="md">
+                                <Heading variant="section-title">
                                     {venue.name} Profile
                                 </Heading>
                             </HStack>
@@ -105,7 +105,9 @@ const Venue = ({}: Props) => {
                     >
                         <CardHeader>
                             <Box position="relative">
-                                <Heading size="md">Events</Heading>
+                                <Heading variant="section-title">
+                                    Events
+                                </Heading>
                             </Box>
                         </CardHeader>
                         <Divider />

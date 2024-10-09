@@ -5,10 +5,10 @@ import {
     Box,
     Button,
     Center,
-    Heading,
     HStack,
     IconButton,
     Image,
+    Text,
     VStack,
 } from "@chakra-ui/react";
 import { z, ZodType } from "zod";
@@ -193,7 +193,7 @@ const PromoterForm = ({
         <Box w={["100%", "100%", "100%", "50%"]} position="relative">
             {isSaving && (
                 <Center position="absolute" w="full" h="70vh">
-                    <Heading>Saving...</Heading>
+                    <Text>Saving...</Text>
                 </Center>
             )}
             <ImageCropper

@@ -112,9 +112,7 @@ const SignIn = () => {
     return (
         <Flex m="auto" direction="column" w={["100%", "80%", "70%", "60%"]}>
             <ResetPasswordDialog isOpen={isOpen} onClose={onClose} />
-            <Heading textAlign="center" size="lg" mb={8}>
-                Log into your Host account
-            </Heading>
+            <Heading variant="page-title">Log into your Host account</Heading>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <VStack
                     w="full"

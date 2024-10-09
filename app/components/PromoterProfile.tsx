@@ -86,9 +86,7 @@ const PromoterProfile = ({
                         alignItems="center"
                         justifyContent="space-between"
                     >
-                        <Heading w="fit-content" size="md">
-                            Profile
-                        </Heading>
+                        <Heading variant="section-title">Profile</Heading>
                         <HStack gap={6}>
                             {!session?.user?.image && !isEditing && (
                                 <Button onClick={onOpen} variant="link">

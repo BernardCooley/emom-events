@@ -6,24 +6,26 @@ import {
     Center,
     Divider,
     Heading,
-    Link,
     Text,
     VStack,
 } from "@chakra-ui/react";
 import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 interface Props {}
 
 const AuthPage = ({}: Props) => {
+    const router = useRouter();
+
     return (
         <VStack w="full" gap={10}>
-            <Heading as="h2">Please log in or register</Heading>
+            <Heading variant="page-title">Please log in or register</Heading>
             <VStack
                 w={["full", "50%"]}
                 border="1px solid"
-                borderColor="gray.300"
+                borderColor="brand.secondary.300"
                 rounded="lg"
                 p={10}
                 gap={8}
@@ -40,8 +42,8 @@ const AuthPage = ({}: Props) => {
                                 callbackUrl: "/promoter-dashboard",
                             });
                         }}
-                        w={"full"}
-                        variant={"outline"}
+                        w="full"
+                        variant="outline"
                         leftIcon={<FcGoogle />}
                     >
                         <Center>
@@ -55,7 +57,7 @@ const AuthPage = ({}: Props) => {
                             });
                         }}
                         w={"full"}
-                        colorScheme={"facebook"}
+                        colorScheme="facebook"
                         leftIcon={<FaFacebook />}
                     >
                         <Center>
@@ -68,34 +70,23 @@ const AuthPage = ({}: Props) => {
                                 callbackUrl: "/promoter-dashboard",
                             })
                         }
-                        colorScheme="blue"
+                        colorScheme="brand.primary"
                     >
                         Sign in with Email and Password
                     </Button>
                     <Divider colorScheme="red" />
                     <Text>OR</Text>
                     <Button
-                        href="/auth/register"
-                        _hover={{
-                            textDecoration: "none",
-                            bg: "blue.600",
-                        }}
-                        as={Link}
-                        colorScheme="blue"
+                        onClick={() => router.push("/auth/register")}
+                        colorScheme="brand.primary"
                     >
                         Register with email and password
                     </Button>
                 </VStack>
             </VStack>
             <Button
-                href="/events"
-                _hover={{
-                    textDecoration: "none",
-                    bg: "red.600",
-                    color: "white",
-                }}
-                as={Link}
-                colorScheme="red"
+                onClick={() => router.push("/events")}
+                colorScheme="brand.error"
                 variant="outline"
             >
                 Cancel

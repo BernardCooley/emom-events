@@ -448,7 +448,7 @@ const EventsPage = ({}: Props) => {
                 positionX="right"
                 positionY="bottom"
             />
-            <Heading>Events</Heading>
+            <Heading variant="page-title">Events</Heading>
             <form>
                 <Flex
                     gap={0}
@@ -477,18 +477,9 @@ const EventsPage = ({}: Props) => {
                         {filterButtonOptions.map((option) => (
                             <Box key={option.value}>
                                 <Button
+                                    variant="filter"
                                     isActive={option.selected}
-                                    _active={{
-                                        backgroundColor: "gray.900",
-                                        color: "white",
-                                    }}
-                                    rounded="full"
                                     onClick={option.onClick}
-                                    px={3}
-                                    h={8}
-                                    whiteSpace="nowrap"
-                                    width="auto"
-                                    minWidth="fit-content"
                                 >
                                     {option.label}
                                 </Button>

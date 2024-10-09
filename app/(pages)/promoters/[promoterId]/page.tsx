@@ -100,7 +100,7 @@ const Promoter = ({}: Props) => {
                                 alignItems="center"
                                 justifyContent="space-between"
                             >
-                                <Heading w="fit-content" size="md">
+                                <Heading variant="section-title">
                                     {promoter.name} Profile
                                 </Heading>
                             </HStack>
@@ -145,7 +145,9 @@ const Promoter = ({}: Props) => {
                     >
                         <CardHeader>
                             <Box position="relative">
-                                <Heading size="md">Events</Heading>
+                                <Heading variant="section-title">
+                                    Events
+                                </Heading>
                             </Box>
                         </CardHeader>
                         <Divider />

@@ -85,7 +85,7 @@ const ItemList = ({
             w="full"
         >
             {title && (
-                <Heading size="lg" mb={4}>
+                <Heading variant="section-title">
                     {capitalizeFirstLetter(title)}
                 </Heading>
             )}
@@ -112,9 +112,9 @@ const ItemList = ({
                                 transition="transform 0.2s"
                             >
                                 <CardHeader>
-                                    <Heading userSelect="none" size="md">
+                                    <Text userSelect="none" size="md">
                                         {item.name}
-                                    </Heading>
+                                    </Text>
                                 </CardHeader>
                                 <CardBody>
                                     <Divider my={2} />
@@ -135,7 +135,7 @@ const ItemList = ({
                     })}
                 </SimpleGrid>
             ) : (
-                <Heading pt={20}>
+                <Heading variant="section-title">
                     {pathname === "promoter-dashboard" ? (
                         <>
                             No Events. Click{" "}

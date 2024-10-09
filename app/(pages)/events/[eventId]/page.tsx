@@ -184,7 +184,7 @@ const Event = ({}: Props) => {
                 </>
             ) : (
                 <Center w="full" h="80vh">
-                    <Heading>No Event details</Heading>
+                    <Heading variant="page-title">No Event details</Heading>
                 </Center>
             )}
         </>

@@ -53,7 +53,7 @@ const EventCard = ({
             <Card>
                 <CardHeader>
                     <HStack w="full" justifyContent="space-between">
-                        <Heading size="lg">{name}</Heading>
+                        <Heading variant="section-title">{name}</Heading>
                         {canEdit && (
                             <Button
                                 right={0}
